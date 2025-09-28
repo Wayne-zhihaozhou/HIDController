@@ -72,9 +72,6 @@
     <ClInclude Include="include\holder.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\InputSimulator.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\Logitech.hpp">
       <Filter>include</Filter>
     </ClInclude>
@@ -108,10 +105,25 @@
     <ClInclude Include="include\send_api.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\send_manager.hpp">
+    <ClInclude Include="include\SendInputHook.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\SendInputHook.hpp">
+    <ClInclude Include="include\dll_export.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IbSendMouse.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IbSendKeyboard.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IbSendBase.cpp">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IbSendBase.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IbSendInput.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

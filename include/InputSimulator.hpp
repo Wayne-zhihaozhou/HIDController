@@ -2,102 +2,70 @@
 #include <Windows.h>
 #include <stdint.h>
 #include "SendTypes.hpp"
+#include "dll_export.hpp"
 
-
-#ifdef DLL1_EXPORTS
-#define DLLAPI extern "C" __declspec(dllexport)
-#else
-#define DLLAPI extern "C" __declspec(dllimport)
-#endif
-
-
-
-DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument);
-DLLAPI void __stdcall IbSendDestroy();
-
-DLLAPI void __stdcall IbSendSyncKeyStates();
+//// 初始化发送模块
+//DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument);
+//
+//// 销毁发送模块
+//DLLAPI void __stdcall IbSendDestroy();
+//
+//// 同步键盘状态
+//DLLAPI void __stdcall IbSendSyncKeyStates();
 
 #pragma region API 1
 
-DLLAPI UINT WINAPI IbSendInput(
-    _In_ UINT cInputs,                    // number of input in the array
-    _In_reads_(cInputs) LPINPUT pInputs,  // array of inputs
-    _In_ int cbSize                       // sizeof(INPUT)
-);
-
-DLLAPI void __stdcall IbSendInputHook(Send::HookCode code);
+//// 发送输入事件
+//DLLAPI UINT WINAPI IbSendInput(
+//    _In_ UINT cInputs,                    // number of input in the array
+//    _In_reads_(cInputs) LPINPUT pInputs,  // array of inputs
+//    _In_ int cbSize                       // sizeof(INPUT)
+//);
+//
+//// 安装或触发输入钩子
+//DLLAPI void __stdcall IbSendInputHook(Send::HookCode code);
 
 #pragma endregion
-
 
 #pragma region API 2
 
-DLLAPI VOID WINAPI IbSend_mouse_event(
-    _In_ DWORD dwFlags,         //MOUSEEVENTF_
-    _In_ DWORD dx,
-    _In_ DWORD dy,
-    _In_ DWORD dwData,
-    _In_ ULONG_PTR dwExtraInfo
-);
+//// 模拟鼠标事件
+//DLLAPI VOID WINAPI IbSend_mouse_event(
+//    _In_ DWORD dwFlags,         //MOUSEEVENTF_
+//    _In_ DWORD dx,
+//    _In_ DWORD dy,
+//    _In_ DWORD dwData,
+//    _In_ ULONG_PTR dwExtraInfo
+//);
 
-DLLAPI VOID WINAPI IbSend_keybd_event(
-    _In_ BYTE bVk,
-    _In_ BYTE bScan,
-    _In_ DWORD dwFlags,         //KEYEVENTF_
-    _In_ ULONG_PTR dwExtraInfo
-);
+//// 模拟键盘事件
+//DLLAPI VOID WINAPI IbSend_keybd_event(
+//    _In_ BYTE bVk,
+//    _In_ BYTE bScan,
+//    _In_ DWORD dwFlags,         //KEYEVENTF_
+//    _In_ ULONG_PTR dwExtraInfo
+//);
 
 #pragma endregion
 
-
 #pragma region API 3
 
-namespace Send {
-    enum class MoveMode : uint32_t {
-        Absolute,  //0
-        Relative   //1
-    };
+//// 移动鼠标到指定位置
+//DLLAPI bool __stdcall IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMode mode);
+//
+//// 鼠标点击指定按键
+//DLLAPI bool __stdcall IbSendMouseClick(Send::MouseButton button);
+//
+//// 模拟鼠标滚轮滚动
+//DLLAPI bool __stdcall IbSendMouseWheel(int32_t movement);
 
-    enum class MouseButton : uint32_t {
-        LeftDown = MOUSEEVENTF_LEFTDOWN,              //0x02
-        LeftUp = MOUSEEVENTF_LEFTUP,                  //0x04
-        Left = LeftDown | LeftUp,                     //0x06
-
-        RightDown = MOUSEEVENTF_RIGHTDOWN,            //0x08
-        RightUp = MOUSEEVENTF_RIGHTUP,                //0x10
-        Right = RightDown | RightUp,                  //0x18
-
-        MiddleDown = MOUSEEVENTF_MIDDLEDOWN,          //0x20
-        MiddleUp = MOUSEEVENTF_MIDDLEUP,              //0x40
-        Middle = MiddleDown | MiddleUp,               //0x60
-
-        XButton1Down = MOUSEEVENTF_XDOWN | XBUTTON1,  //0x81
-        XButton1Up = MOUSEEVENTF_XUP | XBUTTON1,      //0x101
-        XButton1 = XButton1Down | XButton1Up,         //0x181
-
-        XButton2Down = MOUSEEVENTF_XDOWN | XBUTTON2,  //0x82
-        XButton2Up = MOUSEEVENTF_XUP | XBUTTON2,      //0x102
-        XButton2 = XButton2Down | XButton2Up,         //0x182
-    };
-
-    struct KeyboardModifiers {
-        bool LCtrl : 1;   //0x01
-        bool LShift : 1;  //0x02
-        bool LAlt : 1;    //0x04
-        bool LWin : 1;    //0x08
-        bool RCtrl : 1;   //0x10
-        bool RShift : 1;  //0x20  
-        bool RAlt : 1;    //0x40
-        bool RWin : 1;    //0x80
-    };
-}
-
-DLLAPI bool __stdcall IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMode mode);
-DLLAPI bool __stdcall IbSendMouseClick(Send::MouseButton button);
-DLLAPI bool __stdcall IbSendMouseWheel(int32_t movement);
-
-DLLAPI bool __stdcall IbSendKeybdDown(uint16_t vk);
-DLLAPI bool __stdcall IbSendKeybdUp(uint16_t vk);
-DLLAPI bool __stdcall IbSendKeybdDownUp(uint16_t vk, Send::KeyboardModifiers modifiers);
+//// 按下指定键盘按键
+//DLLAPI bool __stdcall IbSendKeybdDown(uint16_t vk);
+//
+//// 释放指定键盘按键
+//DLLAPI bool __stdcall IbSendKeybdUp(uint16_t vk);
+//
+//// 按下并释放指定按键，同时可附加修饰键
+//DLLAPI bool __stdcall IbSendKeybdDownUp(uint16_t vk, Send::KeyboardModifiers modifiers);
 
 #pragma endregion

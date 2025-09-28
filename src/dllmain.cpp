@@ -26,9 +26,9 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 
 
 
-//namespace main {
-//    static std::unique_ptr<Type::Base> send;
-//}
+namespace main {
+    static std::unique_ptr<Type::Base> send;
+}
 
 class SendInputHook {
 public:

@@ -1,3 +1,7 @@
+#include "globals.hpp"
+#include "holder.hpp"
+
+
 class SendInputHook {
 public:
     static inline decltype(SendInput)* SendInput_real = SendInput; // 原始 SendInput
@@ -28,4 +32,8 @@ public:
         IbDetourDetach(&GetAsyncKeyState_real, GetAsyncKeyState_detour);
     }
 };
+
+
+
+//待分类
 ib::HolderB<SendInputHook> sendinput_hook; // 钩子管理
