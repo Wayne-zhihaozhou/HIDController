@@ -1,6 +1,8 @@
 #pragma once
 #include <Windows.h>
 #include <stdint.h>
+#include "SendTypes.hpp"
+
 
 #ifdef DLL1_EXPORTS
 #define DLLAPI extern "C" __declspec(dllexport)
@@ -8,40 +10,7 @@
 #define DLLAPI extern "C" __declspec(dllimport)
 #endif
 
-namespace Send {
-    enum class Error : uint32_t {
-        Success,
-        InvalidArgument,
-        LibraryNotFound,
-        LibraryLoadFailed,
-        LibraryError,
-        DeviceCreateFailed,
-        DeviceNotFound,
-        DeviceOpenFailed
-    };
 
-    enum class SendType : uint32_t {
-        AnyDriver = 0,
-        SendInput = 1,
-        Logitech = 2,
-        LogitechGHubNew = 6,
-        Razer = 3,
-        DD = 4,
-        MouClassInputInjection = 5
-    };
-
-    using InitFlags = const uint32_t;
-    struct Init {
-        using T = InitFlags;
-    };
-
-    enum class HookCode : uint32_t {
-        Off,
-        On,
-        InitOnly,
-        Destroy
-    };
-}
 
 DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument);
 DLLAPI void __stdcall IbSendDestroy();

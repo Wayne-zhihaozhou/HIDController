@@ -24,9 +24,11 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     return TRUE;
 }
 
-namespace main {
-    static std::unique_ptr<Type::Base> send;
-}
+
+
+//namespace main {
+//    static std::unique_ptr<Type::Base> send;
+//}
 
 class SendInputHook {
 public:

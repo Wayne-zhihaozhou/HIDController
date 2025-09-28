@@ -96,6 +96,24 @@
     <ClInclude Include="KeyboardUtils.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\SendTypes.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\globals.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Hook.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\send_api.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\send_manager.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SendInputHook.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">

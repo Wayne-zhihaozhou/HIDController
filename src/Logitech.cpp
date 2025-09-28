@@ -43,6 +43,9 @@ namespace Send::Type::Internal {
             nullptr, 0, &bytes_returned, nullptr);
     }
 
+
+    /////////////////////////
+    
     // 构造 Logitech 对象并初始化虚拟按键状态
     Logitech::Logitech() : VirtualKeyStates(keyboard_report.modifiers, keyboard_mutex) {}
 
