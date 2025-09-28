@@ -49,6 +49,9 @@
     <ClCompile Include="detours\modules.cpp">
       <Filter>detours</Filter>
     </ClCompile>
+    <ClCompile Include="LogitechDriver.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\usb.hpp">
@@ -86,6 +89,12 @@
     </ClInclude>
     <ClInclude Include="detours\detver.h">
       <Filter>detours</Filter>
+    </ClInclude>
+    <ClInclude Include="LogitechDriver.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyboardUtils.hpp">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

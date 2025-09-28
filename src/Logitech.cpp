@@ -1,9 +1,9 @@
-#include "Logitech.hpp"
+#include "Logitech.hpp" 
 #include <string_view>
 
 namespace Send::Type::Internal {
 
-    // LogitechDriver 实现
+    // 创建 Logitech 设备驱动
     Error LogitechDriver::create() {
         std::wstring device_name = find_device();
         if (device_name.empty()) return Error::DeviceNotFound;
@@ -16,11 +16,12 @@ namespace Send::Type::Internal {
         return (device == INVALID_HANDLE_VALUE) ? Error::DeviceOpenFailed : Error::Success;
     }
 
+    // 销毁 Logitech 设备驱动
     void LogitechDriver::destroy() {
         CloseHandle(device);
     }
 
-
+    // 查找 Logitech 设备
     std::wstring LogitechDriver::find_device() {
         return Internal::find_device([](std::wstring_view sv) {
             using namespace std::literals;
@@ -35,34 +36,37 @@ namespace Send::Type::Internal {
             });
     }
 
-
+    // 发送键盘报告
     bool LogitechDriver::report_keyboard(KeyboardReport report) const {
         DWORD bytes_returned;
         return DeviceIoControl(device, 0x2A200C, &report, sizeof(KeyboardReport),
             nullptr, 0, &bytes_returned, nullptr);
     }
 
-    // Logitech 实现
+    // 构造 Logitech 对象并初始化虚拟按键状态
     Logitech::Logitech() : VirtualKeyStates(keyboard_report.modifiers, keyboard_mutex) {}
 
+    // 创建 Logitech 设备
     Error Logitech::create() {
         return driver.create();
     }
 
+    // 销毁 Logitech 设备
     void Logitech::destroy() {
         driver.destroy();
     }
 
+    // 发送鼠标输入数组
     uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
         return Base::send_mouse_input(inputs, n);
     }
 
+    // 发送单个鼠标输入
     bool Logitech::send_mouse_input(const MOUSEINPUT& mi) {
         return send_mouse_report<MouseReport>(mi);
     }
 
-
-
+    // 发送键盘输入
     bool Logitech::send_keyboard_input(const KEYBDINPUT& ki) {
         std::lock_guard lock(keyboard_mutex);
 
@@ -95,7 +99,4 @@ namespace Send::Type::Internal {
         return driver.report_keyboard(keyboard_report);
     }
 
-
-
-
-} // namespace Send::Type::Internal
+}
