@@ -1,5 +1,7 @@
 #include <InputSimulator.hpp>
 #include <SendInputHook.hpp>
+#include <IbSendInput.hpp>
+#include <Logitech.hpp>
 
 
 
@@ -9,7 +11,7 @@ DLLAPI Send::Error __stdcall IbSendInit(SendType type, InitFlags flags, void* ar
         return Error::InvalidArgument;  // Ö»Ö§³Ö Logitech
     }
 
-    auto logitech = std::make_unique<Type::Logitech>();
+    auto logitech = std::make_unique<Type::Internal::Logitech>();
     logitech->create_base(&SendInputHook::GetAsyncKeyState_real);
     Error error = logitech->create();
     if (error != Error::Success)

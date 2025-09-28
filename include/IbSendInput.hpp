@@ -15,7 +15,7 @@ extern "C" {
     );
 
     // 安装或触发输入钩子
-    DLLAPI void __stdcall IbSendInputHook(Send::Error code);
+    DLLAPI void __stdcall IbSendInputHook(Send::HookCode code);
 
 #ifdef __cplusplus
 }

@@ -1,3 +1,9 @@
+#pragma once
+#include "dll_export.hpp"
+#include <SendTypes.hpp>
+#include "SendInputHook.hpp"
+using namespace Send;
+
 DLLAPI void __stdcall IbSendInputHook(HookCode code) {
     switch (code) {
     case HookCode::InitOnly:
