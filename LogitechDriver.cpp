@@ -4,6 +4,9 @@
 #include <IbSendBase.cpp>
 
 
+#include "LogitechDriver.hpp"
+
+
 namespace Send::Type::Internal {
 
     Error LogitechDriver::create() {

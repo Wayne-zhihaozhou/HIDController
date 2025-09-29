@@ -146,7 +146,6 @@
     <ClInclude Include="detours\detver.h" />
     <ClInclude Include="include\base.hpp" />
     <ClInclude Include="include\basic_type.hpp" />
-    <ClInclude Include="include\common.hpp" />
     <ClInclude Include="include\dll_export.hpp" />
     <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\globals.hpp" />

@@ -1,42 +1,73 @@
 #pragma once
+#include <windows.h>
 #include <string>
-#include <Windows.h>
+#include <mutex>
+#include <bit>
+#include <cstdint>
+#include <cmath>
+
+#include "base.hpp"
+#include "usb.hpp"
+#include "InputSimulator.hpp"
+#include "basic_type.hpp"
+
 
 namespace Send::Type::Internal {
+	class LogitechDriver {
+		HANDLE device;
+		bool has_acceleration;//可删除?
 
-    /**
-     * @brief Logitech 设备底层驱动
-     *
-     * 提供创建、销毁和键盘报告发送接口。
-     */
-    class LogitechDriver {
-    public:
-        /**
-         * @brief 创建 Logitech 设备
-         * @return Error 成功返回 Error::Success，找不到设备返回 Error::DeviceNotFound，打开失败返回 Error::DeviceOpenFailed
-         */
-        Error create();
+	public:
 
-        /**
-         * @brief 销毁 Logitech 设备
-         */
-        void destroy();
+		struct MouseButton {
+			bool LButton : 1;
+			bool RButton : 1;
+			bool MButton : 1;
+			bool XButton1 : 1;
+			bool XButton2 : 1;
+			bool unknown : 3;
+		};
 
-        /**
-         * @brief 发送键盘报告
-         * @param report KeyboardReport 键盘报告
-         * @return bool 发送成功返回 true
-         */
-        bool report_keyboard(KeyboardReport report) const;
+		struct KeyboardReport {
+			union {
+				KeyboardModifiers modifiers;
+				uint8_t modifiers_byte;
+			};
+			uint8_t reserved;
+			uint8_t keys[6];
+		};
 
-    private:
-        HANDLE device{ INVALID_HANDLE_VALUE };
+	public:
+		Error create();
+		void destroy();
 
-        /**
-         * @brief 查找 Logitech 设备
-         * @return std::wstring 设备路径，未找到返回空字符串
-         */
-        std::wstring find_device();
-    };
+		template <class ReportType>
+		bool report_mouse(ReportType report, int8_t compensate_switch) const {
+			constexpr DWORD IOCTL_BUSENUM_PLAY_MOUSEMOVE = 0x2A2010;
+			DWORD bytes_returned;
 
-}  // namespace Send::Type::Internal
+			//if (has_acceleration && (report.x || report.y)) {
+			//    ReportType tmp = report;
+			//    tmp.x = tmp.y = compensate_switch;
+			//    DeviceIoControl(device, IOCTL_BUSENUM_PLAY_MOUSEMOVE, &tmp, sizeof(ReportType), nullptr, 0, &bytes_returned, nullptr);
+
+			//    report.x = compensate_lgs_acceleration(report.x);
+			//    report.y = compensate_lgs_acceleration(report.y);
+			//}
+
+			return DeviceIoControl(device, IOCTL_BUSENUM_PLAY_MOUSEMOVE, &report, sizeof(ReportType), nullptr, 0, &bytes_returned, nullptr);
+		}
+
+		bool report_keyboard(KeyboardReport report) const;
+
+
+	private:
+		HANDLE device{ INVALID_HANDLE_VALUE };
+
+		std::wstring find_device();
+	};
+}
+
+
+
+

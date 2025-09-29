@@ -117,9 +117,6 @@
     <ClInclude Include="include\IbSendInput.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\common.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
