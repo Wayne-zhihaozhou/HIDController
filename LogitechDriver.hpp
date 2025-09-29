@@ -62,7 +62,7 @@ namespace Send::Type::Internal {
 
 
 	private:
-		HANDLE device{ INVALID_HANDLE_VALUE };
+		//HANDLE device{ INVALID_HANDLE_VALUE };É¾³ý?
 
 		std::wstring find_device();
 	};

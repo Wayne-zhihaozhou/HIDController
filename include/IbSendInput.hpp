@@ -2,6 +2,10 @@
 #include <Windows.h>
 #include "dll_export.hpp"
 #include "SendTypes.hpp"
+#include "SendInputHook.hpp"
+
+//using namespace Send;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,22 +26,47 @@ extern "C" {
 #endif
 
 
-DLLAPI void __stdcall IbSendInputHook(HookCode code) {
+//重写
+DLLAPI void __stdcall IbSendInputHook(Send::HookCode code) {
     switch (code) {
-    case HookCode::InitOnly:
-        sendinput_hook.create(); // 初始化钩子
+    case Send::HookCode::InitOnly:
+        if (!g_sendInputHook)
+            g_sendInputHook = std::make_unique<SendInputHook>();
         break;
-    case HookCode::Destroy:
-        sendinput_hook.destroy(); // 卸载钩子
+
+    case Send::HookCode::Destroy:
+        g_sendInputHook.reset();  // 自动销毁 SendInputHook
         break;
-    case HookCode::On:
-        if (!sendinput_hook.created())
-            sendinput_hook.create();
-        sendinput_hook->hook = true; // 启用钩子
+
+    case Send::HookCode::On:
+        if (!g_sendInputHook)
+            g_sendInputHook = std::make_unique<SendInputHook>();
+        SendInputHook::hook = true; // 启用钩子
         break;
-    case HookCode::Off:
-        sendinput_hook->hook = false; // 禁用钩子
+
+    case Send::HookCode::Off:
+        SendInputHook::hook = false; // 禁用钩子
         break;
     }
 }
+
+
+//DLLAPI void __stdcall IbSendInputHook(Send::HookCode code) {
+//    switch (code) {
+//    case Send::HookCode::InitOnly:
+//        sendinput_hook.create(); // 初始化钩子
+//        break;
+//    case Send::HookCode::Destroy:
+//        sendinput_hook.destroy(); // 卸载钩子
+//        break;
+//    case Send::HookCode::On:
+//        if (!sendinput_hook.created())
+//            sendinput_hook.create();
+//        sendinput_hook->hook = true; // 启用钩子
+//        break;
+//    case Send::HookCode::Off:
+//        sendinput_hook->hook = false; // 禁用钩子
+//        break;
+//    }
+//}
 

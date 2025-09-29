@@ -1,6 +1,5 @@
 #pragma once
 #include "globals.hpp"
-#include "holder.hpp"
 #include "detours.h"
 #include <Windows.h>
 
@@ -27,15 +26,17 @@ public:
 
     static UINT WINAPI SendInput_detour(UINT cInputs, LPINPUT pInputs, int cbSize);
     static SHORT WINAPI GetAsyncKeyState_detour(int vKey);
+    static inline bool hook = false;
+    static inline decltype(GetAsyncKeyState)* GetAsyncKeyState_real;
 
 private:
     static inline decltype(SendInput)* SendInput_real;
-    static inline decltype(GetAsyncKeyState)* GetAsyncKeyState_real;
-    static inline bool hook;
+    
+    
 };
 
 
 
 
-//待分类
-ib::HolderB<SendInputHook> sendinput_hook; // 钩子管理
+// 全局钩子实例指针（生命周期由 IbSendInputHook 控制）
+extern std::unique_ptr<SendInputHook> g_sendInputHook;

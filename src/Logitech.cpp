@@ -73,12 +73,10 @@ namespace Send::Type::Internal {
 
 	//¡Ÿ ±∏¥÷∆?
 	template <class ReportType>
-	bool send_mouse_report(const MOUSEINPUT& mi)
+	bool Logitech::send_mouse_report(const MOUSEINPUT& mi)
 	{
 		std::lock_guard lock(mouse_mutex);
 
-		if constexpr (debug)
-			DebugOStream() << L"send_mouse_input: " << mi.dwFlags << L", " << mi.dx << L", " << mi.dy << std::endl;
 
 		ReportType mouse_report{};
 

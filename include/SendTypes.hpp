@@ -3,6 +3,11 @@
 #include <cstdint>
 
 namespace Send {
+    namespace Type
+    {
+        using Internal::Base;
+        using Internal::Logitech;
+    }
 
     enum class Error : uint32_t {
         Success,
@@ -79,11 +84,3 @@ namespace Send {
 }
 
 
-namespace Send
-{
-    namespace Type
-    {
-        using Internal::Base;
-        using Internal::Logitech;
-    }
-}
