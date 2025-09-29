@@ -4,12 +4,6 @@
     <ClCompile Include="src\pch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\API 2.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\API 3.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\common.cpp">
       <Filter>src</Filter>
     </ClCompile>

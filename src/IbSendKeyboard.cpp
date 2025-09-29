@@ -5,6 +5,26 @@
 #include "IbSendKeyboard.hpp"
 
 namespace Send {
+
+	DLLAPI VOID WINAPI IbSend_keybd_event(
+		_In_ BYTE bVk,
+		_In_ BYTE bScan,
+		_In_ DWORD dwFlags,
+		_In_ ULONG_PTR dwExtraInfo
+	) {
+		INPUT input{
+			.type = INPUT_KEYBOARD,
+			.ki {
+				.wVk = bVk,
+				.wScan = bScan,
+				.dwFlags = dwFlags,
+				.time = 0,
+				.dwExtraInfo = dwExtraInfo
+			}
+		};
+		IbSendInput(1, &input, sizeof(INPUT));
+	}
+
 	DLLAPI bool __stdcall IbSendKeybdDown(uint16_t vk) {
 		INPUT input{
 			.type = INPUT_KEYBOARD,
