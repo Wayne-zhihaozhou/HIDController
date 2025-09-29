@@ -2,20 +2,24 @@
 #include <string_view>
 
 
-#include "Logitech.hpp"
-
 namespace Send::Type::Internal {
 
 	Logitech::Logitech() = default;
 
+
+	//临时复制?
 	Error Logitech::create() {
-		return driver.init();
+		return driver.create();
 	}
 
+	//临时复制?
 	void Logitech::destroy() {
-		driver.shutdown();
+		driver.destroy();
 	}
 
+
+
+	//临时复制?+修复
 	uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
 		uint32_t count = 0;
 		for (uint32_t i = 0; i < n; ++i) {
@@ -28,25 +32,61 @@ namespace Send::Type::Internal {
 		return count;
 	}
 
+	//临时复制?
 	bool Logitech::send_mouse_input(const MOUSEINPUT& mi) {
 		return send_mouse_report<MouseReport>(mi);
 	}
 
+
+	//临时复制?
 	bool Logitech::send_keyboard_input(const KEYBDINPUT& ki) {
 		std::lock_guard lock(keyboard_mutex);
-		keyboard_report = driver.translate_keyboard_input(ki);
+
+		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
+		if (is_modifier(ki.wVk)) {
+			set_modifier_state(ki.wVk, keydown);
+		}
+		else {
+			uint8_t usage = Usb::keyboard_vk_to_usage((uint8_t)ki.wVk);;
+			if (keydown) {
+				for (int i = 0; i < 6; i++) {
+					if (keyboard_report.keys[i] == 0) {
+						keyboard_report.keys[i] = usage;
+						break;
+					}
+				}
+				//full
+			}
+			else {
+				for (int i = 0; i < 6; i++) {
+					if (keyboard_report.keys[i] == usage) {
+						keyboard_report.keys[i] = 0;
+						//#TODO: move to left?
+						break;
+					}
+				}
+			}
+		}
+
 		return driver.report_keyboard(keyboard_report);
 	}
 
+	//临时复制?
 	template <class ReportType>
-	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
+	bool send_mouse_report(const MOUSEINPUT& mi)
+	{
 		std::lock_guard lock(mouse_mutex);
 
-		ReportType mouse_report{};
-		int8_t local_compensate = -compensate_switch;
+		if constexpr (debug)
+			DebugOStream() << L"send_mouse_input: " << mi.dwFlags << L", " << mi.dx << L", " << mi.dy << std::endl;
 
-		POINT move{ mi.dx, mi.dy };
+		ReportType mouse_report{};
+
+		//#TODO: move and then click, or click and then move? former?
+
+		//#TODO: MOUSEEVENTF_MOVE_NOCOALESCE
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
+			POINT move{ mi.dx, mi.dy };
 			if (mi.dwFlags & MOUSEEVENTF_ABSOLUTE) {
 				if (mi.dwFlags & MOUSEEVENTF_VIRTUALDESK)
 					mouse_virtual_desk_absolute_to_screen(move);
@@ -55,18 +95,20 @@ namespace Send::Type::Internal {
 				mouse_screen_to_relative(move);
 			}
 
+			static_assert(std::is_same_v<decltype(mouse_report.x), decltype(mouse_report.y)>);
 			using CoordinatesType = decltype(mouse_report.x);
-			constexpr auto maxValue = MaxValue<CoordinatesType>::value;
+			constexpr auto maxValue = max_value<CoordinatesType>();
 
-			while (std::abs(move.x) > maxValue || std::abs(move.y) > maxValue) {
-				if (std::abs(move.x) > maxValue) {
+			while (abs(move.x) > maxValue || abs(move.y) > maxValue) {
+				if (abs(move.x) > maxValue) {
 					mouse_report.x = move.x > 0 ? maxValue : -maxValue;
 					move.x -= mouse_report.x;
 				}
 				else {
 					mouse_report.x = 0;
 				}
-				if (std::abs(move.y) > maxValue) {
+
+				if (abs(move.y) > maxValue) {
 					mouse_report.y = move.y > 0 ? maxValue : -maxValue;
 					move.y -= mouse_report.y;
 				}
@@ -74,14 +116,18 @@ namespace Send::Type::Internal {
 					mouse_report.y = 0;
 				}
 
-				driver.report_mouse(mouse_report, local_compensate);
+				driver.report_mouse(mouse_report, compensate_switch = -compensate_switch);
 			}
 
-			mouse_report.x = static_cast<CoordinatesType>(move.x);
-			mouse_report.y = static_cast<CoordinatesType>(move.y);
+			mouse_report.x = (CoordinatesType)move.x;
+			mouse_report.y = (CoordinatesType)move.y;
+		}
+		else {
+			mouse_report.x = 0;
+			mouse_report.y = 0;
 		}
 
-		if (mi.dwFlags & MOUSEEVENTF_WHEEL) {
+		if (mi.dwFlags & MOUSEEVENTF_WHEEL) { // TODO MOUSEEVENTF_HWHEEL
 			mouse_report.wheel = std::bit_cast<int32_t>(mi.mouseData) > 0 ? 1 : -1;
 		}
 
