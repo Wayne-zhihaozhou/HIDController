@@ -151,7 +151,6 @@
     <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\globals.hpp" />
     <ClInclude Include="include\holder.hpp" />
-    <ClInclude Include="include\Hook.hpp" />
     <ClInclude Include="include\IbSendBase.hpp" />
     <ClInclude Include="include\IbSendInput.hpp" />
     <ClInclude Include="include\IbSendKeyboard.hpp" />
@@ -183,6 +182,7 @@
     <ClCompile Include="src\IbSendMouse.cpp" />
     <ClCompile Include="src\Logitech.cpp" />
     <ClCompile Include="src\pch.cpp" />
+    <ClCompile Include="src\SendInputHook.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

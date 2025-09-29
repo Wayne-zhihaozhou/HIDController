@@ -52,6 +52,9 @@
     <ClCompile Include="src\IbSendInput.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SendInputHook.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\usb.hpp">
@@ -91,9 +94,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\globals.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Hook.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\SendInputHook.hpp">
