@@ -160,7 +160,6 @@
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\SendInputHook.hpp" />
     <ClInclude Include="include\SendTypes.hpp" />
-    <ClInclude Include="include\IbSendBase.cpp" />
     <ClInclude Include="include\usb.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +176,7 @@
     <ClCompile Include="src\base.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\globals.cpp" />
+    <ClCompile Include="src\IbSendBase.cpp" />
     <ClCompile Include="src\IbSendInput.cpp" />
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
