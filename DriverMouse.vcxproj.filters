@@ -52,6 +52,12 @@
     <ClCompile Include="LogitechDriver.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\IbSendMouse.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IbSendKeyboard.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\usb.hpp">

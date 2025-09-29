@@ -183,6 +183,8 @@
     <ClCompile Include="src\API 3.cpp" />
     <ClCompile Include="src\common.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\IbSendKeyboard.cpp" />
+    <ClCompile Include="src\IbSendMouse.cpp" />
     <ClCompile Include="src\Logitech.cpp" />
     <ClCompile Include="src\pch.cpp" />
   </ItemGroup>
