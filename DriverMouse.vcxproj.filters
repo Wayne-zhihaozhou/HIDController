@@ -40,9 +40,6 @@
     <ClCompile Include="detours\modules.cpp">
       <Filter>detours</Filter>
     </ClCompile>
-    <ClCompile Include="LogitechDriver.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\IbSendMouse.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -53,6 +50,15 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SendInputHook.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\base.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LogitechDriver.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\globals.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -84,12 +90,6 @@
     <ClInclude Include="detours\detver.h">
       <Filter>detours</Filter>
     </ClInclude>
-    <ClInclude Include="LogitechDriver.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="KeyboardUtils.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\SendTypes.hpp">
       <Filter>include</Filter>
     </ClInclude>
@@ -115,6 +115,12 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\IbSendInput.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\KeyboardUtils.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LogitechDriver.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,15 +1,12 @@
 ﻿#pragma once
 
 #include <mutex>
-
-
-#include <winternl.h>
 #include <functional>
-#pragma comment(lib, "ntdll.lib")
+#include <windows.h>
+#include <winternl.h>
 #include "common.hpp"
 #include "basic_type.hpp"
-#include <windows.h>
-
+#pragma comment(lib, "ntdll.lib")
 
 
 extern "C" {
@@ -42,105 +39,29 @@ extern "C" {
 
 namespace Send::Type::Internal {
 
-
 	class Base {
 	protected:
 		decltype(&::GetAsyncKeyState)* get_key_state_fallback;
 
-		static bool is_modifier(int vKey) {
-			int mods[] = { VK_LCONTROL, VK_RCONTROL, VK_LSHIFT, VK_RSHIFT, VK_LMENU, VK_RMENU, VK_LWIN, VK_RWIN };
-			for (int mod : mods)
-				if (mod == vKey)
-					return true;
-			return false;
-		}
-
-		void mouse_absolute_to_screen(POINT& absolute) const {
-			const static int mainScreenWidth = GetSystemMetrics(SM_CXSCREEN);
-			const static int mainScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-			// the overhead of WM_DISPLAYCHANGE is a bit high
-
-			absolute.x = MulDiv(absolute.x, mainScreenWidth, 65536);
-			absolute.y = MulDiv(absolute.y, mainScreenHeight, 65536);
-		}
-
-		void mouse_virtual_desk_absolute_to_screen(POINT& absolute) const {
-			const static int virtualDeskWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-			const static int virtualDeskHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-
-			absolute.x = MulDiv(absolute.x, virtualDeskWidth, 65536);
-			absolute.y = MulDiv(absolute.y, virtualDeskHeight, 65536);
-		}
-
-		// need to call update_screen_resolution first
-		static void mouse_screen_to_relative(POINT& screen_point) {
-			POINT point;
-			GetCursorPos(&point);
-			//if constexpr (debug)
-				//DebugOStream() << L"mouse_screen_to_relative: cursor (" << point.x << L", " << point.y << L") to point (" << screen_point.x << L", " << screen_point.y << L")\n";
-			screen_point.x -= point.x;
-			screen_point.y -= point.y;
-		}
+		static bool is_modifier(int vKey);
+		void mouse_absolute_to_screen(POINT& absolute) const;
+		void mouse_virtual_desk_absolute_to_screen(POINT& absolute) const;
+		static void mouse_screen_to_relative(POINT& screen_point);
 
 	public:
-		void create_base(decltype(&::GetAsyncKeyState)* get_key_state_fallback) {
-			this->get_key_state_fallback = get_key_state_fallback;
-		}
-
+		void create_base(decltype(&::GetAsyncKeyState)* get_key_state_fallback);
 		virtual ~Base() = default;
 		virtual void destroy() = 0;
 
-		virtual uint32_t send_input(const INPUT inputs[], uint32_t n) {
-			uint32_t count = 0;
-
-			for (uint32_t i = 0; i < n; i++) {
-				DWORD type = inputs[i].type;
-
-				uint32_t j = i + 1;
-				while (j < n && inputs[j].type == type)
-					j++;
-
-				switch (type) {
-				case INPUT_KEYBOARD:
-					count += send_keyboard_input(inputs + i, j - i);
-					break;
-				case INPUT_MOUSE:
-					count += send_mouse_input(inputs + i, j - i);
-					break;
-				}
-
-				i = j;
-			}
-
-			return count;
-		}
-
-		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n) {
-			uint32_t count = 0;
-			for (uint32_t i = 0; i < n; i++)
-				count += send_mouse_input(inputs[i].mi);
-			return count;
-		}
-
+		virtual uint32_t send_input(const INPUT inputs[], uint32_t n);
+		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
 		virtual bool send_mouse_input(const MOUSEINPUT& mi) = 0;
-
-		virtual uint32_t send_keyboard_input(const INPUT inputs[], uint32_t n) {
-			uint32_t count = 0;
-			for (uint32_t i = 0; i < n; i++)
-				count += send_keyboard_input(inputs[i].ki);
-			return count;
-		}
-
+		virtual uint32_t send_keyboard_input(const INPUT inputs[], uint32_t n);
 		virtual bool send_keyboard_input(const KEYBDINPUT& ki) = 0;
 
-		virtual SHORT get_key_state(int vKey) {
-			return (*get_key_state_fallback)(vKey);
-		}
-
-		virtual void sync_key_states() {}
+		virtual SHORT get_key_state(int vKey);
+		virtual void sync_key_states();
 	};
-
 
 
 	struct KeyboardModifiers {
@@ -159,101 +80,13 @@ namespace Send::Type::Internal {
 		std::mutex& mutex;
 
 	protected:
-		VirtualKeyStates(KeyboardModifiers& modifiers, std::mutex& mutex) : modifiers(modifiers), mutex(mutex) {}
-
-		void set_modifier_state(int vKey, bool keydown) {
-			switch (vKey) {
-#define CODE_GENERATE(vk, member)  \
-                case vk:  \
-                    modifiers.##member = keydown;  \
-                    break;
-
-				CODE_GENERATE(VK_LCONTROL, LCtrl)
-					CODE_GENERATE(VK_RCONTROL, RCtrl)
-					CODE_GENERATE(VK_LSHIFT, LShift)
-					CODE_GENERATE(VK_RSHIFT, RShift)
-					CODE_GENERATE(VK_LMENU, LAlt)
-					CODE_GENERATE(VK_RMENU, RAlt)
-					CODE_GENERATE(VK_LWIN, LGui)
-					CODE_GENERATE(VK_RWIN, RGui)
-#undef CODE_GENERATE
-			}
-		}
+		VirtualKeyStates(KeyboardModifiers& modifiers, std::mutex& mutex);
+		void set_modifier_state(int vKey, bool keydown);
 
 	public:
-		SHORT get_key_state(int vKey) override {
-			switch (vKey) {
-#define CODE_GENERATE(vk, member)  case vk: return modifiers.##member << 15;
-
-				CODE_GENERATE(VK_LCONTROL, LCtrl)
-					CODE_GENERATE(VK_RCONTROL, RCtrl)
-					CODE_GENERATE(VK_LSHIFT, LShift)
-					CODE_GENERATE(VK_RSHIFT, RShift)
-					CODE_GENERATE(VK_LMENU, LAlt)
-					CODE_GENERATE(VK_RMENU, RAlt)
-					CODE_GENERATE(VK_LWIN, LGui)
-					CODE_GENERATE(VK_RWIN, RGui)
-#undef CODE_GENERATE
-			default:
-				return (*get_key_state_fallback)(vKey);
-			}
-		}
-
-		void sync_key_states() override {
-			std::lock_guard lock(mutex);
-
-			//#TODO: GetKeyboardState() ?
-			//static bool states[256];  //down := true
-#define CODE_GENERATE(vk, member)  modifiers.##member = (*get_key_state_fallback)(vk) & 0x8000;
-
-			CODE_GENERATE(VK_LCONTROL, LCtrl)
-				CODE_GENERATE(VK_RCONTROL, RCtrl)
-				CODE_GENERATE(VK_LSHIFT, LShift)
-				CODE_GENERATE(VK_RSHIFT, RShift)
-				CODE_GENERATE(VK_LMENU, LAlt)
-				CODE_GENERATE(VK_RMENU, RAlt)
-				CODE_GENERATE(VK_LWIN, LGui)
-				CODE_GENERATE(VK_RWIN, RGui)
-#undef CODE_GENERATE
-		}
+		SHORT get_key_state(int vKey) override;
+		void sync_key_states() override;
 	};
 
-	inline std::wstring find_device(std::function<bool(std::wstring_view name)> p) {
-		std::wstring result{};
-		HANDLE dir_handle;
-
-		OBJECT_ATTRIBUTES obj_attr;
-		UNICODE_STRING obj_name;  //or RTL_CONSTANT_STRING
-		RtlInitUnicodeString(&obj_name, LR"(\GLOBAL??)");
-		InitializeObjectAttributes(&obj_attr, &obj_name, 0, NULL, NULL);
-
-		if (NT_SUCCESS(NtOpenDirectoryObject(&dir_handle, DIRECTORY_QUERY, &obj_attr))) {  //or DIRECTORY_TRAVERSE?
-			union {
-				std::uint8_t buf[2048];//#TODO
-				OBJECT_DIRECTORY_INFORMATION info[1];
-			};
-			ULONG context;
-
-#pragma warning(suppress : 6001)  //Warning C6001: Using uninitialized memory 'context'.
-			NTSTATUS status = NtQueryDirectoryObject(dir_handle, buf, sizeof buf, false, true, &context, NULL);
-			while (NT_SUCCESS(status)) {  //STATUS_SUCCESS, STATUS_MORE_ENTRIES
-				bool found = false;
-				for (ULONG i = 0; info[i].Name.Buffer; i++) {
-					std::wstring_view sv{ info[i].Name.Buffer, info[i].Name.Length / sizeof(wchar_t) };
-					if (p(sv)) {
-						result = LR"(\??\)" + std::wstring(sv);
-						found = true;
-						break;
-					}
-				}
-				if (found || status != STATUS_MORE_ENTRIES)
-					break;
-				status = NtQueryDirectoryObject(dir_handle, buf, sizeof buf, false, false, &context, NULL);
-			}
-
-			CloseHandle(dir_handle);
-		}
-
-		return result;
-	}
+	std::wstring find_device(std::function<bool(std::wstring_view name)> p);
 }

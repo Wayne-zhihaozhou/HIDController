@@ -10,7 +10,7 @@
 #include "usb.hpp"
 #include "InputSimulator.hpp"
 #include "basic_type.hpp"
-#include "../LogitechDriver.hpp"
+#include "LogitechDriver.hpp"
 
 
 namespace Send::Type::Internal {
@@ -20,6 +20,17 @@ namespace Send::Type::Internal {
 	template<> struct MaxValue<int8_t> { static constexpr int8_t  value = INT8_MAX; };
 	template<> struct MaxValue<int16_t> { static constexpr int16_t value = INT16_MAX; };
 
+	template <typename T>
+	static constexpr T max_value()
+	{
+		if constexpr (std::is_same_v<T, int8_t>)
+			return INT8_MAX;
+		else
+		{
+			static_assert(std::is_same_v<T, int16_t>, "Unknown type");
+			return INT16_MAX;
+		}
+	}
 
 
 	class Logitech : public VirtualKeyStates {

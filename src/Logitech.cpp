@@ -4,7 +4,7 @@
 
 namespace Send::Type::Internal {
 
-	Logitech::Logitech() = default;
+	Logitech::Logitech() : VirtualKeyStates(keyboard_report.modifiers, keyboard_mutex) {}
 
 
 	//临时复制?
@@ -16,8 +16,6 @@ namespace Send::Type::Internal {
 	void Logitech::destroy() {
 		driver.destroy();
 	}
-
-
 
 	//临时复制?+修复
 	uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
@@ -130,14 +128,13 @@ namespace Send::Type::Internal {
 		}
 
 #define CODE_GENERATE(down, up, member)  \
-    if (mi.dwFlags & down || mi.dwFlags & up)  \
-        mouse_report.button.member = mi.dwFlags & down;
+            if (mi.dwFlags & down || mi.dwFlags & up)  \
+                mouse_report.button.##member = mi.dwFlags & down;
 
-		CODE_GENERATE(MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, LButton)
+		CODE_GENERATE(MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, LButton)  //#TODO: may be switched?
 			CODE_GENERATE(MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP, RButton)
 			CODE_GENERATE(MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP, MButton)
 #undef CODE_GENERATE
-
 			if (mi.dwFlags & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP)) {
 				bool down = mi.dwFlags & MOUSEEVENTF_XDOWN;
 				switch (mi.mouseData) {
@@ -146,7 +143,7 @@ namespace Send::Type::Internal {
 				}
 			}
 
-		return driver.report_mouse(mouse_report, local_compensate);
+		return driver.report_mouse(mouse_report, compensate_switch = -compensate_switch);
 	}
 
 } // namespace Send::Type::Internal
@@ -195,65 +192,6 @@ namespace Send::Type::Internal {
 		DWORD bytes_returned;
 		return DeviceIoControl(device, 0x2A200C, &report, sizeof(KeyboardReport),
 			nullptr, 0, &bytes_returned, nullptr);
-	}
-
-
-	/////////////////////////
-
-	// 构造 Logitech 对象并初始化虚拟按键状态
-	Logitech::Logitech() : VirtualKeyStates(keyboard_report.modifiers, keyboard_mutex) {}
-
-	// 创建 Logitech 设备
-	Error Logitech::create() {
-		return driver.create();
-	}
-
-	// 销毁 Logitech 设备
-	void Logitech::destroy() {
-		driver.destroy();
-	}
-
-	// 发送鼠标输入数组
-	uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
-		return Base::send_mouse_input(inputs, n);
-	}
-
-	// 发送单个鼠标输入
-	bool Logitech::send_mouse_input(const MOUSEINPUT& mi) {
-		return send_mouse_report<MouseReport>(mi);
-	}
-
-	// 发送键盘输入
-	bool Logitech::send_keyboard_input(const KEYBDINPUT& ki) {
-		std::lock_guard lock(keyboard_mutex);
-
-		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
-		if (is_modifier(ki.wVk)) {
-			set_modifier_state(ki.wVk, keydown);
-		}
-		else {
-			uint8_t usage = Usb::keyboard_vk_to_usage((uint8_t)ki.wVk);
-			if (keydown) {
-				for (int i = 0; i < 6; i++) {
-					if (keyboard_report.keys[i] == 0) {
-						keyboard_report.keys[i] = usage;
-						break;
-					}
-				}
-				// full
-			}
-			else {
-				for (int i = 0; i < 6; i++) {
-					if (keyboard_report.keys[i] == usage) {
-						keyboard_report.keys[i] = 0;
-						//#TODO: move to left?
-						break;
-					}
-				}
-			}
-		}
-
-		return driver.report_keyboard(keyboard_report);
 	}
 
 }

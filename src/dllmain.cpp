@@ -1,9 +1,4 @@
-﻿#include "InputSimulator.hpp"
-using namespace Send;
-
-#include "types.hpp"
-#include "holder.hpp"
-#include <IbSendBase.hpp>
+﻿#include <IbSendBase.hpp>
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

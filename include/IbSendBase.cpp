@@ -1,8 +1,6 @@
-#include <InputSimulator.hpp>
-#include <SendInputHook.hpp>
-#include <IbSendInput.hpp>
+#include <IbSendBase.hpp>
 #include <Logitech.hpp>
-
+#include <IbSendInput.hpp>
 
 
 using namespace Send;

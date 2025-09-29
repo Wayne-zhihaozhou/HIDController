@@ -154,14 +154,14 @@
     <ClInclude Include="include\IbSendInput.hpp" />
     <ClInclude Include="include\IbSendKeyboard.hpp" />
     <ClInclude Include="include\IbSendMouse.hpp" />
+    <ClInclude Include="include\KeyboardUtils.hpp" />
     <ClInclude Include="include\Logitech.hpp" />
+    <ClInclude Include="include\LogitechDriver.hpp" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\SendInputHook.hpp" />
     <ClInclude Include="include\SendTypes.hpp" />
     <ClInclude Include="include\IbSendBase.cpp" />
     <ClInclude Include="include\usb.hpp" />
-    <ClInclude Include="KeyboardUtils.hpp" />
-    <ClInclude Include="LogitechDriver.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="detours\creatwth.cpp" />
@@ -174,12 +174,14 @@
     <ClCompile Include="detours\disolx86.cpp" />
     <ClCompile Include="detours\image.cpp" />
     <ClCompile Include="detours\modules.cpp" />
-    <ClCompile Include="LogitechDriver.cpp" />
+    <ClCompile Include="src\base.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\globals.cpp" />
     <ClCompile Include="src\IbSendInput.cpp" />
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
     <ClCompile Include="src\Logitech.cpp" />
+    <ClCompile Include="src\LogitechDriver.cpp" />
     <ClCompile Include="src\pch.cpp" />
     <ClCompile Include="src\SendInputHook.cpp" />
   </ItemGroup>

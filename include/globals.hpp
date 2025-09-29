@@ -1,7 +1,8 @@
-#include "base.hpp"
+// globals.hpp
+#pragma once
 #include <memory>
+#include "base.hpp"
 
 namespace main {
-    // 全局发送对象，管理具体发送实现
-    static std::unique_ptr<Send::Type::Internal::Base> send;
+    extern std::unique_ptr<Send::Type::Internal::Base> send;
 }

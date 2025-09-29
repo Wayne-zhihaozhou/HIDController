@@ -26,47 +26,5 @@ extern "C" {
 #endif
 
 
-//重写
-DLLAPI void __stdcall IbSendInputHook(Send::HookCode code) {
-    switch (code) {
-    case Send::HookCode::InitOnly:
-        if (!g_sendInputHook)
-            g_sendInputHook = std::make_unique<SendInputHook>();
-        break;
 
-    case Send::HookCode::Destroy:
-        g_sendInputHook.reset();  // 自动销毁 SendInputHook
-        break;
-
-    case Send::HookCode::On:
-        if (!g_sendInputHook)
-            g_sendInputHook = std::make_unique<SendInputHook>();
-        SendInputHook::hook = true; // 启用钩子
-        break;
-
-    case Send::HookCode::Off:
-        SendInputHook::hook = false; // 禁用钩子
-        break;
-    }
-}
-
-
-//DLLAPI void __stdcall IbSendInputHook(Send::HookCode code) {
-//    switch (code) {
-//    case Send::HookCode::InitOnly:
-//        sendinput_hook.create(); // 初始化钩子
-//        break;
-//    case Send::HookCode::Destroy:
-//        sendinput_hook.destroy(); // 卸载钩子
-//        break;
-//    case Send::HookCode::On:
-//        if (!sendinput_hook.created())
-//            sendinput_hook.create();
-//        sendinput_hook->hook = true; // 启用钩子
-//        break;
-//    case Send::HookCode::Off:
-//        sendinput_hook->hook = false; // 禁用钩子
-//        break;
-//    }
-//}
 

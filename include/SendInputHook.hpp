@@ -26,17 +26,13 @@ public:
 
     static UINT WINAPI SendInput_detour(UINT cInputs, LPINPUT pInputs, int cbSize);
     static SHORT WINAPI GetAsyncKeyState_detour(int vKey);
+
     static inline bool hook = false;
-    static inline decltype(GetAsyncKeyState)* GetAsyncKeyState_real;
+    static inline decltype(GetAsyncKeyState)* GetAsyncKeyState_real = GetAsyncKeyState;
 
 private:
-    static inline decltype(SendInput)* SendInput_real;
-    
-    
+    static inline decltype(SendInput)* SendInput_real = SendInput;
 };
 
-
-
-
-// 全局钩子实例指针（生命周期由 IbSendInputHook 控制）
+// 全局钩子实例
 extern std::unique_ptr<SendInputHook> g_sendInputHook;
