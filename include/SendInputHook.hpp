@@ -1,6 +1,24 @@
 #pragma once
 #include "globals.hpp"
 #include "holder.hpp"
+#include "detours.h"
+#include <Windows.h>
+
+template<typename T>
+LONG IbDetourAttach(_Inout_ T* ppPointer, _In_ T pDetour) {
+    DetourTransactionBegin();
+    DetourUpdateThread(GetCurrentThread());
+    DetourAttach((void**)ppPointer, pDetour);
+    return DetourTransactionCommit();
+}
+
+template<typename T>
+LONG IbDetourDetach(_Inout_ T* ppPointer, _In_ T pDetour) {
+    DetourTransactionBegin();
+    DetourUpdateThread(GetCurrentThread());
+    DetourDetach((void**)ppPointer, pDetour);
+    return DetourTransactionCommit();
+}
 
 class SendInputHook {
 public:

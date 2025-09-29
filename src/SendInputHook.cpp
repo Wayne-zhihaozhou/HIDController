@@ -1,7 +1,7 @@
 // SendInputHook.cpp
 #include "SendInputHook.hpp"
 
-// 初始化静态成员（如果没有使用 inline static）
+// 初始化静态成员
 decltype(SendInputHook::SendInput_real) SendInputHook::SendInput_real = SendInput;
 decltype(SendInputHook::GetAsyncKeyState_real) SendInputHook::GetAsyncKeyState_real = GetAsyncKeyState;
 bool SendInputHook::hook = false;
