@@ -4,9 +4,6 @@
     <ClCompile Include="src\pch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\common.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\dllmain.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -61,9 +58,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\basic_type.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\common.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\framework.h">
@@ -124,6 +118,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\IbSendInput.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

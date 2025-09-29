@@ -179,7 +179,6 @@
     <ClCompile Include="detours\image.cpp" />
     <ClCompile Include="detours\modules.cpp" />
     <ClCompile Include="LogitechDriver.cpp" />
-    <ClCompile Include="src\common.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
