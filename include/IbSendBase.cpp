@@ -6,6 +6,7 @@
 
 
 using namespace Send;
+
 DLLAPI Send::Error __stdcall IbSendInit(SendType type, InitFlags flags, void* argument) {
     if (type != SendType::Logitech) {
         return Error::InvalidArgument;  // 只支持 Logitech
@@ -28,4 +29,9 @@ DLLAPI void __stdcall IbSendDestroy() {
         return;
     main::send->destroy(); // 销毁全局对象
     main::send.reset();
+}
+
+
+DLLAPI void __stdcall IbSendSyncKeyStates() {
+    main::send->sync_key_states(); // 同步按键状态
 }

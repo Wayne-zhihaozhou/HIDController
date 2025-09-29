@@ -160,9 +160,7 @@
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\SendInputHook.hpp" />
     <ClInclude Include="include\SendTypes.hpp" />
-    <ClInclude Include="include\send_api.hpp" />
     <ClInclude Include="include\IbSendBase.cpp" />
-    <ClInclude Include="include\types.hpp" />
     <ClInclude Include="include\usb.hpp" />
     <ClInclude Include="KeyboardUtils.hpp" />
     <ClInclude Include="LogitechDriver.hpp" />
@@ -180,6 +178,7 @@
     <ClCompile Include="detours\modules.cpp" />
     <ClCompile Include="LogitechDriver.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\IbSendInput.cpp" />
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
     <ClCompile Include="src\Logitech.cpp" />

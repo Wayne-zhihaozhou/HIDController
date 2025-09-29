@@ -1,6 +1,8 @@
 #include "LogitechDriver.hpp"
 #include <string_view>
-#include "InternalDeviceFinder.hpp"  // ºŸ…Ë find_device π§æﬂ
+#include <SendTypes.hpp>
+#include <IbSendBase.cpp>
+
 
 namespace Send::Type::Internal {
 

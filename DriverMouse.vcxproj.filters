@@ -49,6 +49,9 @@
     <ClCompile Include="src\IbSendKeyboard.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\IbSendInput.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\usb.hpp">
@@ -72,9 +75,6 @@
     <ClInclude Include="include\pch.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\types.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="detours\detours.h">
       <Filter>detours</Filter>
     </ClInclude>
@@ -94,9 +94,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\Hook.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\send_api.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\SendInputHook.hpp">
