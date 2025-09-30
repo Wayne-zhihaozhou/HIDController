@@ -8,7 +8,7 @@ namespace Send::Type::Internal {
 
 
 	//¡Ÿ ±∏¥÷∆?
-	Error Logitech::create() {
+	Send::Error Logitech::create() {
 		return driver.create();
 	}
 

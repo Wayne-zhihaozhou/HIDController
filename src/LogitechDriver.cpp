@@ -7,7 +7,7 @@
 //±»ÐÞ¸Ä¹ý
 namespace Send::Type::Internal {
 
-    Error LogitechDriver::create() {
+    Send::Error LogitechDriver::create() {
         std::wstring device_name = find_device();
         if (device_name.empty()) return Error::DeviceNotFound;
 

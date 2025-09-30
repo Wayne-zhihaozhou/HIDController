@@ -1,6 +1,5 @@
 #include <bit>
 #include <cassert>
-#include "InputSimulator.hpp"
 #include <IbSendInput.hpp>
 #include "IbSendKeyboard.hpp"
 

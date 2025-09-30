@@ -8,9 +8,7 @@
 #include <cmath>
 
 #include "base.hpp"
-#include "usb.hpp"
-#include "InputSimulator.hpp"
-#include "basic_type.hpp"
+#include "SendTypes.hpp"
 
 
 namespace Send::Type::Internal {
@@ -39,7 +37,7 @@ namespace Send::Type::Internal {
 		};
 
 	public:
-		Error create();
+		Send::Error create();
 		void destroy();
 
 		template <class ReportType>

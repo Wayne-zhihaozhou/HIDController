@@ -7,12 +7,11 @@
 #include <cstdint>
 #include <cmath>
 
-#include "base.hpp"
-//#include "usb.hpp"
+//#include "base.hpp"
+#include "SendTypes.hpp"
 #include "KeyboardUtils.hpp"
-#include "InputSimulator.hpp"
-#include "basic_type.hpp"
 #include "LogitechDriver.hpp"
+
 
 
 namespace Send::Type::Internal {
@@ -62,7 +61,7 @@ namespace Send::Type::Internal {
 
 	public:
 		Logitech();
-		Error create();
+		Send::Error create();
 		void destroy() override;
 
 		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n) override;

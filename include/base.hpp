@@ -4,8 +4,6 @@
 #include <functional>
 #include <windows.h>
 #include <winternl.h>
-#include "common.hpp"
-#include "basic_type.hpp"
 #pragma comment(lib, "ntdll.lib")
 
 
