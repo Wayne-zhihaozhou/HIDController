@@ -2,34 +2,34 @@
 #include <Logitech.hpp>
 #include <IbSendInput.hpp>
 
-
-using namespace Send;
-
-DLLAPI Send::Error __stdcall IbSendInit(SendType type, InitFlags flags, void* argument) {
-    if (type != SendType::Logitech) {
-        return Error::InvalidArgument;  // 只支持 Logitech
+// 初始化发送模块（仅支持 Logitech），创建并保存全局发送对象
+DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument) {
+    if (type != Send::SendType::Logitech) {
+        return Send::Error::InvalidArgument;  // 只支持 Logitech
     }
 
-    auto logitech = std::make_unique<Type::Internal::Logitech>();
+    auto logitech = std::make_unique<Send::Type::Internal::Logitech>();
     logitech->create_base(&SendInputHook::GetAsyncKeyState_real);
-    Error error = logitech->create();
-    if (error != Error::Success)
+    Send::Error error = logitech->create();
+    if (error != Send::Error::Success)
         return error;
 
-    main::send = std::move(logitech); // 保存全局对象
-    return Error::Success;
+    main::send = std::move(logitech); 
+    return Send::Error::Success;
 }
 
+
+// 销毁发送模块，释放全局发送对象
 DLLAPI void __stdcall IbSendDestroy() {
-    IbSendInputHook(HookCode::Destroy);
+    IbSendInputHook(Send::HookCode::Destroy);
 
     if (!main::send)
         return;
-    main::send->destroy(); // 销毁全局对象
+    main::send->destroy();
     main::send.reset();
 }
 
-
+// 同步按键状态到发送模块
 DLLAPI void __stdcall IbSendSyncKeyStates() {
-    main::send->sync_key_states(); // 同步按键状态
+    main::send->sync_key_states(); 
 }
