@@ -3,8 +3,7 @@
 #include <IbSendInput.hpp>
 #include "IbSendMouse.hpp"
 
-using namespace Send;
-
+// 发送一个单独的鼠标事件（相当于原生 mouse_event）
 DLLAPI VOID WINAPI IbSend_mouse_event(
     _In_ DWORD dwFlags,
     _In_ DWORD dx,
@@ -12,6 +11,7 @@ DLLAPI VOID WINAPI IbSend_mouse_event(
     _In_ DWORD dwData,
     _In_ ULONG_PTR dwExtraInfo
 ) {
+    // 构造鼠标输入结构
     INPUT input{
         .type = INPUT_MOUSE,
         .mi {
@@ -23,10 +23,13 @@ DLLAPI VOID WINAPI IbSend_mouse_event(
             .dwExtraInfo = dwExtraInfo
         }
     };
+    // 调用发送函数
     IbSendInput(1, &input, sizeof(INPUT));
 }
 
+// 模拟鼠标移动（支持绝对和相对模式）
 DLLAPI bool __stdcall Send::IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMode mode) {
+    // 构造鼠标移动事件
     INPUT input{
         .type = INPUT_MOUSE,
         .mi {
@@ -44,10 +47,13 @@ DLLAPI bool __stdcall Send::IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMo
             .dwExtraInfo = 0
         }
     };
+    // 发送事件
     return IbSendInput(1, &input, sizeof(INPUT));
 }
 
+// 模拟一次鼠标点击（按下 + 抬起）
 DLLAPI bool __stdcall Send::IbSendMouseClick(Send::MouseButton button) {
+    // 初始化按下和抬起事件
     INPUT inputs[2];
     inputs[0] = inputs[1] = {
         .type = INPUT_MOUSE,
@@ -60,6 +66,7 @@ DLLAPI bool __stdcall Send::IbSendMouseClick(Send::MouseButton button) {
         }
     };
 
+    // 根据按键类型设置事件标志
     switch (button) {
     case MouseButton::Left:
         inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
@@ -84,12 +91,15 @@ DLLAPI bool __stdcall Send::IbSendMouseClick(Send::MouseButton button) {
         inputs[0].mi.mouseData = inputs[1].mi.mouseData = XBUTTON2;
         return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
     default:
+        // 默认处理自定义标志
         inputs[0].mi.dwFlags = static_cast<DWORD>(button);
         return IbSendInput(1, inputs, sizeof(INPUT));
     }
 }
 
+// 模拟鼠标滚轮滚动
 DLLAPI bool __stdcall Send::IbSendMouseWheel(int32_t movement) {
+    // 构造滚轮事件
     INPUT input{
         .type = INPUT_MOUSE,
         .mi {
@@ -101,6 +111,7 @@ DLLAPI bool __stdcall Send::IbSendMouseWheel(int32_t movement) {
             .dwExtraInfo = 0
         }
     };
+    // 发送事件
     return IbSendInput(1, &input, sizeof(INPUT));
 }
 
