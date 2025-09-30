@@ -1,5 +1,4 @@
-﻿#include "dll_export.hpp"
-#include "SendTypes.hpp"
+﻿#include "DriverMouse.hpp"
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,

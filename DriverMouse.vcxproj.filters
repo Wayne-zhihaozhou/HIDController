@@ -75,9 +75,6 @@
     <ClInclude Include="include\framework.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\holder.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\Logitech.hpp">
       <Filter>include</Filter>
     </ClInclude>
@@ -118,6 +115,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\LogitechDriver.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DriverMouse.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
