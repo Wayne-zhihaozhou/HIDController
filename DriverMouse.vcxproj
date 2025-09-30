@@ -153,7 +153,7 @@
     <ClInclude Include="include\IbSendInput.hpp" />
     <ClInclude Include="include\IbSendKeyboard.hpp" />
     <ClInclude Include="include\IbSendMouse.hpp" />
-    <ClInclude Include="include\KeyboardUtils.hpp" />
+    <ClInclude Include="include\KeyboardMap.hpp" />
     <ClInclude Include="include\Logitech.hpp" />
     <ClInclude Include="include\LogitechDriver.hpp" />
     <ClInclude Include="include\pch.h" />

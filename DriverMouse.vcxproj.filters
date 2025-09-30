@@ -108,7 +108,7 @@
     <ClInclude Include="include\IbSendInput.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\KeyboardUtils.hpp">
+    <ClInclude Include="include\KeyboardMap.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\LogitechDriver.hpp">

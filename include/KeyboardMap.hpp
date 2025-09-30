@@ -2,7 +2,7 @@
 #include <cstdint>
 
 namespace Send::Type::Internal::Usb {
-
+    //将 Windows 虚拟键码（VK_*）转换为 USB HID 键盘用的 Usage ID（键盘扫描码）
     constexpr uint8_t keyboard_vk_to_usage(uint8_t vkCode) {
         //#TODO: fully test
 
@@ -211,7 +211,4 @@ namespace Send::Type::Internal::Usb {
 #pragma endregion
     }
 
-    //需要从base中移植过来
-	//bool is_modifier(uint8_t vk);
-
-}  // namespace Send::Type::Internal::Usb
+}
