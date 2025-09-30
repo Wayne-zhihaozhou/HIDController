@@ -178,7 +178,6 @@
     <ClCompile Include="src\IbSendInput.cpp" />
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
-    <ClCompile Include="src\KeyboardUtils.cpp" />
     <ClCompile Include="src\Logitech.cpp" />
     <ClCompile Include="src\LogitechDriver.cpp" />
     <ClCompile Include="src\pch.cpp" />

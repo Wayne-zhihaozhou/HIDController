@@ -64,9 +64,6 @@
     <ClCompile Include="src\IbSendBase.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\KeyboardUtils.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\base.hpp">

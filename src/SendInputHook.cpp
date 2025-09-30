@@ -4,11 +4,6 @@
 // 初始化全局智能指针
 std::unique_ptr<SendInputHook> g_sendInputHook = nullptr;
 
-// 初始化静态成员
-//decltype(SendInputHook::SendInput_real) SendInputHook::SendInput_real = SendInput;
-//decltype(SendInputHook::GetAsyncKeyState_real) SendInputHook::GetAsyncKeyState_real = GetAsyncKeyState;
-//bool SendInputHook::hook = false;
-
 
 // 构造函数：安装 detour
 SendInputHook::SendInputHook() {
