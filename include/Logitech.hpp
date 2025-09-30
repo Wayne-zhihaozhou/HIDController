@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿//Logitech.hpp
+#pragma once
 #include <windows.h>
 #include <string>
 #include <mutex>

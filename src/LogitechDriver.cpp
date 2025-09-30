@@ -1,9 +1,10 @@
-
+//LogitechDriver.cpp
 #include <string_view>
 #include <SendTypes.hpp>
 #include "LogitechDriver.hpp"
 
 
+//±»ÐÞ¸Ä¹ý
 namespace Send::Type::Internal {
 
     Error LogitechDriver::create() {
@@ -41,5 +42,6 @@ namespace Send::Type::Internal {
         return DeviceIoControl(device, 0x2A200C, &report, sizeof(KeyboardReport),
             nullptr, 0, &bytes_returned, nullptr);
     }
+
 
 }  // namespace Send::Type::Internal

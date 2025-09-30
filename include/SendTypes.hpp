@@ -4,11 +4,7 @@
 #include <Windows.h>
 
 namespace Send {
-    //namespace Type
-    //{
-    //    using Internal::Base;
-    //    using Internal::Logitech;
-    //}
+
 
     enum class Error : uint32_t {
         Success,
