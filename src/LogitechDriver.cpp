@@ -1,32 +1,40 @@
-//LogitechDriver.cpp
+// LogitechDriver.cpp
 #include <string_view>
 #include <SendTypes.hpp>
 #include "LogitechDriver.hpp"
 
 
-//被修改过
 namespace Send::Type::Internal {
 
+    // 创建 Logitech 驱动设备连接
     Send::Error LogitechDriver::create() {
+        // 查找匹配的设备路径
         std::wstring device_name = find_device();
         if (device_name.empty()) return Error::DeviceNotFound;
 
+        // 打开设备句柄
         device = CreateFileW(
             device_name.c_str(),
             GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
             OPEN_EXISTING, 0, NULL
         );
+
+        // 返回打开结果
         return (device == INVALID_HANDLE_VALUE) ? Error::DeviceOpenFailed : Error::Success;
     }
 
+    // 销毁 Logitech 驱动设备连接
     void LogitechDriver::destroy() {
+        // 关闭设备句柄
         if (device != INVALID_HANDLE_VALUE) {
             CloseHandle(device);
             device = INVALID_HANDLE_VALUE;
         }
     }
 
+    // 查找匹配的 Logitech 设备路径
     std::wstring LogitechDriver::find_device() {
+        // 根据设备名规则过滤设备对象
         return Internal::find_device([](std::wstring_view sv) {
             using namespace std::literals;
             return (sv.starts_with(L"ROOT#SYSTEM#"sv) || sv.starts_with(L"Root#SYSTEM#"sv)) &&
@@ -37,11 +45,12 @@ namespace Send::Type::Internal {
             });
     }
 
+    // 向设备发送键盘报告数据
     bool LogitechDriver::report_keyboard(KeyboardReport report) const {
         DWORD bytes_returned;
+        // 通过 IOCTL 向驱动发送键盘数据
         return DeviceIoControl(device, 0x2A200C, &report, sizeof(KeyboardReport),
             nullptr, 0, &bytes_returned, nullptr);
     }
 
-
-}  // namespace Send::Type::Internal
+}
