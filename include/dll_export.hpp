@@ -17,7 +17,7 @@ DLLAPI void __stdcall IbSendDestroy();
 // 同步键盘状态
 DLLAPI void __stdcall IbSendSyncKeyStates();
 
-// 低级鼠标事件（Windows 原生 mouse_event 包装）
+// 
 DLLAPI VOID WINAPI IbSend_mouse_event(
     _In_ DWORD dwFlags,
     _In_ DWORD dx,

@@ -145,7 +145,6 @@
     <ClInclude Include="detours\detours.h" />
     <ClInclude Include="detours\detver.h" />
     <ClInclude Include="include\base.hpp" />
-    <ClInclude Include="include\basic_type.hpp" />
     <ClInclude Include="include\dll_export.hpp" />
     <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\globals.hpp" />
@@ -160,7 +159,6 @@
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\SendInputHook.hpp" />
     <ClInclude Include="include\SendTypes.hpp" />
-    <ClInclude Include="include\usb.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="detours\creatwth.cpp" />
@@ -180,6 +178,7 @@
     <ClCompile Include="src\IbSendInput.cpp" />
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
+    <ClCompile Include="src\KeyboardUtils.cpp" />
     <ClCompile Include="src\Logitech.cpp" />
     <ClCompile Include="src\LogitechDriver.cpp" />
     <ClCompile Include="src\pch.cpp" />

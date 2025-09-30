@@ -8,7 +8,8 @@
 #include <cmath>
 
 #include "base.hpp"
-#include "usb.hpp"
+//#include "usb.hpp"
+#include "KeyboardUtils.hpp"
 #include "InputSimulator.hpp"
 #include "basic_type.hpp"
 #include "LogitechDriver.hpp"
