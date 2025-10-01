@@ -1,5 +1,5 @@
+//dll_export.hpp
 #pragma once
-
 
 #ifdef DLL1_EXPORTS
 #define DLLAPI extern "C" __declspec(dllexport)

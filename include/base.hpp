@@ -1,5 +1,5 @@
-﻿#pragma once
-
+﻿//base.hpp
+#pragma once
 #include <mutex>
 #include <functional>
 #include <windows.h>

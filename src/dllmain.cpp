@@ -1,4 +1,6 @@
-﻿#include "DriverMouse.hpp"
+﻿//dllmain.cpp
+#include"pch.h"
+#include "DriverMouse.hpp"
 
 // DLL 入口函数：当 DLL 被加载/卸载或线程创建/结束时会被系统调用
 BOOL APIENTRY DllMain(HMODULE hModule,

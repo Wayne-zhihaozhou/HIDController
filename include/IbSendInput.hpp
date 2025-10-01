@@ -1,10 +1,11 @@
+//IbSendInput.hpp
 #pragma once
 #include <Windows.h>
 #include "dll_export.hpp"
 #include "SendTypes.hpp"
 #include "SendInputHook.hpp"
 
-//using namespace Send;
+
 
 
 #ifdef __cplusplus

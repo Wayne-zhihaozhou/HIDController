@@ -1,5 +1,33 @@
-﻿#pragma once
+﻿//framework.h
+//告诉别人项目有哪些公共定义和前向声明。
+#pragma once
 
-#define WIN32_LEAN_AND_MEAN             // 从 Windows 头文件中排除极少使用的内容
-// Windows 头文件
-#include <windows.h>
+/*
+
+// ✅ 项目级公共宏
+#define APP_VERSION "1.0.0"
+#define ENABLE_LOGGING 1
+
+// ✅ 导出宏
+#ifdef BUILD_DLL
+#  define API __declspec(dllexport)
+#else
+#  define API __declspec(dllimport)
+#endif
+
+// ✅ 全局常量
+constexpr int DEFAULT_TIMEOUT_MS = 5000;
+
+// ✅ 前向声明
+class DeviceManager;
+struct InputPacket;
+
+// ✅ 公共枚举
+enum class ErrorCode {
+    Ok,
+    Timeout,
+    Unknown
+};
+
+
+*/

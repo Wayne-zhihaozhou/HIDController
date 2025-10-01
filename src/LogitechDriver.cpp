@@ -1,4 +1,5 @@
 // LogitechDriver.cpp
+#include"pch.h"
 #include <string_view>
 #include <SendTypes.hpp>
 #include "LogitechDriver.hpp"
