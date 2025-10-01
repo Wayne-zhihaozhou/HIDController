@@ -1,6 +1,9 @@
 #include "base.hpp"
 #include <windows.h>
 
+
+
+
 namespace Send::Type::Internal {
 
 	// ÅĞ¶ÏÄ³¸öĞéÄâ¼üÂëÊÇ·ñÎªĞŞÊÎ¼ü£¨Ctrl/Shift/Alt/Win£©
@@ -195,4 +198,9 @@ namespace Send::Type::Internal {
 		return result;
 	}
 
+}
+
+
+namespace Send {
+	std::unique_ptr<Type::Internal::Base> g_send = nullptr;
 }

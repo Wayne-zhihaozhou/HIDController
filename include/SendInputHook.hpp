@@ -1,7 +1,7 @@
 #pragma once
-#include "globals.hpp"
-#include "detours.h"
 #include <Windows.h>
+#include <memory>
+#include "detours.h"
 
 template<typename T>
 LONG IbDetourAttach(_Inout_ T* ppPointer, _In_ T pDetour) {

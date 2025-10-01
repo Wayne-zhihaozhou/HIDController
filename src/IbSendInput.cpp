@@ -1,5 +1,5 @@
 #include "dll_export.hpp"
-#include "globals.hpp"
+#include "base.hpp"
 #include <SendTypes.hpp>
 #include <SendInputHook.hpp>
 
@@ -11,7 +11,7 @@ DLLAPI UINT WINAPI IbSendInput(
 	_In_ int cbSize
 ) {
 	// 调用底层发送对象的输入函数
-	return main::send->send_input(pInputs, cInputs);
+	return Send::g_send->send_input(pInputs, cInputs);
 }
 
 

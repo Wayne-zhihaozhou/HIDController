@@ -1,4 +1,5 @@
 #include "Logitech.hpp" 
+#include "KeyboardMap.hpp"
 #include <string_view>
 
 namespace Send::Type::Internal {

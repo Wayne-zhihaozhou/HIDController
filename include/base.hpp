@@ -4,6 +4,7 @@
 #include <functional>
 #include <windows.h>
 #include <winternl.h>
+#include <memory>
 #pragma comment(lib, "ntdll.lib")
 
 
@@ -34,6 +35,8 @@ extern "C" {
 		_Out_opt_ PULONG  ReturnLength
 	);
 }
+
+
 
 namespace Send::Type::Internal {
 
@@ -87,4 +90,9 @@ namespace Send::Type::Internal {
 	};
 
 	std::wstring find_device(std::function<bool(std::wstring_view name)> p);
+}
+
+
+namespace Send {
+	extern std::unique_ptr<Type::Internal::Base> g_send;
 }

@@ -58,9 +58,6 @@
     <ClCompile Include="src\LogitechDriver.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\globals.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\IbSendBase.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -85,9 +82,6 @@
       <Filter>detours</Filter>
     </ClInclude>
     <ClInclude Include="include\SendTypes.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\globals.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\SendInputHook.hpp">

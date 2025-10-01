@@ -14,7 +14,7 @@ DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags fla
     if (error != Send::Error::Success)
         return error;
 
-    main::send = std::move(logitech); 
+    Send::g_send = std::move(logitech); 
     return Send::Error::Success;
 }
 
@@ -23,13 +23,13 @@ DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags fla
 DLLAPI void __stdcall IbSendDestroy() {
     IbSendInputHook(Send::HookCode::Destroy);
 
-    if (!main::send)
+    if (!Send::g_send)
         return;
-    main::send->destroy();
-    main::send.reset();
+    Send::g_send->destroy();
+    Send::g_send.reset();
 }
 
 // 同步按键状态到发送模块
 DLLAPI void __stdcall IbSendSyncKeyStates() {
-    main::send->sync_key_states(); 
+    Send::g_send->sync_key_states(); 
 }

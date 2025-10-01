@@ -1,9 +1,9 @@
 // SendInputHook.cpp
 #include "SendInputHook.hpp"
+#include "base.hpp"
 
 // 初始化全局智能指针
 std::unique_ptr<SendInputHook> g_sendInputHook = nullptr;
-
 
 // 构造函数：安装 detour
 SendInputHook::SendInputHook() {
@@ -22,12 +22,12 @@ SendInputHook::~SendInputHook() {
 SHORT WINAPI SendInputHook::GetAsyncKeyState_detour(int vKey) {
     if (!hook)
         return GetAsyncKeyState_real(vKey);
-    return main::send->get_key_state(vKey);
+    return Send::g_send->get_key_state(vKey);
 }
 
 // 拦截 SendInput
 UINT WINAPI SendInputHook::SendInput_detour(UINT cInputs, LPINPUT pInputs, int cbSize) {
     if (!hook)
         return SendInput_real(cInputs, pInputs, cbSize);
-    return main::send->send_input(pInputs, cInputs);
+    return Send::g_send->send_input(pInputs, cInputs);
 }
