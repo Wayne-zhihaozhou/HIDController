@@ -1,13 +1,11 @@
 //IbSendInput.cpp
 #include"pch.h"
-
-#include "base.hpp"
-#include <SendTypes.hpp>
+#include "SendInput.hpp"
 #include <SendInputHook.hpp>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+
+
+
 // 发送一组模拟输入事件（键盘/鼠标）
  UINT WINAPI IbSendInput(
 	_In_ UINT cInputs,
@@ -47,7 +45,3 @@ extern "C" {
 	}
 }
 
-
-#ifdef __cplusplus
-}
-#endif

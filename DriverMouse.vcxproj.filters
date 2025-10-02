@@ -10,43 +10,13 @@
     <ClCompile Include="src\Logitech.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="detours\creatwth.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\detours.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\disasm.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\disolarm.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\disolarm64.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\disolia64.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\disolx64.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\disolx86.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\image.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
-    <ClCompile Include="detours\modules.cpp">
-      <Filter>detours</Filter>
-    </ClCompile>
     <ClCompile Include="src\IbSendMouse.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\IbSendKeyboard.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\IbSendInput.cpp">
+    <ClCompile Include="src\SendInput.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SendInputHook.cpp">
@@ -78,16 +48,10 @@
     <ClInclude Include="detours\detours.h">
       <Filter>detours</Filter>
     </ClInclude>
-    <ClInclude Include="detours\detver.h">
-      <Filter>detours</Filter>
-    </ClInclude>
     <ClInclude Include="include\SendTypes.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\SendInputHook.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dll_export.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\IbSendMouse.hpp">
@@ -99,7 +63,7 @@
     <ClInclude Include="include\IbSendBase.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\IbSendInput.hpp">
+    <ClInclude Include="include\SendInput.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\KeyboardMap.hpp">

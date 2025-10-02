@@ -3,8 +3,6 @@
 #include "SendTypes.hpp"
 #include "LogitechDriver.hpp"
 
-
-
 namespace Send::Type::Internal {
 
 	//------------------ MaxValue ------------------

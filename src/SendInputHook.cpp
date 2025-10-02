@@ -1,7 +1,7 @@
 // SendInputHook.cpp
 #include"pch.h"
-#include "SendInputHook.hpp"
-#include "base.hpp"
+#include <SendInputHook.hpp>
+
 
 // 初始化全局智能指针
 std::unique_ptr<SendInputHook> g_sendInputHook = nullptr;

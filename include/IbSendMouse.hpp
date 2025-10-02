@@ -15,22 +15,15 @@ extern "C" {
 		_In_ ULONG_PTR dwExtraInfo
 	);
 
-#ifdef __cplusplus
-}
-#endif
-
-// 高级封装鼠标操作
-#ifdef __cplusplus
-namespace Send {
-
 	// 移动鼠标
-	bool WINAPI IbSendMouseMove(uint32_t x, uint32_t y, MoveMode mode);
+	bool WINAPI IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMode mode);
 
 	// 鼠标点击
-	bool WINAPI IbSendMouseClick(MouseButton button);
+	bool WINAPI IbSendMouseClick(Send::MouseButton button);
 
 	// 鼠标滚轮
 	bool WINAPI IbSendMouseWheel(int32_t movement);
 
-}  // namespace Send
+#ifdef __cplusplus
+}
 #endif

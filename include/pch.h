@@ -29,17 +29,34 @@
 #define WIN32_LEAN_AND_MEAN
 
 
-
-#include <windows.h>   // 系统头
-#include <mutex>       // STL
+// 系统和标准库头文件
+#include <windows.h>
+#include <mutex>
 #include <memory>
 #include <string>
 #include <cstdint>
-
-
 #include <functional>
 #include <winternl.h>
-#include <memory>
+#include <bit>
+#include <cassert>
+#include <string_view>
 
-#include "framework.h" // 项目公共框架头
+// 第三方库头文件
+#include "../detours/detours.h"
+
+
+// 项目自定义头文件
+#include "base.hpp"
+#include "SendTypes.hpp"
+#include "SendInput.hpp"
+//#include "IbSendBase.hpp"
+//#include "IbSendInput.hpp"
+//#include "IbSendKeyboard.hpp"
+//#include "IbSendMouse.hpp"
+//#include "SendInputHook.hpp"
+//#include "KeyboardMap.hpp"
+//#include "Logitech.hpp"
+//#include "LogitechDriver.hpp"
+//#include "framework.h"
+
 

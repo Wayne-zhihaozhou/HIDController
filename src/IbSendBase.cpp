@@ -1,9 +1,9 @@
 //ibSendBase.cpp
 #include"pch.h"
-#include <IbSendBase.hpp>
+#include "IbSendBase.hpp"
 #include <Logitech.hpp>
-#include <IbSendInput.hpp>
-#include <SendTypes.hpp>
+#include <SendInputHook.hpp>
+
 
 // 初始化发送模块（仅支持 Logitech），创建并保存全局发送对象
  Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument) {
@@ -36,3 +36,4 @@
  void WINAPI IbSendSyncKeyStates() {
     Send::g_send->sync_key_states(); 
 }
+

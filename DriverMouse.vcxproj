@@ -120,6 +120,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(ProjectDir)detours</AdditionalLibraryDirectories>
+      <AdditionalDependencies>detours_x64.lib;detours_x86.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,13 +145,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="detours\detours.h" />
-    <ClInclude Include="detours\detver.h" />
     <ClInclude Include="include\base.hpp" />
-    <ClInclude Include="include\dll_export.hpp" />
     <ClInclude Include="include\DriverMouse.hpp" />
     <ClInclude Include="include\framework.h" />
     <ClInclude Include="include\IbSendBase.hpp" />
-    <ClInclude Include="include\IbSendInput.hpp" />
+    <ClInclude Include="include\SendInput.hpp" />
     <ClInclude Include="include\IbSendKeyboard.hpp" />
     <ClInclude Include="include\IbSendMouse.hpp" />
     <ClInclude Include="include\KeyboardMap.hpp" />
@@ -160,40 +160,10 @@
     <ClInclude Include="include\SendTypes.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="detours\creatwth.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\detours.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\disasm.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\disolarm.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\disolarm64.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\disolia64.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\disolx64.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\disolx86.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\image.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="detours\modules.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\base.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\IbSendBase.cpp" />
-    <ClCompile Include="src\IbSendInput.cpp">
+    <ClCompile Include="src\SendInput.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="src\IbSendKeyboard.cpp" />

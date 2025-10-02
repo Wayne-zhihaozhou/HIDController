@@ -1,7 +1,5 @@
 //SendInputHook.hpp
 #pragma once
-#include <Windows.h>
-#include <memory>
 #include "detours.h"
 
 template<typename T>

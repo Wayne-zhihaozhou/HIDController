@@ -1,11 +1,6 @@
 //ibsendkeyboard.cpp
 #include"pch.h"
-#include <bit>
-#include <cassert>
-#include <IbSendInput.hpp>
-#include "IbSendKeyboard.hpp"
-
-namespace Send {
+#include"IbSendKeyboard.hpp"
 
 	// 发送一个单独的键盘事件（相当于原生 keybd_event）
 	 VOID WINAPI IbSend_keybd_event(
@@ -123,4 +118,3 @@ namespace Send {
 			return IbSendInput(i, inputs, sizeof(INPUT)) == i;
 	}
 
-}

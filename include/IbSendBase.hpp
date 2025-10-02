@@ -1,6 +1,5 @@
 //IbSendBase.hpp
 #pragma once
-
 #include "SendTypes.hpp"
 
 #ifdef __cplusplus

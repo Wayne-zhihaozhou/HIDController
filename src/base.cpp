@@ -1,10 +1,6 @@
 //base.cpp
 #include"pch.h"
-#include "base.hpp"
-#include <windows.h>
-
-
-
+#include"base.hpp"
 
 namespace Send::Type::Internal {
 

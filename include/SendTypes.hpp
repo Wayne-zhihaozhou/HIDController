@@ -1,7 +1,6 @@
 // SendTypes.hpp
 #pragma once
-#include <cstdint>
-#include <Windows.h>
+
 
 namespace Send {
 

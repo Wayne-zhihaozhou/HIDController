@@ -1,8 +1,11 @@
 //Logitech.cpp
 #include"pch.h"
-#include "Logitech.hpp" 
-#include "KeyboardMap.hpp"
-#include <string_view>
+#include "Logitech.hpp"
+#include <base.hpp>
+#include <SendTypes.hpp>
+#include <KeyboardMap.hpp>
+
+
 
 namespace Send::Type::Internal {
 

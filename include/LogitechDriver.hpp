@@ -1,13 +1,5 @@
 //LogitechDriver.hpp
 #pragma once
-#include <windows.h>
-#include <string>
-#include <mutex>
-#include <bit>
-#include <cstdint>
-#include <cmath>
-
-#include "base.hpp"
 #include "SendTypes.hpp"
 
 

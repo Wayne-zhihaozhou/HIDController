@@ -1,8 +1,8 @@
 // LogitechDriver.cpp
 #include"pch.h"
-#include <string_view>
-#include <SendTypes.hpp>
-#include "LogitechDriver.hpp"
+#include"LogitechDriver.hpp"
+#include <Logitech.hpp>
+
 
 
 namespace Send::Type::Internal {

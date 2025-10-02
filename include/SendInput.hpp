@@ -1,10 +1,6 @@
 //IbSendInput.hpp
 #pragma once
 #include "SendTypes.hpp"
-#include "SendInputHook.hpp"
-
-
-
 
 #ifdef __cplusplus
 extern "C" {
