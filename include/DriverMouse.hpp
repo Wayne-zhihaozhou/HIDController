@@ -3,8 +3,7 @@
 #include <SendTypes.hpp>
 
 
-
-//--------------------定义DLL导出宏----------
+//-------------------- 定义DLL导出宏 ----------
 #ifdef DLL1_EXPORTS
 #define DLLAPI extern "C" __declspec(dllexport)//C语言链接方式;函数导出到DLL中
 #else
@@ -12,43 +11,47 @@
 #endif
 
 
-//--------------------枚举--------------------
-
+//使用C风格
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// -------------------- 初始化/销毁 --------------------
+	// -------------------- 初始化/销毁 --------------------
+	
+	// 初始化发送模块
+	DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument);
 
-// 初始化模块（加载驱动等）
-// 返回 true 表示成功
-DLLAPI bool InitializeDriverMouse();
+	// 销毁发送模块
+	DLLAPI void WINAPI IbSendDestroy();
 
-// 卸载模块
-DLLAPI void ShutdownDriverMouse();
+	// 同步键盘状态
+	DLLAPI void WINAPI IbSendSyncKeyStates();
 
-// -------------------- 鼠标控制 --------------------
+	// -------------------- 鼠标控制 --------------------
 
-// 相对移动鼠标 dx/dy 单位为像素
-DLLAPI void MoveMouseRelative(int dx, int dy);
+	// 移动鼠标
+	DLLAPI bool WINAPI IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMode mode);
 
-// 绝对移动鼠标到屏幕坐标 x/y
-DLLAPI void MoveMouseAbsolute(int x, int y);
+	// 鼠标点击
+	DLLAPI bool WINAPI IbSendMouseClick(Send::MouseButton button);
 
-// 设置鼠标相对移动加成系数
-DLLAPI void SetMouseSensitivity(float factor);
+	// 鼠标滚轮
+	DLLAPI bool WINAPI IbSendMouseWheel(int32_t movement);
 
-// -------------------- 键盘控制 --------------------
+	// -------------------- 键盘控制 --------------------
+	struct KeyboardModifiers;
 
-// 按下某个虚拟键码
-DLLAPI void KeyDown(int vKey);
+	// 按下指定键
+	DLLAPI bool WINAPI IbSendKeybdDown(uint16_t vk);
 
-// 松开某个虚拟键码
-DLLAPI void KeyUp(int vKey);
+	// 释放指定键
+	DLLAPI bool WINAPI IbSendKeybdUp(uint16_t vk);
 
-// 发送组合按键（例如 Ctrl + C）
-// vKeys 是虚拟键码数组，count 为数组长度
-DLLAPI void SendKeyCombination(const int* vKeys, int count);
+	// 按下并释放指定键，可附加修饰键
+	DLLAPI bool WINAPI IbSendKeybdDownUp(uint16_t vk, KeyboardModifiers modifiers);
+
+
+
 
 #ifdef __cplusplus
 }
