@@ -20,7 +20,7 @@ extern "C" {
     );
 
     // 安装或触发输入钩子
-    DLLAPI void __stdcall IbSendInputHook(Send::HookCode code);
+    DLLAPI void WINAPI IbSendInputHook(Send::HookCode code);
 
 #ifdef __cplusplus
 }

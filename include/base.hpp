@@ -1,10 +1,5 @@
 ﻿//base.hpp
 #pragma once
-#include <mutex>
-#include <functional>
-#include <windows.h>
-#include <winternl.h>
-#include <memory>
 #pragma comment(lib, "ntdll.lib")
 
 

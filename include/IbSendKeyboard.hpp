@@ -25,13 +25,13 @@ extern "C" {
 namespace Send {
 
     // 按下指定键
-    DLLAPI bool __stdcall IbSendKeybdDown(uint16_t vk);
+    DLLAPI bool WINAPI IbSendKeybdDown(uint16_t vk);
 
     // 释放指定键
-    DLLAPI bool __stdcall IbSendKeybdUp(uint16_t vk);
+    DLLAPI bool WINAPI IbSendKeybdUp(uint16_t vk);
 
     // 按下并释放指定键，可附加修饰键
-    DLLAPI bool __stdcall IbSendKeybdDownUp(uint16_t vk, KeyboardModifiers modifiers);
+    DLLAPI bool WINAPI IbSendKeybdDownUp(uint16_t vk, KeyboardModifiers modifiers);
 
 }  // namespace Send
 #endif

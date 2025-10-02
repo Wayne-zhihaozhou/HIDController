@@ -5,7 +5,7 @@
 #include <IbSendInput.hpp>
 
 // 初始化发送模块（仅支持 Logitech），创建并保存全局发送对象
-DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument) {
+DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument) {
     if (type != Send::SendType::Logitech) {
         return Send::Error::InvalidArgument;  // 只支持 Logitech
     }
@@ -22,7 +22,7 @@ DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags fla
 
 
 // 销毁发送模块，释放全局发送对象
-DLLAPI void __stdcall IbSendDestroy() {
+DLLAPI void WINAPI IbSendDestroy() {
     IbSendInputHook(Send::HookCode::Destroy);
 
     if (!Send::g_send)
@@ -32,6 +32,6 @@ DLLAPI void __stdcall IbSendDestroy() {
 }
 
 // 同步按键状态到发送模块
-DLLAPI void __stdcall IbSendSyncKeyStates() {
+DLLAPI void WINAPI IbSendSyncKeyStates() {
     Send::g_send->sync_key_states(); 
 }

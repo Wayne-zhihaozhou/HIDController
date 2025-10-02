@@ -8,14 +8,14 @@
 extern "C" {
 #endif
 
-    // 低级鼠标事件
-    DLLAPI VOID WINAPI IbSend_mouse_event(
-        _In_ DWORD dwFlags,
-        _In_ DWORD dx,
-        _In_ DWORD dy,
-        _In_ DWORD dwData,
-        _In_ ULONG_PTR dwExtraInfo
-    );
+	// 低级鼠标事件
+	VOID WINAPI IbSend_mouse_event(
+		_In_ DWORD dwFlags,
+		_In_ DWORD dx,
+		_In_ DWORD dy,
+		_In_ DWORD dwData,
+		_In_ ULONG_PTR dwExtraInfo
+	);
 
 #ifdef __cplusplus
 }
@@ -25,14 +25,14 @@ extern "C" {
 #ifdef __cplusplus
 namespace Send {
 
-    // 移动鼠标
-    DLLAPI bool __stdcall IbSendMouseMove(uint32_t x, uint32_t y, MoveMode mode);
+	// 移动鼠标
+	bool WINAPI IbSendMouseMove(uint32_t x, uint32_t y, MoveMode mode);
 
-    // 鼠标点击
-    DLLAPI bool __stdcall IbSendMouseClick(MouseButton button);
+	// 鼠标点击
+	bool WINAPI IbSendMouseClick(MouseButton button);
 
-    // 鼠标滚轮
-    DLLAPI bool __stdcall IbSendMouseWheel(int32_t movement);
+	// 鼠标滚轮
+	bool WINAPI IbSendMouseWheel(int32_t movement);
 
 }  // namespace Send
 #endif

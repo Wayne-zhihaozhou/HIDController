@@ -36,5 +36,10 @@
 #include <string>
 #include <cstdint>
 
+
+#include <functional>
+#include <winternl.h>
+#include <memory>
+
 #include "framework.h" // 项目公共框架头
 

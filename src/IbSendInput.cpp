@@ -18,7 +18,7 @@ DLLAPI UINT WINAPI IbSendInput(
 
 
 // 管理输入钩子的生命周期和启用状态
-DLLAPI void __stdcall IbSendInputHook(Send::HookCode code) {
+DLLAPI void WINAPI IbSendInputHook(Send::HookCode code) {
 	switch (code) {
 	case Send::HookCode::InitOnly:
 		// 如果钩子未创建则初始化

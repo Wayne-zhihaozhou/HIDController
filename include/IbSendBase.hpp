@@ -8,13 +8,13 @@ extern "C" {
 #endif
 
 	// 初始化发送模块
-	DLLAPI Send::Error __stdcall IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument);
+	DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument);
 
 	// 销毁发送模块
-	DLLAPI void __stdcall IbSendDestroy();
+	DLLAPI void WINAPI IbSendDestroy();
 
 	// 同步键盘状态
-	DLLAPI void __stdcall IbSendSyncKeyStates();
+	DLLAPI void WINAPI IbSendSyncKeyStates();
 
 #ifdef __cplusplus
 }

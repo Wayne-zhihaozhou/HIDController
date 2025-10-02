@@ -30,7 +30,7 @@ namespace Send {
 	}
 
 	// 模拟按下一个键
-	DLLAPI bool __stdcall IbSendKeybdDown(uint16_t vk) {
+	DLLAPI bool WINAPI IbSendKeybdDown(uint16_t vk) {
 		// 构造“按下”事件
 		INPUT input{
 			.type = INPUT_KEYBOARD,
@@ -47,7 +47,7 @@ namespace Send {
 	}
 
 	// 模拟释放一个键
-	DLLAPI bool __stdcall IbSendKeybdUp(uint16_t vk) {
+	DLLAPI bool WINAPI IbSendKeybdUp(uint16_t vk) {
 		// 构造“释放”事件
 		INPUT input{
 			.type = INPUT_KEYBOARD,
@@ -64,7 +64,7 @@ namespace Send {
 	}
 
 	// 模拟按下并释放一个键，可选带修饰键（Ctrl/Shift/Alt/Win）
-	DLLAPI bool __stdcall IbSendKeybdDownUp(uint16_t vk, Send::KeyboardModifiers modifiers) {
+	DLLAPI bool WINAPI IbSendKeybdDownUp(uint16_t vk, Send::KeyboardModifiers modifiers) {
 		// 初始化空的输入结构
 		constexpr INPUT blank_input = INPUT{ .type = INPUT_KEYBOARD, .ki { 0, 0, 0, 0, 0 } };
 

@@ -1,6 +1,6 @@
 ﻿//dllmain.cpp
 #include"pch.h"
-#include "DriverMouse.hpp"
+#include <IbSendBase.hpp>
 
 // DLL 入口函数：当 DLL 被加载/卸载或线程创建/结束时会被系统调用
 BOOL APIENTRY DllMain(HMODULE hModule,
@@ -33,4 +33,11 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     return TRUE;
 }
 
+
+/*
+
+待解决:
+写 api 接口,不要暴露内部细节.只提供用户需要的几个函数
+
+*/
 
