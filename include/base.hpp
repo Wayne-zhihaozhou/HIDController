@@ -56,7 +56,7 @@ namespace Send::Internal {
 		virtual bool send_keyboard_input(const KEYBDINPUT& ki) = 0;
 
 		virtual SHORT get_key_state(int vKey);
-		virtual void sync_key_states();
+		//virtual void sync_key_states();
 	};
 
 
@@ -81,7 +81,7 @@ namespace Send::Internal {
 
 	public:
 		SHORT get_key_state(int vKey) override;
-		void sync_key_states() override;
+		//void sync_key_states() override;
 	};
 
 	std::wstring find_device(std::function<bool(std::wstring_view name)> p);

@@ -33,7 +33,7 @@ DLLAPI void WINAPI IbSendDestroy() {
 }
 
 // 同步按键状态到发送模块
-DLLAPI void WINAPI IbSendSyncKeyStates() {
-    Send::g_send->sync_key_states(); 
-}
+//DLLAPI void WINAPI IbSendSyncKeyStates() {
+//    Send::g_send->sync_key_states(); 
+//}
 

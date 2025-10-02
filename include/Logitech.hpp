@@ -23,7 +23,7 @@ namespace Send::Internal {
 	}
 
 
-	class Logitech : public VirtualKeyStates {
+	class Logitech : public Send::Internal::Base {
 	private:
 		LogitechDriver driver;
 		std::mutex mouse_mutex;
@@ -51,11 +51,11 @@ namespace Send::Internal {
 	public:
 		Logitech();
 		Send::Error create();
-		void destroy() override;
+		void destroy();
 
-		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n) override;
-		virtual bool send_mouse_input(const MOUSEINPUT& mi) override;
-		bool send_keyboard_input(const KEYBDINPUT& ki) override;
+		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
+		virtual bool send_mouse_input(const MOUSEINPUT& mi);
+		bool send_keyboard_input(const KEYBDINPUT& ki);
 
 	};
 

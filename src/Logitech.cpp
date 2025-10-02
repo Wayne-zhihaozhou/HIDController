@@ -9,8 +9,8 @@
 
 namespace Send::Internal {
 
-	// 构造函数：初始化 VirtualKeyStates 基类
-	Logitech::Logitech() : VirtualKeyStates(keyboard_report.modifiers, keyboard_mutex) {}
+	// 构造函数
+	Logitech::Logitech() = default;
 
 	// 初始化 Logitech 驱动
 	Send::Error Logitech::create() {
@@ -44,33 +44,41 @@ namespace Send::Internal {
 	bool Logitech::send_keyboard_input(const KEYBDINPUT& ki) {
 		std::lock_guard lock(keyboard_mutex);
 
-		// 判断是按下还是释放
 		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
-		if (is_modifier(ki.wVk)) {
-			// 修饰键状态更新
-			set_modifier_state(ki.wVk, keydown);
-		}
-		else {
-			// 普通键处理：按下则填入 report，抬起则清除
+
+		// 处理修饰键
+		switch (ki.wVk) {
+		case VK_LCONTROL: keyboard_report.modifiers.LCtrl = keydown; break;
+		case VK_RCONTROL: keyboard_report.modifiers.RCtrl = keydown; break;
+		case VK_LSHIFT:   keyboard_report.modifiers.LShift = keydown; break;
+		case VK_RSHIFT:   keyboard_report.modifiers.RShift = keydown; break;
+		case VK_LMENU:    keyboard_report.modifiers.LAlt = keydown; break;
+		case VK_RMENU:    keyboard_report.modifiers.RAlt = keydown; break;
+		case VK_LWIN:     keyboard_report.modifiers.LGui = keydown; break;
+		case VK_RWIN:     keyboard_report.modifiers.RGui = keydown; break;
+
+		default:
+			// 普通按键处理
 			uint8_t usage = Usb::keyboard_vk_to_usage((uint8_t)ki.wVk);
 			if (keydown) {
+				// 按下：填入空位
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report.keys[i] == 0) {
 						keyboard_report.keys[i] = usage;
 						break;
 					}
 				}
-				// #TODO: 满键处理
 			}
 			else {
+				// 抬起：清除对应按键
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report.keys[i] == usage) {
 						keyboard_report.keys[i] = 0;
-						// #TODO: 是否需要左移键位
 						break;
 					}
 				}
 			}
+			break;
 		}
 
 		// 提交键盘报告
