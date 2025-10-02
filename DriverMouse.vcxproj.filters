@@ -36,9 +36,6 @@
     <ClInclude Include="include\base.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\framework.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\Logitech.hpp">
       <Filter>include</Filter>
     </ClInclude>

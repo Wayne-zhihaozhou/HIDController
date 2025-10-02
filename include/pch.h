@@ -41,9 +41,6 @@
 #include <cassert>
 #include <string_view>
 
-// 第三方库头文件
-#include "../detours/detours.h"
-
 
 // 项目自定义头文件
 #include "base.hpp"
