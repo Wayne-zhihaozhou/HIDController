@@ -32,19 +32,12 @@ namespace Send::Internal {
 		Send::Error create();
 		void destroy();
 
+
+		//可以取消模板,使用普通函数
 		template <class ReportType>
-		bool report_mouse(ReportType report, int8_t compensate_switch) const {
+		bool report_mouse(ReportType report) const {
 			constexpr DWORD IOCTL_BUSENUM_PLAY_MOUSEMOVE = 0x2A2010;
 			DWORD bytes_returned;
-
-			//if (has_acceleration && (report.x || report.y)) {
-			//    ReportType tmp = report;
-			//    tmp.x = tmp.y = compensate_switch;
-			//    DeviceIoControl(device, IOCTL_BUSENUM_PLAY_MOUSEMOVE, &tmp, sizeof(ReportType), nullptr, 0, &bytes_returned, nullptr);
-
-			//    report.x = compensate_lgs_acceleration(report.x);
-			//    report.y = compensate_lgs_acceleration(report.y);
-			//}
 
 			return DeviceIoControl(device, IOCTL_BUSENUM_PLAY_MOUSEMOVE, &report, sizeof(ReportType), nullptr, 0, &bytes_returned, nullptr);
 		}

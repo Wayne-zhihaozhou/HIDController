@@ -139,7 +139,7 @@ namespace Send::Internal {
 			if (mi.mouseData == XBUTTON2) mouse_report.button.XButton2 = down;
 		}
 
-		return driver.report_mouse(mouse_report, compensate_switch = -compensate_switch);
+		return driver.report_mouse(mouse_report);
 	}
 
 

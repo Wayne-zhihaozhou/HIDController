@@ -29,7 +29,6 @@ namespace Send::Internal {
 		std::mutex mouse_mutex;
 		LogitechDriver::KeyboardReport keyboard_report{};
 		std::mutex keyboard_mutex;
-		int8_t compensate_switch = -1;
 
 		struct MouseReport {
 			union {
