@@ -39,7 +39,7 @@ namespace Send::Internal {
 	protected:
 		decltype(&::GetAsyncKeyState)* get_key_state_fallback;
 
-		static bool is_modifier(int vKey);
+		//static bool is_modifier(int vKey);
 		void mouse_absolute_to_screen(POINT& absolute) const;
 		void mouse_virtual_desk_absolute_to_screen(POINT& absolute) const;
 		static void mouse_screen_to_relative(POINT& screen_point);

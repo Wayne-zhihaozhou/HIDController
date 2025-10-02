@@ -4,14 +4,14 @@
 
 namespace Send::Internal {
 
-	// 判断某个虚拟键码是否为修饰键（Ctrl/Shift/Alt/Win）
-	bool Base::is_modifier(int vKey) {
-		int mods[] = { VK_LCONTROL, VK_RCONTROL, VK_LSHIFT, VK_RSHIFT, VK_LMENU, VK_RMENU, VK_LWIN, VK_RWIN };
-		for (int mod : mods)
-			if (mod == vKey)
-				return true;
-		return false;
-	}
+	//// 判断某个虚拟键码是否为修饰键（Ctrl/Shift/Alt/Win）
+	//bool Base::is_modifier(int vKey) {
+	//	int mods[] = { VK_LCONTROL, VK_RCONTROL, VK_LSHIFT, VK_RSHIFT, VK_LMENU, VK_RMENU, VK_LWIN, VK_RWIN };
+	//	for (int mod : mods)
+	//		if (mod == vKey)
+	//			return true;
+	//	return false;
+	//}
 
 	// 将鼠标绝对坐标转换为主屏幕坐标
 	void Base::mouse_absolute_to_screen(POINT& absolute) const {
