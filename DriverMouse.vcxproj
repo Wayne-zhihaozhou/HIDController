@@ -147,10 +147,7 @@
     <ClInclude Include="detours\detours.h" />
     <ClInclude Include="include\base.hpp" />
     <ClInclude Include="include\DriverMouse.hpp" />
-    <ClInclude Include="include\IbSendBase.hpp" />
     <ClInclude Include="include\SendInput.hpp" />
-    <ClInclude Include="include\IbSendKeyboard.hpp" />
-    <ClInclude Include="include\IbSendMouse.hpp" />
     <ClInclude Include="include\KeyboardMap.hpp" />
     <ClInclude Include="include\Logitech.hpp" />
     <ClInclude Include="include\LogitechDriver.hpp" />

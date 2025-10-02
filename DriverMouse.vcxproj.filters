@@ -51,15 +51,6 @@
     <ClInclude Include="include\SendInputHook.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\IbSendMouse.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IbSendKeyboard.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\IbSendBase.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\SendInput.hpp">
       <Filter>include</Filter>
     </ClInclude>
