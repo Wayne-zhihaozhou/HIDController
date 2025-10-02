@@ -24,13 +24,7 @@ namespace Send {
     };
 
     enum class SendType : uint32_t {
-        AnyDriver = 0,
-        SendInput = 1,
-        Logitech = 2,
-        LogitechGHubNew = 6,
-        Razer = 3,
-        DD = 4,
-        MouClassInputInjection = 5
+        Logitech = 0,
     };
 
     using InitFlags = const uint32_t;
