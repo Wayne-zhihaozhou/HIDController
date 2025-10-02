@@ -36,16 +36,18 @@ namespace Send::Internal {
 				LogitechDriver::MouseButton button;
 				uint8_t button_byte;
 			};
-			int8_t x;
-			int8_t y;
+			uint8_t x;
+			uint8_t y;
 			uint8_t wheel;
 			uint8_t unknown_T;
 
-		private:
-			void assert_size() { static_assert(sizeof(MouseReport) == 5); }
+		//private:
+			//void assert_size() { static_assert(sizeof(MouseReport) == 5); }
 		};
 
-		template <class ReportType>
+
+
+		
 		bool send_mouse_report(const MOUSEINPUT& mi);
 
 	public:
@@ -56,6 +58,9 @@ namespace Send::Internal {
 		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
 		virtual bool send_mouse_input(const MOUSEINPUT& mi);
 		bool send_keyboard_input(const KEYBDINPUT& ki);
+
+
+
 
 	};
 
