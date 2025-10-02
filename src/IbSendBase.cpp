@@ -1,6 +1,5 @@
 //ibSendBase.cpp
 #include"pch.h"
-#include "IbSendBase.hpp"
 #include "Logitech.hpp"
 #include "SendInputHook.hpp"
 

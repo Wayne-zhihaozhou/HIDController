@@ -1,6 +1,5 @@
 //ibsendkeyboard.cpp
 #include"pch.h"
-#include"IbSendKeyboard.hpp"
 
 	// 发送一个单独的键盘事件（相当于原生 keybd_event）
 DLLAPI VOID WINAPI IbSend_keybd_event(

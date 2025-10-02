@@ -1,6 +1,5 @@
 //IbSendMouse.cpp
 #include"pch.h"
-#include"IbSendMouse.hpp"
 
 
 	// 发送一个单独的鼠标事件（相当于原生 mouse_event）
