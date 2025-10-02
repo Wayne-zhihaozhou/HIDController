@@ -3,7 +3,7 @@
 #include "SendTypes.hpp"
 #include "LogitechDriver.hpp"
 
-namespace Send::Type::Internal {
+namespace Send::Internal {
 
 	//------------------ MaxValue ------------------
 	template<typename T> struct MaxValue;
@@ -59,5 +59,5 @@ namespace Send::Type::Internal {
 
 	};
 
-} // namespace Send::Type::Internal
+} // namespace Send::Internal
 

@@ -3,7 +3,7 @@
 #include "SendTypes.hpp"
 
 
-namespace Send::Type::Internal {
+namespace Send::Internal {
 	class LogitechDriver {
 		HANDLE device;
 		bool has_acceleration;//©ии╬ЁЩ?

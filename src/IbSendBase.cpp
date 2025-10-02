@@ -11,7 +11,7 @@
         return Send::Error::InvalidArgument;  // Ö»Ö§³Ö Logitech
     }
 
-    auto logitech = std::make_unique<Send::Type::Internal::Logitech>();
+    auto logitech = std::make_unique<Send::Internal::Logitech>();
     logitech->create_base(&SendInputHook::GetAsyncKeyState_real);
     Send::Error error = logitech->create();
     if (error != Send::Error::Success)

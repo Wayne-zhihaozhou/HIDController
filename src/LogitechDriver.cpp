@@ -5,7 +5,7 @@
 
 
 
-namespace Send::Type::Internal {
+namespace Send::Internal {
 
     // 创建 Logitech 驱动设备连接
     Send::Error LogitechDriver::create() {

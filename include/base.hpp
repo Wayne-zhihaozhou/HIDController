@@ -33,7 +33,7 @@ extern "C" {
 
 
 
-namespace Send::Type::Internal {
+namespace Send::Internal {
 
 	class Base {
 	protected:
@@ -89,5 +89,5 @@ namespace Send::Type::Internal {
 
 
 namespace Send {
-	extern std::unique_ptr<Type::Internal::Base> g_send;
+	extern std::unique_ptr<Send::Internal::Base> g_send;
 }

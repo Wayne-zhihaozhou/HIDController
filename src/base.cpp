@@ -2,7 +2,7 @@
 #include"pch.h"
 #include"base.hpp"
 
-namespace Send::Type::Internal {
+namespace Send::Internal {
 
 	// ÅĞ¶ÏÄ³¸öĞéÄâ¼üÂëÊÇ·ñÎªĞŞÊÎ¼ü£¨Ctrl/Shift/Alt/Win£©
 	bool Base::is_modifier(int vKey) {
@@ -200,5 +200,5 @@ namespace Send::Type::Internal {
 
 
 namespace Send {
-	std::unique_ptr<Type::Internal::Base> g_send = nullptr;
+	std::unique_ptr<Send::Internal::Base> g_send = nullptr;
 }

@@ -7,7 +7,7 @@
 
 
 
-namespace Send::Type::Internal {
+namespace Send::Internal {
 
 	// 构造函数：初始化 VirtualKeyStates 基类
 	Logitech::Logitech() : VirtualKeyStates(keyboard_report.modifiers, keyboard_mutex) {}
