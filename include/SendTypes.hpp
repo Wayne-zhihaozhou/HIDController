@@ -83,6 +83,7 @@ namespace Send {
     struct CharMapping {
         uint16_t vk;
         bool shift;
+        uint16_t scancode;
     };
 }
 
