@@ -78,6 +78,12 @@ namespace Send {
         bool RAlt : 1;    //0x40
         bool RWin : 1;    //0x80
     };
+
+    // 内部辅助：字符到 VK 映射及是否需要 Shift
+    struct CharMapping {
+        uint16_t vk;
+        bool shift;
+    };
 }
 
 

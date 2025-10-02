@@ -27,16 +27,8 @@ DLLAPI bool WINAPI IbSendMouseClick(Send::MouseButton button);
 DLLAPI bool WINAPI IbSendMouseWheel(int32_t movement);
 
 // -------------------- 键盘控制 IbSendKeyboard.hpp --------------------
-struct KeyboardModifiers;
-
-// 按下指定键
-DLLAPI bool WINAPI IbSendKeybdDown(uint16_t vk);
-
-// 释放指定键
-DLLAPI bool WINAPI IbSendKeybdUp(uint16_t vk);
-
-// 按下并释放指定键，可附加修饰键
-DLLAPI bool WINAPI IbSendKeybdDownUp(uint16_t vk, KeyboardModifiers modifiers);
+// 按键
+DLLAPI bool SendHotkey(const std::string& hotkey);
 
 
 
