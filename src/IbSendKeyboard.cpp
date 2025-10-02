@@ -3,7 +3,7 @@
 #include"IbSendKeyboard.hpp"
 
 	// 发送一个单独的键盘事件（相当于原生 keybd_event）
-	 VOID WINAPI IbSend_keybd_event(
+DLLAPI VOID WINAPI IbSend_keybd_event(
 		_In_ BYTE bVk,
 		_In_ BYTE bScan,
 		_In_ DWORD dwFlags,
@@ -25,7 +25,7 @@
 	}
 
 	// 模拟按下一个键
-	 bool WINAPI IbSendKeybdDown(uint16_t vk) {
+DLLAPI bool WINAPI IbSendKeybdDown(uint16_t vk) {
 		// 构造“按下”事件
 		INPUT input{
 			.type = INPUT_KEYBOARD,
@@ -42,7 +42,7 @@
 	}
 
 	// 模拟释放一个键
-	 bool WINAPI IbSendKeybdUp(uint16_t vk) {
+DLLAPI bool WINAPI IbSendKeybdUp(uint16_t vk) {
 		// 构造“释放”事件
 		INPUT input{
 			.type = INPUT_KEYBOARD,
@@ -59,7 +59,7 @@
 	}
 
 	// 模拟按下并释放一个键，可选带修饰键（Ctrl/Shift/Alt/Win）
-	 bool WINAPI IbSendKeybdDownUp(uint16_t vk, Send::KeyboardModifiers modifiers) {
+DLLAPI bool WINAPI IbSendKeybdDownUp(uint16_t vk, Send::KeyboardModifiers modifiers) {
 		// 初始化空的输入结构
 		constexpr INPUT blank_input = INPUT{ .type = INPUT_KEYBOARD, .ki { 0, 0, 0, 0, 0 } };
 
