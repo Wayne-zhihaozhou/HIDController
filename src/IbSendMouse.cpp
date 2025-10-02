@@ -58,6 +58,36 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	return IbSendInput(1, &input, sizeof(INPUT));
 }
 
+DLLAPI bool WINAPI MouseMoveRelativeBatch(int32_t dx, int32_t dy) {
+	const int32_t MAX_DELTA = 128;  // 每条事件最大移动像素
+	std::vector<INPUT> inputs;
+
+	int32_t steps = max(std::ceil(std::abs(dx) / (float)MAX_DELTA),
+		std::ceil(std::abs(dy) / (float)MAX_DELTA));
+
+	if (steps == 0) steps = 1;
+
+	for (int32_t i = 1; i <= steps; ++i) {
+		// 分段相对移动量
+		int32_t move_x = dx * i / steps - dx * (i - 1) / steps;
+		int32_t move_y = dy * i / steps - dy * (i - 1) / steps;
+
+		INPUT input{};
+		input.type = INPUT_MOUSE;
+		input.mi.dx = std::bit_cast<LONG>(move_x);
+		input.mi.dy = std::bit_cast<LONG>(move_y);
+		input.mi.mouseData = 0;
+		input.mi.dwFlags = MOUSEEVENTF_MOVE;  // 相对移动
+		input.mi.time = 0;
+		input.mi.dwExtraInfo = 0;
+
+		inputs.push_back(input);
+	}
+
+	// 一次性批量发送所有分段事件
+	return IbSendInput(static_cast<UINT>(inputs.size()), inputs.data(), sizeof(INPUT)) != 0;
+}
+
 // 模拟一次鼠标点击（按下 + 抬起）
 DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
 	// 初始化按下和抬起事件
