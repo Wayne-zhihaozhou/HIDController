@@ -27,7 +27,7 @@ DLLAPI VOID WINAPI IbSend_mouse_event(
 }
 
 // 模拟鼠标移动（支持绝对和相对模式）
-DLLAPI bool WINAPI IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMode mode) {
+DLLAPI bool WINAPI MouseMove(uint32_t x, uint32_t y, Send::MoveMode mode) {
 	// 构造鼠标移动事件
 	INPUT input{
 		.type = INPUT_MOUSE,
@@ -51,7 +51,7 @@ DLLAPI bool WINAPI IbSendMouseMove(uint32_t x, uint32_t y, Send::MoveMode mode) 
 }
 
 // 模拟一次鼠标点击（按下 + 抬起）
-DLLAPI bool WINAPI IbSendMouseClick(Send::MouseButton button) {
+DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
 	// 初始化按下和抬起事件
 	INPUT inputs[2];
 	inputs[0] = inputs[1] = {
@@ -97,7 +97,7 @@ DLLAPI bool WINAPI IbSendMouseClick(Send::MouseButton button) {
 }
 
 // 模拟鼠标滚轮滚动
-DLLAPI bool WINAPI IbSendMouseWheel(int32_t movement) {
+DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 	// 构造滚轮事件
 	INPUT input{
 		.type = INPUT_MOUSE,
