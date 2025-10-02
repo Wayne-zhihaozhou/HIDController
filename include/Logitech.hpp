@@ -25,7 +25,7 @@ namespace Send::Internal {
 
 	class Logitech : public Send::Internal::Base {
 	private:
-		LogitechDriver driver;
+		LogitechDriver driver{};
 		std::mutex mouse_mutex;
 		LogitechDriver::KeyboardReport keyboard_report{};
 		std::mutex keyboard_mutex;

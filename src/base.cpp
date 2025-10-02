@@ -91,68 +91,6 @@ namespace Send::Internal {
 		return (*get_key_state_fallback)(vKey);
 	}
 
-
-//	// -------------------- VirtualKeyStates --------------------
-//
-//	// 构造函数，绑定修饰键状态和互斥锁
-//	VirtualKeyStates::VirtualKeyStates(KeyboardModifiers& modifiers, std::mutex& mutex)
-//		: modifiers(modifiers), mutex(mutex) {}
-//
-//	// 设置修饰键的按下/释放状态
-//	void VirtualKeyStates::set_modifier_state(int vKey, bool keydown) {
-//		switch (vKey) {
-//#define CODE_GENERATE(vk, member)  \
-//			case vk:  \
-//				modifiers.member = keydown;  \
-//				break;
-//
-//			CODE_GENERATE(VK_LCONTROL, LCtrl)
-//				CODE_GENERATE(VK_RCONTROL, RCtrl)
-//				CODE_GENERATE(VK_LSHIFT, LShift)
-//				CODE_GENERATE(VK_RSHIFT, RShift)
-//				CODE_GENERATE(VK_LMENU, LAlt)
-//				CODE_GENERATE(VK_RMENU, RAlt)
-//				CODE_GENERATE(VK_LWIN, LGui)
-//				CODE_GENERATE(VK_RWIN, RGui)
-//#undef CODE_GENERATE
-//		}
-//	}
-//
-//	// 获取修饰键的状态
-//	SHORT VirtualKeyStates::get_key_state(int vKey) {
-//		switch (vKey) {
-//#define CODE_GENERATE(vk, member)  case vk: return modifiers.member << 15;
-//
-//			CODE_GENERATE(VK_LCONTROL, LCtrl)
-//				CODE_GENERATE(VK_RCONTROL, RCtrl)
-//				CODE_GENERATE(VK_LSHIFT, LShift)
-//				CODE_GENERATE(VK_RSHIFT, RShift)
-//				CODE_GENERATE(VK_LMENU, LAlt)
-//				CODE_GENERATE(VK_RMENU, RAlt)
-//				CODE_GENERATE(VK_LWIN, LGui)
-//				CODE_GENERATE(VK_RWIN, RGui)
-//#undef CODE_GENERATE
-//		default:
-//			return (*get_key_state_fallback)(vKey);
-//		}
-//	}
-//
-//	// 同步所有修饰键的状态
-//	void VirtualKeyStates::sync_key_states() {
-//		std::lock_guard lock(mutex);
-//#define CODE_GENERATE(vk, member)  modifiers.member = (*get_key_state_fallback)(vk) & 0x8000;
-//
-//		CODE_GENERATE(VK_LCONTROL, LCtrl)
-//			CODE_GENERATE(VK_RCONTROL, RCtrl)
-//			CODE_GENERATE(VK_LSHIFT, LShift)
-//			CODE_GENERATE(VK_RSHIFT, RShift)
-//			CODE_GENERATE(VK_LMENU, LAlt)
-//			CODE_GENERATE(VK_RMENU, RAlt)
-//			CODE_GENERATE(VK_LWIN, LGui)
-//			CODE_GENERATE(VK_RWIN, RGui)
-//#undef CODE_GENERATE
-//	}
-
 	// -------------------- find_device --------------------
 
 	// 遍历系统设备目录，查找满足条件的设备路径

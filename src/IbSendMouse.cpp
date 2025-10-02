@@ -26,27 +26,35 @@ DLLAPI VOID WINAPI IbSend_mouse_event(
 	IbSendInput(1, &input, sizeof(INPUT));
 }
 
-// 模拟鼠标移动（支持绝对和相对模式）
-DLLAPI bool WINAPI MouseMove(uint32_t x, uint32_t y, Send::MoveMode mode) {
-	// 构造鼠标移动事件
+// 模拟鼠标绝对移动
+DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
 	INPUT input{
 		.type = INPUT_MOUSE,
-		.mi {
+		.mi = {
 			.dx = std::bit_cast<LONG>(x),
 			.dy = std::bit_cast<LONG>(y),
 			.mouseData = 0,
-			.dwFlags = [mode]() -> DWORD {
-				switch (mode) {
-					case Send::MoveMode::Absolute: return MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
-					case Send::MoveMode::Relative: return MOUSEEVENTF_MOVE;
-					default: assert(false);
-				}
-			}(),
+			.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK,
 			.time = 0,
 			.dwExtraInfo = 0
 		}
 	};
-	// 发送事件
+	return IbSendInput(1, &input, sizeof(INPUT));
+}
+
+// 模拟鼠标相对移动
+DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
+	INPUT input{
+		.type = INPUT_MOUSE,
+		.mi = {
+			.dx = std::bit_cast<LONG>(dx),
+			.dy = std::bit_cast<LONG>(dy),
+			.mouseData = 0,
+			.dwFlags = MOUSEEVENTF_MOVE,
+			.time = 0,
+			.dwExtraInfo = 0
+		}
+	};
 	return IbSendInput(1, &input, sizeof(INPUT));
 }
 
