@@ -193,7 +193,9 @@
     <ClCompile Include="src\base.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\IbSendBase.cpp" />
-    <ClCompile Include="src\IbSendInput.cpp" />
+    <ClCompile Include="src\IbSendInput.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
     <ClCompile Include="src\Logitech.cpp" />

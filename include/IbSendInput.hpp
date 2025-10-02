@@ -1,7 +1,5 @@
 //IbSendInput.hpp
 #pragma once
-#include <Windows.h>
-#include "dll_export.hpp"
 #include "SendTypes.hpp"
 #include "SendInputHook.hpp"
 
@@ -12,15 +10,15 @@
 extern "C" {
 #endif
 
-    // 发送输入事件
-    DLLAPI UINT WINAPI IbSendInput(
-        _In_ UINT cInputs,
-        _In_reads_(cInputs) LPINPUT pInputs,
-        _In_ int cbSize
-    );
+	// 发送输入事件
+	UINT WINAPI IbSendInput(
+		_In_ UINT cInputs,
+		_In_reads_(cInputs) LPINPUT pInputs,
+		_In_ int cbSize
+	);
 
-    // 安装或触发输入钩子
-    DLLAPI void WINAPI IbSendInputHook(Send::HookCode code);
+	// 安装或触发输入钩子
+	void WINAPI IbSendInputHook(Send::HookCode code);
 
 #ifdef __cplusplus
 }

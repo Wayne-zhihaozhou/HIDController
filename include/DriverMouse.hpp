@@ -1,78 +1,18 @@
 //DriveMouse.hpp
 #pragma once
-//#include "SendTypes.hpp"
-//#include "IbSendBase.hpp"
-//#include "IbSendMouse.hpp"
-//#include "IbSendInput.hpp"
-//#include "IbSendKeyboard.hpp"
-
-
-
-
-// IbSendMouseCAPI.hpp
-#pragma once
-#include "dll_export.hpp"
 #include <SendTypes.hpp>
 
 
-// ----------------------------
-// DLL 导入/导出宏定义
-// ----------------------------
+
+//--------------------定义DLL导出宏----------
 #ifdef DLL1_EXPORTS
-// 编译 DLL 时定义 DLL1_EXPORTS，导出函数
-#define DLLAPI extern "C" __declspec(dllexport)
+#define DLLAPI extern "C" __declspec(dllexport)//C语言链接方式;函数导出到DLL中
 #else
-// 客户端使用 DLL 时，导入函数
-#define DLLAPI extern "C" __declspec(dllimport)
-#endif
-
-// ----------------------------
-// 调用约定宏（可选）
-// ----------------------------
-#ifndef WINAPI
-#define WINAPI WINAPI  // Windows 默认调用约定
-#endif
-
-// ----------------------------
-// 枚举示例
-// ----------------------------
-typedef enum {
-    MOVE_ABSOLUTE = 0,
-    MOVE_RELATIVE = 1
-} MoveMode;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    // ----------------------------
-    // DLL 导出函数声明示例
-    // ----------------------------
-
-    // 鼠标移动
-    DLLAPI bool WINAPI IbSendMouse_Move(int x, int y, MoveMode mode);
-
-    // 鼠标点击
-    DLLAPI bool WINAPI IbSendMouse_Click(int button);
-
-    // 鼠标滚轮
-    DLLAPI bool WINAPI IbSendMouse_Wheel(int movement);
-
-#ifdef __cplusplus
-}
+#define DLLAPI extern "C" __declspec(dllimport)//C语言链接方式;函数导入到DLL中
 #endif
 
 
-/*
-
-// DriverMouseAPI.hpp
-#pragma once
-
-#ifdef DRIVER_MOUSE_EXPORTS
-#define DLLAPI extern "C" __declspec(dllexport)
-#else
-#define DLLAPI extern "C" __declspec(dllimport)
-#endif
+//--------------------枚举--------------------
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,5 +56,5 @@ DLLAPI void SendKeyCombination(const int* vKeys, int count);
 
 
 
-*/
+
 

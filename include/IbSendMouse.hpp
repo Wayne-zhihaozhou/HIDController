@@ -1,7 +1,5 @@
 //IbSendMouse.hpp
 #pragma once
-#include <Windows.h>
-#include "dll_export.hpp"
 #include "SendTypes.hpp"
 
 #ifdef __cplusplus
