@@ -133,8 +133,6 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
-
-
 DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 	const int32_t MAX_DELTA = 120;  // 每个 HID 报告最大滚动量，标准滚轮为 120
 
@@ -165,46 +163,114 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
 }
 
-//待修改确认.
-DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
-	const uint32_t MAX_DELTA = 128;  // 分步移动最大增量
 
+DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
+	/**
+	 * 鼠标绝对移动到指定屏幕坐标
+	 *
+	 * Args:
+	 *     target_x (uint32_t): 目标X坐标（屏幕像素）
+	 *     target_y (uint32_t): 目标Y坐标（屏幕像素）
+	 *
+	 * Returns:
+	 *     bool: 成功返回 true，失败返回 false
+	 */
+
+	 // 获取屏幕分辨率
+	int screen_width = GetSystemMetrics(SM_CXSCREEN);
+	int screen_height = GetSystemMetrics(SM_CYSCREEN);
+
+	// 将目标坐标映射到 [0, 65535] 范围
+	auto map_to_absolute = [](uint32_t value, int max) -> LONG {
+		return static_cast<LONG>((value * 65535) / max);
+		};
+
+	LONG abs_x = map_to_absolute(target_x, screen_width - 1);
+	LONG abs_y = map_to_absolute(target_y, screen_height - 1);
+
+	const int MAX_DELTA = 16;  // 每步最大像素移动，保证 HID 不丢报告
 	POINT curr{};
-	if (!GetCursorPos(&curr)) return false;
+	int step_index = 0;
 
-	int32_t dx = static_cast<int32_t>(x) - curr.x;
-	int32_t dy = static_cast<int32_t>(y) - curr.y;
+	// 创建 Logitech 对象一次性使用
+	auto logitech = std::make_unique<Send::Internal::Logitech>();
+	logitech->create();
 
-	int32_t steps = max(
-		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
-		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
-	);
-	if (steps == 0) steps = 1;
+	while (true) {
+		if (!GetCursorPos(&curr)) return false;
 
-	std::vector<MOUSEINPUT> moves;
-	moves.reserve(steps);
+		int dx = static_cast<int>(target_x) - curr.x;
+		int dy = static_cast<int>(target_y) - curr.y;
 
-	float step_x = static_cast<float>(dx) / steps;
-	float step_y = static_cast<float>(dy) / steps;
-	float prev_x = static_cast<float>(curr.x);
-	float prev_y = static_cast<float>(curr.y);
+		// 已经接近目标位置
+		if (std::abs(dx) <= 1 && std::abs(dy) <= 1) break;
 
-	for (int32_t i = 1; i <= steps; ++i) {
-		float curr_step_x = curr.x + step_x * i;
-		float curr_step_y = curr.y + step_y * i;
+		// 限制每步增量
+		int step_x = (std::abs(dx) > MAX_DELTA) ? (dx > 0 ? MAX_DELTA : -MAX_DELTA) : dx;
+		int step_y = (std::abs(dy) > MAX_DELTA) ? (dy > 0 ? MAX_DELTA : -MAX_DELTA) : dy;
+
+		// 计算绝对坐标
+		LONG move_x = map_to_absolute(curr.x + step_x, screen_width - 1);
+		LONG move_y = map_to_absolute(curr.y + step_y, screen_height - 1);
 
 		MOUSEINPUT mi{};
-		mi.dx = static_cast<int32_t>(curr_step_x + 0.5f);
-		mi.dy = static_cast<int32_t>(curr_step_y + 0.5f);
-		mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
+		mi.dx = move_x;
+		mi.dy = move_y;
+		mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+		mi.time = 0;
+		mi.dwExtraInfo = 0;
 
-		moves.push_back(mi);
-		prev_x = curr_step_x;
-		prev_y = curr_step_y;
+		if (!logitech->send_mouse_report(mi)) return false;
+
+		step_index++;
+		//Sleep(1);  // 给 HID 时间处理
 	}
 
-	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
+	return true;
 }
+
+
+
+//待修改确认.
+//DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
+//	const uint32_t MAX_DELTA = 128;  // 分步移动最大增量
+//
+//	POINT curr{};
+//	if (!GetCursorPos(&curr)) return false;
+//
+//	int32_t dx = static_cast<int32_t>(x) - curr.x;
+//	int32_t dy = static_cast<int32_t>(y) - curr.y;
+//
+//	int32_t steps = max(
+//		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
+//		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
+//	);
+//	if (steps == 0) steps = 1;
+//
+//	std::vector<MOUSEINPUT> moves;
+//	moves.reserve(steps);
+//
+//	float step_x = static_cast<float>(dx) / steps;
+//	float step_y = static_cast<float>(dy) / steps;
+//	float prev_x = static_cast<float>(curr.x);
+//	float prev_y = static_cast<float>(curr.y);
+//
+//	for (int32_t i = 1; i <= steps; ++i) {
+//		float curr_step_x = curr.x + step_x * i;
+//		float curr_step_y = curr.y + step_y * i;
+//
+//		MOUSEINPUT mi{};
+//		mi.dx = static_cast<int32_t>(curr_step_x + 0.5f);
+//		mi.dy = static_cast<int32_t>(curr_step_y + 0.5f);
+//		mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
+//
+//		moves.push_back(mi);
+//		prev_x = curr_step_x;
+//		prev_y = curr_step_y;
+//	}
+//
+//	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
+//}
 
 
 
