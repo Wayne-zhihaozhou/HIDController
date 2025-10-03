@@ -7,6 +7,45 @@
 
 namespace Send::Internal {
 
+	// 遍历系统设备目录，查找满足条件的设备路径
+	std::wstring find_device(std::function<bool(std::wstring_view name)> p) {
+		std::wstring result{};
+		HANDLE dir_handle;
+
+		OBJECT_ATTRIBUTES obj_attr;
+		UNICODE_STRING obj_name;
+		RtlInitUnicodeString(&obj_name, LR"(\GLOBAL??)");
+		InitializeObjectAttributes(&obj_attr, &obj_name, 0, NULL, NULL);
+
+		if (NT_SUCCESS(NtOpenDirectoryObject(&dir_handle, DIRECTORY_QUERY, &obj_attr))) {
+			union {
+				std::uint8_t buf[2048];
+				OBJECT_DIRECTORY_INFORMATION info[1];
+			};
+			ULONG context;
+
+			NTSTATUS status = NtQueryDirectoryObject(dir_handle, buf, sizeof buf, false, true, &context, NULL);
+			while (NT_SUCCESS(status)) {
+				bool found = false;
+				for (ULONG i = 0; info[i].Name.Buffer; i++) {
+					std::wstring_view sv{ info[i].Name.Buffer, info[i].Name.Length / sizeof(wchar_t) };
+					if (p(sv)) {
+						result = LR"(\??\)" + std::wstring(sv);
+						found = true;
+						break;
+					}
+				}
+				if (found || status != STATUS_MORE_ENTRIES)
+					break;
+				status = NtQueryDirectoryObject(dir_handle, buf, sizeof buf, false, false, &context, NULL);
+			}
+
+			CloseHandle(dir_handle);
+		}
+
+		return result;
+	}
+
 	// 查找匹配的 Logitech 设备路径
 	std::wstring LogitechDriver::find_device() {
 		// 根据设备名规则过滤设备对象

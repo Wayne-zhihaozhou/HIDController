@@ -1,35 +1,6 @@
 ﻿//base.hpp
 #pragma once
-#pragma comment(lib, "ntdll.lib")
 
-
-extern "C" {
-	constexpr NTSTATUS STATUS_SUCCESS = 0x00000000;
-	constexpr NTSTATUS STATUS_MORE_ENTRIES = 0x00000105;
-	constexpr NTSTATUS STATUS_BUFFER_TOO_SMALL = 0xC0000023;
-	constexpr ACCESS_MASK DIRECTORY_QUERY = 0x0001;
-
-	NTSTATUS WINAPI NtOpenDirectoryObject(
-		_Out_ PHANDLE            DirectoryHandle,
-		_In_  ACCESS_MASK        DesiredAccess,
-		_In_  POBJECT_ATTRIBUTES ObjectAttributes
-	);
-
-	typedef struct _OBJECT_DIRECTORY_INFORMATION {
-		UNICODE_STRING Name;
-		UNICODE_STRING TypeName;
-	} OBJECT_DIRECTORY_INFORMATION, * POBJECT_DIRECTORY_INFORMATION;
-
-	NTSTATUS WINAPI NtQueryDirectoryObject(
-		_In_      HANDLE  DirectoryHandle,
-		_Out_opt_ PVOID   Buffer,
-		_In_      ULONG   Length,
-		_In_      BOOLEAN ReturnSingleEntry,
-		_In_      BOOLEAN RestartScan,
-		_Inout_   PULONG  Context,
-		_Out_opt_ PULONG  ReturnLength
-	);
-}
 
 
 
@@ -38,9 +9,9 @@ namespace Send::Internal {
 	class Base {
 	protected:
 
-		void mouse_absolute_to_screen(POINT& absolute) const;
-		void mouse_virtual_desk_absolute_to_screen(POINT& absolute) const;
-		static void mouse_screen_to_relative(POINT& screen_point);
+		//void mouse_absolute_to_screen(POINT& absolute) const;
+		//void mouse_virtual_desk_absolute_to_screen(POINT& absolute) const;
+		//static void mouse_screen_to_relative(POINT& screen_point);
 
 	public:
 		Base();
@@ -50,7 +21,7 @@ namespace Send::Internal {
 	};
 
 
-	std::wstring find_device(std::function<bool(std::wstring_view name)> p);
+	//std::wstring find_device(std::function<bool(std::wstring_view name)> p);
 }
 
 

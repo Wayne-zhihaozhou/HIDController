@@ -2,9 +2,7 @@
 #include"pch.h"
 #include "Logitech.hpp"
 #include "base.hpp"
-#include "SendTypes.hpp"
 #include "KeyboardMap.hpp"
-
 #include <algorithm>
 
 
@@ -46,6 +44,32 @@ namespace Send::Internal {
 			if (mi.mouseData == XBUTTON1) btn.XButton1 = false;
 			if (mi.mouseData == XBUTTON2) btn.XButton2 = false;
 		}
+	}
+
+	// 将鼠标绝对坐标转换为主屏幕坐标
+	void mouse_absolute_to_screen(POINT& absolute)  {
+		const static int mainScreenWidth = GetSystemMetrics(SM_CXSCREEN);
+		const static int mainScreenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+		absolute.x = MulDiv(absolute.x, mainScreenWidth, 65536);
+		absolute.y = MulDiv(absolute.y, mainScreenHeight, 65536);
+	}
+
+	// 将鼠标绝对坐标转换为虚拟桌面屏幕坐标
+	void mouse_virtual_desk_absolute_to_screen(POINT& absolute)  {
+		const static int virtualDeskWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		const static int virtualDeskHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
+		absolute.x = MulDiv(absolute.x, virtualDeskWidth, 65536);
+		absolute.y = MulDiv(absolute.y, virtualDeskHeight, 65536);
+	}
+
+	// 将屏幕坐标转换为相对当前鼠标位置的偏移
+	void mouse_screen_to_relative(POINT& screen_point) {
+		POINT point;
+		GetCursorPos(&point);
+		screen_point.x -= point.x;
+		screen_point.y -= point.y;
 	}
 
 	// 发送鼠标报告（支持移动、滚轮、按键等事件）
