@@ -10,7 +10,7 @@ DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags,
     if (type != Send::SendType::Logitech) {
         return Send::Error::InvalidArgument;  // 只支持 Logitech
     }
-    auto logitech = std::make_unique<Send::Internal::Logitech>();
+    auto logitech = std::make_unique<Send::Internal::Logitech>();//待修改,创建全局变量
     Send::Error error = logitech->create();
     if (error != Send::Error::Success)
         return error;

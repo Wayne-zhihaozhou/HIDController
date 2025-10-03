@@ -226,7 +226,10 @@ DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
 	}
 }
 
-// 模拟鼠标滚轮滚动
+
+
+
+//// 模拟鼠标滚轮滚动
 DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 	// 构造滚轮事件
 	INPUT input{

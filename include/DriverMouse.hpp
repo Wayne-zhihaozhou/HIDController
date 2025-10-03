@@ -1,7 +1,8 @@
 //DriveMouse.hpp
 #pragma once
 #include "SendTypes.hpp"
-
+#include <vector>
+#include <cstdint>
 
 
 // -------------------- 初始化/销毁 IbSendBase.hpp --------------------
@@ -25,8 +26,9 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement);
 // -------------------- 键盘控制 IbSendKeyboard.hpp --------------------
 DLLAPI bool WINAPI KeyDown(uint16_t vk);
 DLLAPI bool WINAPI KeyUp(uint16_t vk);
-DLLAPI bool WINAPI KeyPress(uint16_t vk);
-DLLAPI bool WINAPI KeyCombo(uint16_t vk, Send::KeyboardModifiers modifiers);
+DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys);
+//DLLAPI bool WINAPI KeyPress(uint16_t vk);
+//DLLAPI bool WINAPI KeyCombo(uint16_t vk, Send::KeyboardModifiers modifiers);
 
 
 

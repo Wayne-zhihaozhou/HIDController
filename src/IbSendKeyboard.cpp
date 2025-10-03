@@ -1,14 +1,15 @@
-//ibsendkeyboard.cpp
+ï»¿//ibsendkeyboard.cpp
 #include"pch.h"
+#include <Logitech.hpp>
 
-	// ·¢ËÍÒ»¸öµ¥¶ÀµÄ¼üÅÌÊÂ¼ş£¨Ïàµ±ÓÚÔ­Éú keybd_event£©
+	// å‘é€ä¸€ä¸ªå•ç‹¬çš„é”®ç›˜äº‹ä»¶ï¼ˆç›¸å½“äºåŸç”Ÿ keybd_eventï¼‰
 DLLAPI VOID WINAPI IbSend_keybd_event(
 	_In_ BYTE bVk,
 	_In_ BYTE bScan,
 	_In_ DWORD dwFlags,
 	_In_ ULONG_PTR dwExtraInfo
 ) {
-	// ¹¹ÔìÒ»¸ö¼üÅÌÊäÈë½á¹¹
+	// æ„é€ ä¸€ä¸ªé”®ç›˜è¾“å…¥ç»“æ„
 	INPUT input{
 		.type = INPUT_KEYBOARD,
 		.ki {
@@ -19,13 +20,75 @@ DLLAPI VOID WINAPI IbSend_keybd_event(
 			.dwExtraInfo = dwExtraInfo
 		}
 	};
-	// µ÷ÓÃ·¢ËÍº¯Êı
+	// è°ƒç”¨å‘é€å‡½æ•°
 	IbSendInput(1, &input, sizeof(INPUT));
 }
 
-// Ä£Äâ°´ÏÂÒ»¸ö¼ü
+
+bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
+	auto logitech = std::make_unique<Send::Internal::Logitech>();
+	logitech->create();
+	for (uint32_t i = 0; i < count; ++i) {
+		if (!logitech->send_keyboard_report(inputs[i])) return false;
+	}
+	return true;
+}
+
+
+
+// æ¨¡æ‹Ÿå•ä¸ªæŒ‰é”®æŒ‰ä¸‹
 DLLAPI bool WINAPI KeyDown(uint16_t vk) {
-	// ¹¹Ôì¡°°´ÏÂ¡±ÊÂ¼ş
+	KEYBDINPUT ki{};
+	ki.wVk = vk;
+	ki.dwFlags = 0;  // æŒ‰ä¸‹
+	ki.wScan = 0;
+	ki.time = 0;
+	ki.dwExtraInfo = 0;
+
+	return send_keyboard_input_bulk(&ki, 1);
+}
+
+// æ¨¡æ‹Ÿå•ä¸ªæŒ‰é”®æŠ¬èµ·
+DLLAPI bool WINAPI KeyUp(uint16_t vk) {
+	KEYBDINPUT ki{};
+	ki.wVk = vk;
+	ki.dwFlags = KEYEVENTF_KEYUP; // æŠ¬èµ·
+	ki.wScan = 0;
+	ki.time = 0;
+	ki.dwExtraInfo = 0;
+
+	return send_keyboard_input_bulk(&ki, 1);
+}
+
+// æ‰¹é‡å‘é€ç»„åˆé”®ï¼Œæ¯”å¦‚ Ctrl+Shift+A
+DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
+	std::vector<KEYBDINPUT> inputs;
+	inputs.reserve(keys.size() * 2);
+
+	// âœ… å…ˆæŒ‰ä¸‹æ‰€æœ‰é”®ï¼ˆä»å‰åˆ°åï¼‰
+	for (auto vk : keys) {
+		KEYBDINPUT ki{};
+		ki.wVk = vk;
+		ki.dwFlags = 0;  // æŒ‰ä¸‹
+		inputs.push_back(ki);
+	}
+
+	// âœ… å†â€œåå‘â€æŠ¬èµ·æ‰€æœ‰é”®ï¼ˆä»ååˆ°å‰ï¼Œä¿è¯ä¿®é¥°é”®æœ€åé‡Šæ”¾ï¼‰
+	for (auto it = keys.rbegin(); it != keys.rend(); ++it) {
+		KEYBDINPUT ki{};
+		ki.wVk = *it;
+		ki.dwFlags = KEYEVENTF_KEYUP; // æŠ¬èµ·
+		inputs.push_back(ki);
+	}
+
+	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
+}
+
+
+/*
+// æ¨¡æ‹ŸæŒ‰ä¸‹ä¸€ä¸ªé”®
+DLLAPI bool WINAPI KeyDown(uint16_t vk) {
+	// æ„é€ â€œæŒ‰ä¸‹â€äº‹ä»¶
 	INPUT input{
 		.type = INPUT_KEYBOARD,
 		.ki {
@@ -36,13 +99,13 @@ DLLAPI bool WINAPI KeyDown(uint16_t vk) {
 			.dwExtraInfo = 0
 		}
 	};
-	// ·¢ËÍÊÂ¼ş
+	// å‘é€äº‹ä»¶
 	return IbSendInput(1, &input, sizeof(INPUT));
 }
 
-// Ä£ÄâÊÍ·ÅÒ»¸ö¼ü
+// æ¨¡æ‹Ÿé‡Šæ”¾ä¸€ä¸ªé”®
 DLLAPI bool WINAPI KeyUp(uint16_t vk) {
-	// ¹¹Ôì¡°ÊÍ·Å¡±ÊÂ¼ş
+	// æ„é€ â€œé‡Šæ”¾â€äº‹ä»¶
 	INPUT input{
 		.type = INPUT_KEYBOARD,
 		.ki {
@@ -53,29 +116,29 @@ DLLAPI bool WINAPI KeyUp(uint16_t vk) {
 			.dwExtraInfo = 0
 		}
 	};
-	// ·¢ËÍÊÂ¼ş
+	// å‘é€äº‹ä»¶
 	return IbSendInput(1, &input, sizeof(INPUT));
 }
 
-// Ä£Äâ°´ÏÂÒ»¸ö¼ü£¬²¢ÊÍ·ÅËü
+// æ¨¡æ‹ŸæŒ‰ä¸‹ä¸€ä¸ªé”®ï¼Œå¹¶é‡Šæ”¾å®ƒ
 DLLAPI bool WINAPI KeyPress(uint16_t vk) {
-	// ´´½¨Á½¸ö INPUT ÊÂ¼ş£º°´ÏÂºÍËÉ¿ª
+	// åˆ›å»ºä¸¤ä¸ª INPUT äº‹ä»¶ï¼šæŒ‰ä¸‹å’Œæ¾å¼€
 	INPUT inputs[2]{};
 
-	// °´ÏÂ¼ü
+	// æŒ‰ä¸‹é”®
 	inputs[0].type = INPUT_KEYBOARD;
 	inputs[0].ki.wVk = vk;
-	// dwFlags Ä¬ÈÏÎª 0£¬±íÊ¾°´ÏÂ
+	// dwFlags é»˜è®¤ä¸º 0ï¼Œè¡¨ç¤ºæŒ‰ä¸‹
 
-	// ËÉ¿ª¼ü
+	// æ¾å¼€é”®
 	inputs[1] = inputs[0];
 	inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
 
-	// Ò»´Î·¢ËÍÁ½¸öÊÂ¼ş
+	// ä¸€æ¬¡å‘é€ä¸¤ä¸ªäº‹ä»¶
 	return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
 }
 
-// Ä£Äâ°´ÏÂ²¢ÊÍ·ÅÒ»¸ö¼ü£¬¿ÉÑ¡´øĞŞÊÎ¼ü£¨Ctrl/Shift/Alt/Win£©
+// æ¨¡æ‹ŸæŒ‰ä¸‹å¹¶é‡Šæ”¾ä¸€ä¸ªé”®ï¼Œå¯é€‰å¸¦ä¿®é¥°é”®ï¼ˆCtrl/Shift/Alt/Winï¼‰
 DLLAPI bool WINAPI KeyCombo(uint16_t vk, Send::KeyboardModifiers modifiers) {
 	struct Modifier { uint16_t vk; bool active; };
 	Modifier mods[] = {
@@ -92,7 +155,7 @@ DLLAPI bool WINAPI KeyCombo(uint16_t vk, Send::KeyboardModifiers modifiers) {
 	INPUT inputs[18]{};
 	int idx = 0;
 
-	// °´ÏÂĞŞÊÎ¼ü
+	// æŒ‰ä¸‹ä¿®é¥°é”®
 	for (auto& m : mods) {
 		if (m.active) {
 			inputs[idx].type = INPUT_KEYBOARD;
@@ -101,17 +164,17 @@ DLLAPI bool WINAPI KeyCombo(uint16_t vk, Send::KeyboardModifiers modifiers) {
 		}
 	}
 
-	// °´ÏÂÄ¿±ê¼ü
+	// æŒ‰ä¸‹ç›®æ ‡é”®
 	inputs[idx].type = INPUT_KEYBOARD;
 	inputs[idx].ki.wVk = vk;
 	idx++;
 
-	// ËÉ¿ªÄ¿±ê¼ü
+	// æ¾å¼€ç›®æ ‡é”®
 	inputs[idx] = inputs[idx - 1];
 	inputs[idx].ki.dwFlags = KEYEVENTF_KEYUP;
 	idx++;
 
-	// ËÉ¿ªĞŞÊÎ¼ü£¨ÄæĞò£©
+	// æ¾å¼€ä¿®é¥°é”®ï¼ˆé€†åºï¼‰
 	for (int i = 7; i >= 0; i--) {
 		if (mods[i].active) {
 			inputs[idx].type = INPUT_KEYBOARD;
@@ -123,3 +186,4 @@ DLLAPI bool WINAPI KeyCombo(uint16_t vk, Send::KeyboardModifiers modifiers) {
 
 	return IbSendInput(idx, inputs, sizeof(INPUT)) == idx;
 }
+*/

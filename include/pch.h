@@ -8,6 +8,7 @@
 #include <mutex>
 #include <memory>
 #include <string>
+#include <vector>
 #include <cstdint>
 #include <functional>
 #include <winternl.h>

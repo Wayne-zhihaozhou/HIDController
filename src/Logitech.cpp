@@ -1,4 +1,4 @@
-//Logitech.cpp
+ï»¿//Logitech.cpp
 #include"pch.h"
 #include "Logitech.hpp"
 #include "base.hpp"
@@ -10,20 +10,20 @@
 
 namespace Send::Internal {
 
-	// ¹¹Ôìº¯Êı
+	// æ„é€ å‡½æ•°
 	Logitech::Logitech() = default;
 
-	// ³õÊ¼»¯ Logitech Çı¶¯
+	// åˆå§‹åŒ– Logitech é©±åŠ¨
 	Send::Error Logitech::create() {
 		return driver.create();
 	}
 
-	// Ïú»Ù Logitech Çı¶¯
+	// é”€æ¯ Logitech é©±åŠ¨
 	void Logitech::destroy() {
 		driver.destroy();
 	}
 
-	// ·¢ËÍÒ»×éÊó±êÊäÈëÊÂ¼ş
+	// å‘é€ä¸€ç»„é¼ æ ‡è¾“å…¥äº‹ä»¶
 	//uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
 	//	uint32_t count = 0;
 	//	for (uint32_t i = 0; i < n; ++i) {
@@ -36,33 +36,53 @@ namespace Send::Internal {
 	//	return count;
 	//}
 
-	// ·¢ËÍµ¥¸öÊó±êÊäÈëÊÂ¼ş
+	// å‘é€å•ä¸ªé¼ æ ‡è¾“å…¥äº‹ä»¶
 	//bool Logitech::send_mouse_input(const MOUSEINPUT& mi) {
 	//	return send_mouse_report(mi);
 	//}
 
-	// ·¢ËÍ¼üÅÌÊäÈëÊÂ¼ş£¨Ö§³ÖĞŞÊÎ¼ü×´Ì¬¸üĞÂ£©
-	bool Logitech::send_keyboard_input(const KEYBDINPUT& ki) {
+	// å‘é€é”®ç›˜è¾“å…¥äº‹ä»¶ï¼ˆæ”¯æŒä¿®é¥°é”®çŠ¶æ€æ›´æ–°ï¼‰
+	bool Logitech::send_keyboard_report(const KEYBDINPUT& ki) {
 		std::lock_guard lock(keyboard_mutex);
 
 		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
 
-		// ´¦ÀíĞŞÊÎ¼ü
+		// å¤„ç†ä¿®é¥°é”®
+		//switch (ki.wVk) {
+		//case VK_LCONTROL: keyboard_report.modifiers.LCtrl = keydown; break;
+		//case VK_RCONTROL: keyboard_report.modifiers.RCtrl = keydown; break;
+		//case VK_LSHIFT:   keyboard_report.modifiers.LShift = keydown; break;
+		//case VK_RSHIFT:   keyboard_report.modifiers.RShift = keydown; break;
+		//case VK_LMENU:    keyboard_report.modifiers.LAlt = keydown; break;
+		//case VK_RMENU:    keyboard_report.modifiers.RAlt = keydown; break;
+		//case VK_LWIN:     keyboard_report.modifiers.LGui = keydown; break;
+		//case VK_RWIN:     keyboard_report.modifiers.RGui = keydown; break;
+
 		switch (ki.wVk) {
+			// âœ… Ctrl
+		case VK_CONTROL:  keyboard_report.modifiers.RCtrl = keydown; break;
 		case VK_LCONTROL: keyboard_report.modifiers.LCtrl = keydown; break;
 		case VK_RCONTROL: keyboard_report.modifiers.RCtrl = keydown; break;
+
+			// âœ… Shift
+		case VK_SHIFT:	  keyboard_report.modifiers.RShift = keydown; break;
 		case VK_LSHIFT:   keyboard_report.modifiers.LShift = keydown; break;
 		case VK_RSHIFT:   keyboard_report.modifiers.RShift = keydown; break;
+
+			// âœ… Alt
+		case VK_MENU:	  keyboard_report.modifiers.RAlt = keydown; break;
 		case VK_LMENU:    keyboard_report.modifiers.LAlt = keydown; break;
 		case VK_RMENU:    keyboard_report.modifiers.RAlt = keydown; break;
+
+			// âœ… Win
 		case VK_LWIN:     keyboard_report.modifiers.LGui = keydown; break;
 		case VK_RWIN:     keyboard_report.modifiers.RGui = keydown; break;
 
 		default:
-			// ÆÕÍ¨°´¼ü´¦Àí
+			// æ™®é€šæŒ‰é”®å¤„ç†
 			uint8_t usage = Usb::keyboard_vk_to_usage((uint8_t)ki.wVk);
 			if (keydown) {
-				// °´ÏÂ£ºÌîÈë¿ÕÎ»
+				// æŒ‰ä¸‹ï¼šå¡«å…¥ç©ºä½
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report.keys[i] == 0) {
 						keyboard_report.keys[i] = usage;
@@ -71,7 +91,7 @@ namespace Send::Internal {
 				}
 			}
 			else {
-				// Ì§Æğ£ºÇå³ı¶ÔÓ¦°´¼ü
+				// æŠ¬èµ·ï¼šæ¸…é™¤å¯¹åº”æŒ‰é”®
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report.keys[i] == usage) {
 						keyboard_report.keys[i] = 0;
@@ -82,11 +102,11 @@ namespace Send::Internal {
 			break;
 		}
 
-		// Ìá½»¼üÅÌ±¨¸æ
+		// æäº¤é”®ç›˜æŠ¥å‘Š
 		return driver.report_keyboard(keyboard_report);
 	}
 
-	// ·¢ËÍÊó±ê±¨¸æ£¨Ö§³ÖÒÆ¶¯¡¢¹öÂÖ¡¢°´¼üµÈÊÂ¼ş£©//////////////////////////////
+	// å‘é€é¼ æ ‡æŠ¥å‘Šï¼ˆæ”¯æŒç§»åŠ¨ã€æ»šè½®ã€æŒ‰é”®ç­‰äº‹ä»¶ï¼‰//////////////////////////////
 	void set_button(LogitechDriver::MouseButton& btn, uint32_t dwFlags, uint32_t downFlag, uint32_t upFlag) {
 		if (dwFlags & (downFlag | upFlag))
 			btn = static_cast<LogitechDriver::MouseButton>((dwFlags & downFlag) != 0);
@@ -101,7 +121,7 @@ namespace Send::Internal {
 		mouse_report.wheel = 0;
 		mouse_report.button_byte = 0;
 
-		// ´¦ÀíÊó±êÒÆ¶¯
+		// å¤„ç†é¼ æ ‡ç§»åŠ¨
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
 			POINT move{ mi.dx, mi.dy };
 
@@ -117,12 +137,12 @@ namespace Send::Internal {
 			mouse_report.y = move.y;
 		}
 
-		// ´¦Àí¹öÂÖ
+		// å¤„ç†æ»šè½®
 		if (mi.dwFlags & MOUSEEVENTF_WHEEL) {
 			mouse_report.wheel = (static_cast<int32_t>(mi.mouseData) > 0) ? 1 : -1;
 		}
 
-		// ´¦ÀíÊó±ê°´¼ü
+		// å¤„ç†é¼ æ ‡æŒ‰é”®
 		auto set_button = [](LogitechDriver::MouseButton& btn, uint32_t dwFlags, uint32_t downFlag, uint32_t upFlag) {
 			if (dwFlags & (downFlag | upFlag))
 				btn = static_cast<LogitechDriver::MouseButton>((dwFlags & downFlag) != 0);
@@ -132,7 +152,7 @@ namespace Send::Internal {
 		set_button(mouse_report.button, mi.dwFlags, MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP);
 		set_button(mouse_report.button, mi.dwFlags, MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP);
 
-		 //X °´Å¥
+		//X æŒ‰é’®
 		if (mi.dwFlags & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP)) {
 			bool down = mi.dwFlags & MOUSEEVENTF_XDOWN;
 			if (mi.mouseData == XBUTTON1) mouse_report.button.XButton1 = down;

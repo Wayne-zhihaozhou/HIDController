@@ -82,7 +82,7 @@ namespace Send::Internal {
 	uint32_t Base::send_keyboard_input(const INPUT inputs[], uint32_t n) {
 		uint32_t count = 0;
 		for (uint32_t i = 0; i < n; i++)
-			count += send_keyboard_input(inputs[i].ki);
+			count += send_keyboard_report(inputs[i].ki);
 		return count;
 	}
 
