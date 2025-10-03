@@ -16,9 +16,6 @@
     <ClCompile Include="src\IbSendKeyboard.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\SendInput.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\base.cpp">
       <Filter>src</Filter>
     </ClCompile>

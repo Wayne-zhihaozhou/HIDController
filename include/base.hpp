@@ -75,7 +75,7 @@ namespace Send::Internal {
 		void set_modifier_state(int vKey, bool keydown);
 
 	public:
-		SHORT get_key_state(int vKey) override;
+		//SHORT get_key_state(int vKey) override;
 		//void sync_key_states() override;
 	};
 

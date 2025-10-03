@@ -1,4 +1,4 @@
-//IbSendMouse.cpp
+ï»¿//IbSendMouse.cpp
 #include"pch.h"
 #include <Logitech.hpp>
 #include <SendInputHook.hpp>
@@ -12,6 +12,92 @@ bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 		if (!logitech->send_mouse_report(inputs[i])) return false;
 	}
 	return true;
+}
+
+// åªæŒ‰ä¸‹é¼ æ ‡æŒ‰é’®
+DLLAPI bool WINAPI MouseDown(Send::MouseButton button) {
+	MOUSEINPUT input{};
+	input.dx = input.dy = 0;
+	input.mouseData = 0;
+	input.dwExtraInfo = 0;
+	input.time = 0;
+
+	switch (button) {
+	case Send::MouseButton::Left:   input.dwFlags = MOUSEEVENTF_LEFTDOWN; break;
+	case Send::MouseButton::Right:  input.dwFlags = MOUSEEVENTF_RIGHTDOWN; break;
+	case Send::MouseButton::Middle: input.dwFlags = MOUSEEVENTF_MIDDLEDOWN; break;
+	case Send::MouseButton::XButton1: input.dwFlags = MOUSEEVENTF_XDOWN; input.mouseData = XBUTTON1; break;
+	case Send::MouseButton::XButton2: input.dwFlags = MOUSEEVENTF_XDOWN; input.mouseData = XBUTTON2; break;
+	default:
+		input.dwFlags = static_cast<DWORD>(button);
+		break;
+	}
+
+	return send_mouse_input_bulk(&input, 1);
+}
+
+// åªæ¾å¼€é¼ æ ‡æŒ‰é’®
+DLLAPI bool WINAPI MouseUp(Send::MouseButton button) {
+	MOUSEINPUT input{};
+	input.dx = input.dy = 0;
+	input.mouseData = 0;
+	input.dwExtraInfo = 0;
+	input.time = 0;
+
+	switch (button) {
+	case Send::MouseButton::Left:   input.dwFlags = MOUSEEVENTF_LEFTUP; break;
+	case Send::MouseButton::Right:  input.dwFlags = MOUSEEVENTF_RIGHTUP; break;
+	case Send::MouseButton::Middle: input.dwFlags = MOUSEEVENTF_MIDDLEUP; break;
+	case Send::MouseButton::XButton1: input.dwFlags = MOUSEEVENTF_XUP; input.mouseData = XBUTTON1; break;
+	case Send::MouseButton::XButton2: input.dwFlags = MOUSEEVENTF_XUP; input.mouseData = XBUTTON2; break;
+	default:
+		input.dwFlags = static_cast<DWORD>(button);
+		break;
+	}
+
+	return send_mouse_input_bulk(&input, 1);
+}
+
+// æŒ‰ä¸‹ç„¶åæ¾å¼€ï¼ˆå®Œæ•´ç‚¹å‡»ï¼‰
+DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
+	MOUSEINPUT inputs[2]{};
+
+	// åˆå§‹åŒ– down/up
+	inputs[0].dx = inputs[1].dx = 0;
+	inputs[0].dy = inputs[1].dy = 0;
+	inputs[0].mouseData = inputs[1].mouseData = 0;
+	inputs[0].dwExtraInfo = inputs[1].dwExtraInfo = 0;
+	inputs[0].time = inputs[1].time = 0;
+
+	switch (button) {
+	case Send::MouseButton::Left:
+		inputs[0].dwFlags = MOUSEEVENTF_LEFTDOWN;
+		inputs[1].dwFlags = MOUSEEVENTF_LEFTUP;
+		break;
+	case Send::MouseButton::Right:
+		inputs[0].dwFlags = MOUSEEVENTF_RIGHTDOWN;
+		inputs[1].dwFlags = MOUSEEVENTF_RIGHTUP;
+		break;
+	case Send::MouseButton::Middle:
+		inputs[0].dwFlags = MOUSEEVENTF_MIDDLEDOWN;
+		inputs[1].dwFlags = MOUSEEVENTF_MIDDLEUP;
+		break;
+	case Send::MouseButton::XButton1:
+		inputs[0].dwFlags = MOUSEEVENTF_XDOWN;
+		inputs[1].dwFlags = MOUSEEVENTF_XUP;
+		inputs[0].mouseData = inputs[1].mouseData = XBUTTON1;
+		break;
+	case Send::MouseButton::XButton2:
+		inputs[0].dwFlags = MOUSEEVENTF_XDOWN;
+		inputs[1].dwFlags = MOUSEEVENTF_XUP;
+		inputs[0].mouseData = inputs[1].mouseData = XBUTTON2;
+		break;
+	default:
+		inputs[0].dwFlags = static_cast<DWORD>(button);
+		return send_mouse_input_bulk(&inputs[0], 1);
+	}
+
+	return send_mouse_input_bulk(inputs, 2);
 }
 
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
@@ -48,9 +134,40 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 }
 
 
-//´ıĞŞ¸ÄÈ·ÈÏ.
+
+DLLAPI bool WINAPI MouseWheel(int32_t movement) {
+	const int32_t MAX_DELTA = 120;  // æ¯ä¸ª HID æŠ¥å‘Šæœ€å¤§æ»šåŠ¨é‡ï¼Œæ ‡å‡†æ»šè½®ä¸º 120
+
+	int32_t steps = (std::abs(movement) + MAX_DELTA - 1) / MAX_DELTA;
+	if (steps == 0) steps = 1;
+
+	std::vector<MOUSEINPUT> wheels;
+	wheels.reserve(steps);
+
+	float step_value = static_cast<float>(movement) / steps;
+	float prev_value = 0;
+
+	for (int32_t i = 1; i <= steps; ++i) {
+		float curr_value = step_value * i;
+
+		MOUSEINPUT mi{};
+		mi.dx = 0;
+		mi.dy = 0;
+		mi.dwFlags = MOUSEEVENTF_WHEEL;
+		mi.mouseData = static_cast<DWORD>(curr_value - prev_value + 0.5f);
+		mi.time = 0;
+		mi.dwExtraInfo = 0;
+
+		wheels.push_back(mi);
+		prev_value = curr_value;
+	}
+
+	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
+}
+
+//å¾…ä¿®æ”¹ç¡®è®¤.
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
-	const uint32_t MAX_DELTA = 128;  // ·Ö²½ÒÆ¶¯×î´óÔöÁ¿
+	const uint32_t MAX_DELTA = 128;  // åˆ†æ­¥ç§»åŠ¨æœ€å¤§å¢é‡
 
 	POINT curr{};
 	if (!GetCursorPos(&curr)) return false;
@@ -91,68 +208,52 @@ DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
 
 
 
-// Ä£ÄâÒ»´ÎÊó±êµã»÷£¨°´ÏÂ + Ì§Æğ£©
-DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
-	// ³õÊ¼»¯°´ÏÂºÍÌ§ÆğÊÂ¼ş
-	INPUT inputs[2];
-	inputs[0] = inputs[1] = {
-		.type = INPUT_MOUSE,
-		.mi {
-			.dx = 0,
-			.dy = 0,
-			.mouseData = 0,
-			.time = 0,
-			.dwExtraInfo = 0
-		}
-	};
+//å¾…ä¿®æ”¹
+// æ¨¡æ‹Ÿä¸€æ¬¡é¼ æ ‡ç‚¹å‡»ï¼ˆæŒ‰ä¸‹ + æŠ¬èµ·ï¼‰
+//DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
+//	// åˆå§‹åŒ–æŒ‰ä¸‹å’ŒæŠ¬èµ·äº‹ä»¶
+//	INPUT inputs[2];
+//	inputs[0] = inputs[1] = {
+//		.type = INPUT_MOUSE,
+//		.mi {
+//			.dx = 0,
+//			.dy = 0,
+//			.mouseData = 0,
+//			.time = 0,
+//			.dwExtraInfo = 0
+//		}
+//	};
+//
+//	// æ ¹æ®æŒ‰é”®ç±»å‹è®¾ç½®äº‹ä»¶æ ‡å¿—
+//	switch (button) {
+//	case Send::MouseButton::Left:
+//		inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+//		inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
+//	case Send::MouseButton::Right:
+//		inputs[0].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
+//		inputs[1].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
+//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
+//	case Send::MouseButton::Middle:
+//		inputs[0].mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN;
+//		inputs[1].mi.dwFlags = MOUSEEVENTF_MIDDLEUP;
+//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
+//	case Send::MouseButton::XButton1:
+//		inputs[0].mi.dwFlags = MOUSEEVENTF_XDOWN;
+//		inputs[1].mi.dwFlags = MOUSEEVENTF_XUP;
+//		inputs[0].mi.mouseData = inputs[1].mi.mouseData = XBUTTON1;
+//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
+//	case Send::MouseButton::XButton2:
+//		inputs[0].mi.dwFlags = MOUSEEVENTF_XDOWN;
+//		inputs[1].mi.dwFlags = MOUSEEVENTF_XUP;
+//		inputs[0].mi.mouseData = inputs[1].mi.mouseData = XBUTTON2;
+//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
+//	default:
+//		// é»˜è®¤å¤„ç†è‡ªå®šä¹‰æ ‡å¿—
+//		inputs[0].mi.dwFlags = static_cast<DWORD>(button);
+//		return IbSendInput(1, inputs, sizeof(INPUT));
+//	}
+//}
 
-	// ¸ù¾İ°´¼üÀàĞÍÉèÖÃÊÂ¼ş±êÖ¾
-	switch (button) {
-	case Send::MouseButton::Left:
-		inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-		inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
-		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-	case Send::MouseButton::Right:
-		inputs[0].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-		inputs[1].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-	case Send::MouseButton::Middle:
-		inputs[0].mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN;
-		inputs[1].mi.dwFlags = MOUSEEVENTF_MIDDLEUP;
-		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-	case Send::MouseButton::XButton1:
-		inputs[0].mi.dwFlags = MOUSEEVENTF_XDOWN;
-		inputs[1].mi.dwFlags = MOUSEEVENTF_XUP;
-		inputs[0].mi.mouseData = inputs[1].mi.mouseData = XBUTTON1;
-		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-	case Send::MouseButton::XButton2:
-		inputs[0].mi.dwFlags = MOUSEEVENTF_XDOWN;
-		inputs[1].mi.dwFlags = MOUSEEVENTF_XUP;
-		inputs[0].mi.mouseData = inputs[1].mi.mouseData = XBUTTON2;
-		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-	default:
-		// Ä¬ÈÏ´¦Àí×Ô¶¨Òå±êÖ¾
-		inputs[0].mi.dwFlags = static_cast<DWORD>(button);
-		return IbSendInput(1, inputs, sizeof(INPUT));
-	}
-}
 
-
-// Ä£ÄâÊó±ê¹öÂÖ¹ö¶¯
-DLLAPI bool WINAPI MouseWheel(int32_t movement) {
-	// ¹¹Ôì¹öÂÖÊÂ¼ş
-	INPUT input{
-		.type = INPUT_MOUSE,
-		.mi {
-			.dx = 0,
-			.dy = 0,
-			.mouseData = std::bit_cast<DWORD>(movement),
-			.dwFlags = MOUSEEVENTF_WHEEL,
-			.time = 0,
-			.dwExtraInfo = 0
-		}
-	};
-	// ·¢ËÍÊÂ¼ş
-	return IbSendInput(1, &input, sizeof(INPUT));
-}
 

@@ -72,9 +72,28 @@ namespace Send::Internal {
 	}
 
 	// 发送鼠标报告（支持移动、滚轮、按键等事件）
-	void set_button(LogitechDriver::MouseButton& btn, uint32_t dwFlags, uint32_t downFlag, uint32_t upFlag) {
-		if (dwFlags & (downFlag | upFlag))
-			btn = static_cast<LogitechDriver::MouseButton>((dwFlags & downFlag) != 0);
+	void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi) {
+		// 左键
+		if (mi.dwFlags & MOUSEEVENTF_LEFTDOWN) btn.LButton = true;
+		if (mi.dwFlags & MOUSEEVENTF_LEFTUP)   btn.LButton = false;
+
+		// 右键
+		if (mi.dwFlags & MOUSEEVENTF_RIGHTDOWN) btn.RButton = true;
+		if (mi.dwFlags & MOUSEEVENTF_RIGHTUP)   btn.RButton = false;
+
+		// 中键
+		if (mi.dwFlags & MOUSEEVENTF_MIDDLEDOWN) btn.MButton = true;
+		if (mi.dwFlags & MOUSEEVENTF_MIDDLEUP)   btn.MButton = false;
+
+		// X 按钮
+		if (mi.dwFlags & MOUSEEVENTF_XDOWN) {
+			if (mi.mouseData == XBUTTON1) btn.XButton1 = true;
+			if (mi.mouseData == XBUTTON2) btn.XButton2 = true;
+		}
+		if (mi.dwFlags & MOUSEEVENTF_XUP) {
+			if (mi.mouseData == XBUTTON1) btn.XButton1 = false;
+			if (mi.mouseData == XBUTTON2) btn.XButton2 = false;
+		}
 	}
 
 	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
@@ -113,9 +132,8 @@ namespace Send::Internal {
 				btn = static_cast<LogitechDriver::MouseButton>((dwFlags & downFlag) != 0);
 			};
 
-		set_button(mouse_report.button, mi.dwFlags, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP);
-		set_button(mouse_report.button, mi.dwFlags, MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP);
-		set_button(mouse_report.button, mi.dwFlags, MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP);
+		update_mouse_button(mouse_report.button, mi);
+
 
 		//X 按钮
 		if (mi.dwFlags & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP)) {
