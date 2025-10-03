@@ -54,7 +54,7 @@ namespace Send::Internal {
 		return DeviceIoControl(
 			device,
 			IOCTL_BUSENUM_PLAY_MOUSEMOVE,
-			const_cast<MouseReport*>(&report), // const_cast 是必须的，因为 API 要求非 const
+			const_cast<MouseReport*>(&report), 
 			sizeof(MouseReport),
 			nullptr,
 			0,

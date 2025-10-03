@@ -100,6 +100,8 @@ namespace Send::Internal {
 	bool Logitech::send_keyboard_report(const KEYBDINPUT& ki) {
 		std::lock_guard lock(keyboard_mutex);
 
+		LogitechDriver::KeyboardReport keyboard_report{};
+
 		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
 
 		switch (ki.wVk) {

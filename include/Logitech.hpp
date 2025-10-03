@@ -8,10 +8,8 @@ namespace Send::Internal {
 	class Logitech : public Send::Internal::Base {
 	private:
 		LogitechDriver driver{};
-		LogitechDriver::KeyboardReport keyboard_report{};
 		std::mutex mouse_mutex;
 		std::mutex keyboard_mutex;
-
 	public:
 		Logitech();
 		Send::Error create();
