@@ -10,10 +10,9 @@
 #define DLLAPI  extern "C" __declspec(dllimport)
 #endif
 
-// -------------------- 初始化/销毁 IbSendBase.hpp --------------------
-
 
 // -------------------- 鼠标控制 IbSendMouse.hpp --------------------
+
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy);
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y);
 DLLAPI bool WINAPI MouseDown(uint16_t button);

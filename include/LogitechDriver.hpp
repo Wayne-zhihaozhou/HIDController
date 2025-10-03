@@ -61,10 +61,10 @@ namespace Send::Internal {
 				MouseButton button;
 				uint8_t button_byte;
 			};
-			uint8_t x;
-			uint8_t y;
-			uint8_t wheel;
-			uint8_t unknown_T;
+			int8_t x;
+			int8_t y;
+			int8_t wheel;
+			int8_t unknown_T;
 
 		private:
 			void assert_size() { static_assert(sizeof(MouseReport) == 5); }

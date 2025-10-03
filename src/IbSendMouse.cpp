@@ -87,6 +87,10 @@ DLLAPI bool WINAPI MouseClick(uint16_t button) {
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	const int32_t MAX_DELTA = 128;
 
+	//纠正系数
+	dx = dx * 4 / 3;
+	dy = dy * 4 / 3;
+
 	int32_t steps = max(
 		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
 		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
@@ -120,31 +124,7 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 
 //待完善
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
-	 //获取屏幕分辨率
-	int screen_width = GetSystemMetrics(SM_CXSCREEN);
-	int screen_height = GetSystemMetrics(SM_CYSCREEN);
-
-	// 坐标映射到 HID 逻辑坐标 [0,65535]
-	auto map_to_absolute = [](uint32_t value, int max) -> LONG {
-		return static_cast<LONG>((value * 65535) / max);
-		};
-
-	LONG abs_x = map_to_absolute(target_x, screen_width - 1);
-	LONG abs_y = map_to_absolute(target_y, screen_height - 1);
-
-	MOUSEINPUT mi{};
-	mi.dx = 200;
-	mi.dy = 200;
-	mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
-	mi.time = 0;
-	mi.dwExtraInfo = 0;
-
-	auto& logitech = Send::Internal::Logitech::getLogitechInstance();
-	if (!logitech.send_mouse_report(mi)) {
-		return false;
-	}
-
-	return true;
+	return false; 
 }
 
 DLLAPI bool WINAPI MouseWheel(int32_t movement) {
