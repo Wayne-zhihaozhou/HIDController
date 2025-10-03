@@ -32,6 +32,7 @@ DLLAPI VOID WINAPI IbSend_mouse_event(
 bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	auto logitech = std::make_unique<Send::Internal::Logitech>();
 	logitech->create_base(&SendInputHook::GetAsyncKeyState_real);
+	logitech->create();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech->send_mouse_report(inputs[i])) return false;
 	}
