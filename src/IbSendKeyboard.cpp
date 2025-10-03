@@ -3,10 +3,9 @@
 #include <Logitech.hpp>
 
 bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
-	auto logitech = std::make_unique<Send::Internal::Logitech>();
-	logitech->create();
+	auto& logitech = Send::Internal::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
-		if (!logitech->send_keyboard_report(inputs[i])) return false;
+		if (!logitech.send_keyboard_report(inputs[i])) return false;
 	}
 	return true;
 }

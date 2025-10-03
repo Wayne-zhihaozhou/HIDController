@@ -5,10 +5,9 @@
 
 
 bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
-	auto logitech = std::make_unique<Send::Internal::Logitech>();
-	logitech->create();
+	auto& logitech = Send::Internal::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
-		if (!logitech->send_mouse_report(inputs[i])) return false;
+		if (!logitech.send_mouse_report(inputs[i])) return false;
 	}
 	return true;
 }
@@ -118,18 +117,20 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
+
+//待完善
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
-	// 获取屏幕分辨率
-	//int screen_width = GetSystemMetrics(SM_CXSCREEN);
-	//int screen_height = GetSystemMetrics(SM_CYSCREEN);
+	 //获取屏幕分辨率
+	int screen_width = GetSystemMetrics(SM_CXSCREEN);
+	int screen_height = GetSystemMetrics(SM_CYSCREEN);
 
-	//// 坐标映射到 HID 逻辑坐标 [0,65535]
-	//auto map_to_absolute = [](uint32_t value, int max) -> LONG {
-	//	return static_cast<LONG>((value * 65535) / max);
-	//	};
+	// 坐标映射到 HID 逻辑坐标 [0,65535]
+	auto map_to_absolute = [](uint32_t value, int max) -> LONG {
+		return static_cast<LONG>((value * 65535) / max);
+		};
 
-	//LONG abs_x = map_to_absolute(target_x, screen_width - 1);
-	//LONG abs_y = map_to_absolute(target_y, screen_height - 1);
+	LONG abs_x = map_to_absolute(target_x, screen_width - 1);
+	LONG abs_y = map_to_absolute(target_y, screen_height - 1);
 
 	MOUSEINPUT mi{};
 	mi.dx = 200;
@@ -138,11 +139,8 @@ DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
 	mi.time = 0;
 	mi.dwExtraInfo = 0;
 
-	// 创建 Logitech 对象并发送一次 HID 报告
-	auto logitech = std::make_unique<Send::Internal::Logitech>();
-	logitech->create();
-
-	if (!logitech->send_mouse_report(mi)) {
+	auto& logitech = Send::Internal::Logitech::getLogitechInstance();
+	if (!logitech.send_mouse_report(mi)) {
 		return false;
 	}
 

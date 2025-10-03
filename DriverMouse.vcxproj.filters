@@ -4,9 +4,6 @@
     <ClCompile Include="src\pch.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\dllmain.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Logitech.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -16,20 +13,11 @@
     <ClCompile Include="src\IbSendKeyboard.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\base.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\LogitechDriver.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\IbSendBase.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\base.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\Logitech.hpp">
       <Filter>include</Filter>
     </ClInclude>

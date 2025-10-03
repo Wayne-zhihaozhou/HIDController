@@ -1,9 +1,8 @@
 ﻿//Logitech.cpp
 #include"pch.h"
 #include "Logitech.hpp"
-#include "base.hpp"
 #include "KeyboardMap.hpp"
-#include <algorithm>
+
 
 
 
@@ -19,6 +18,14 @@ namespace Send::Internal {
 	// 销毁 Logitech 驱动
 	void Logitech::destroy() {
 		driver.destroy();
+	}
+
+	// 单例实现
+	Logitech& Logitech::getLogitechInstance() {
+		static Logitech instance;  // 延迟初始化，线程安全（C++11+）
+		static bool initialized = instance.create();  // 初始化 Logitech driver
+		(void)initialized;  // 避免未使用警告
+		return instance;
 	}
 
 	//辅助函数
@@ -47,7 +54,7 @@ namespace Send::Internal {
 	}
 
 	// 将鼠标绝对坐标转换为主屏幕坐标
-	void mouse_absolute_to_screen(POINT& absolute)  {
+	void mouse_absolute_to_screen(POINT& absolute) {
 		const static int mainScreenWidth = GetSystemMetrics(SM_CXSCREEN);
 		const static int mainScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -56,7 +63,7 @@ namespace Send::Internal {
 	}
 
 	// 将鼠标绝对坐标转换为虚拟桌面屏幕坐标
-	void mouse_virtual_desk_absolute_to_screen(POINT& absolute)  {
+	void mouse_virtual_desk_absolute_to_screen(POINT& absolute) {
 		const static int virtualDeskWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
 		const static int virtualDeskHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 

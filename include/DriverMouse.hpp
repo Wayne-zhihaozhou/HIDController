@@ -2,7 +2,8 @@
 #pragma once
 #include <vector>
 #include <cstdint>
-//#include <Logitech.hpp>
+
+
 #ifdef DLL1_EXPORTS
 #define DLLAPI  extern "C" __declspec(dllexport)
 #else
@@ -10,12 +11,6 @@
 #endif
 
 // -------------------- 初始化/销毁 IbSendBase.hpp --------------------
-
-// 初始化发送模块
-DLLAPI bool WINAPI IbSendInit();
-
-// 销毁发送模块
-DLLAPI void WINAPI IbSendDestroy();
 
 
 // -------------------- 鼠标控制 IbSendMouse.hpp --------------------
