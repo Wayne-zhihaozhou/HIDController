@@ -4,14 +4,10 @@
 
 namespace Send::Internal {
 
-	//// 判断某个虚拟键码是否为修饰键（Ctrl/Shift/Alt/Win）
-	//bool Base::is_modifier(int vKey) {
-	//	int mods[] = { VK_LCONTROL, VK_RCONTROL, VK_LSHIFT, VK_RSHIFT, VK_LMENU, VK_RMENU, VK_LWIN, VK_RWIN };
-	//	for (int mod : mods)
-	//		if (mod == vKey)
-	//			return true;
-	//	return false;
-	//}
+
+	Base::Base()
+	{
+	}
 
 	// 将鼠标绝对坐标转换为主屏幕坐标
 	void Base::mouse_absolute_to_screen(POINT& absolute) const {
@@ -39,57 +35,6 @@ namespace Send::Internal {
 		screen_point.y -= point.y;
 	}
 
-	// 初始化Base类，设置备用键盘状态函数
-	void Base::create_base(decltype(&::GetAsyncKeyState)* get_key_state_fallback) {
-		this->get_key_state_fallback = get_key_state_fallback;
-	}
-
-	// 发送一组输入事件（键盘或鼠标）
-	//uint32_t Base::send_input(const INPUT inputs[], uint32_t n) {
-	//	uint32_t count = 0;
-
-	//	for (uint32_t i = 0; i < n; i++) {
-	//		DWORD type = inputs[i].type;
-
-	//		uint32_t j = i + 1;
-	//		while (j < n && inputs[j].type == type)
-	//			j++;
-
-	//		switch (type) {
-	//		case INPUT_KEYBOARD:
-	//			count += send_keyboard_input(inputs + i, j - i);
-	//			break;
-	//		case INPUT_MOUSE:
-	//			count += send_mouse_input(inputs + i, j - i);
-	//			break;
-	//		}
-
-	//		i = j;
-	//	}
-
-	//	return count;
-	//}
-
-	// 批量发送鼠标输入事件
-	//uint32_t Base::send_mouse_input(const INPUT inputs[], uint32_t n) {
-	//	uint32_t count = 0;
-	//	for (uint32_t i = 0; i < n; i++)
-	//		count += send_mouse_input(inputs[i].mi);
-	//	return count;
-	//}
-
-	// 批量发送键盘输入事件
-	uint32_t Base::send_keyboard_input(const INPUT inputs[], uint32_t n) {
-		uint32_t count = 0;
-		for (uint32_t i = 0; i < n; i++)
-			count += send_keyboard_report(inputs[i].ki);
-		return count;
-	}
-
-	// 获取某个按键的状态（按下/释放）
-	SHORT Base::get_key_state(int vKey) {
-		return (*get_key_state_fallback)(vKey);
-	}
 
 	// -------------------- find_device --------------------
 

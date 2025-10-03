@@ -23,23 +23,6 @@ namespace Send::Internal {
 		driver.destroy();
 	}
 
-	// 发送一组鼠标输入事件
-	//uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
-	//	uint32_t count = 0;
-	//	for (uint32_t i = 0; i < n; ++i) {
-	//		if (inputs[i].type == INPUT_MOUSE) {
-	//			if (send_mouse_report(inputs[i].mi)) {
-	//				++count;
-	//			}
-	//		}
-	//	}
-	//	return count;
-	//}
-
-	// 发送单个鼠标输入事件
-	//bool Logitech::send_mouse_input(const MOUSEINPUT& mi) {
-	//	return send_mouse_report(mi);
-	//}
 
 	// 发送键盘输入事件（支持修饰键状态更新）
 	bool Logitech::send_keyboard_report(const KEYBDINPUT& ki) {
@@ -47,34 +30,16 @@ namespace Send::Internal {
 
 		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
 
-		// 处理修饰键
-		//switch (ki.wVk) {
-		//case VK_LCONTROL: keyboard_report.modifiers.LCtrl = keydown; break;
-		//case VK_RCONTROL: keyboard_report.modifiers.RCtrl = keydown; break;
-		//case VK_LSHIFT:   keyboard_report.modifiers.LShift = keydown; break;
-		//case VK_RSHIFT:   keyboard_report.modifiers.RShift = keydown; break;
-		//case VK_LMENU:    keyboard_report.modifiers.LAlt = keydown; break;
-		//case VK_RMENU:    keyboard_report.modifiers.RAlt = keydown; break;
-		//case VK_LWIN:     keyboard_report.modifiers.LGui = keydown; break;
-		//case VK_RWIN:     keyboard_report.modifiers.RGui = keydown; break;
-
 		switch (ki.wVk) {
-			// ✅ Ctrl
 		case VK_CONTROL:  keyboard_report.modifiers.RCtrl = keydown; break;
 		case VK_LCONTROL: keyboard_report.modifiers.LCtrl = keydown; break;
 		case VK_RCONTROL: keyboard_report.modifiers.RCtrl = keydown; break;
-
-			// ✅ Shift
 		case VK_SHIFT:	  keyboard_report.modifiers.RShift = keydown; break;
 		case VK_LSHIFT:   keyboard_report.modifiers.LShift = keydown; break;
 		case VK_RSHIFT:   keyboard_report.modifiers.RShift = keydown; break;
-
-			// ✅ Alt
 		case VK_MENU:	  keyboard_report.modifiers.RAlt = keydown; break;
 		case VK_LMENU:    keyboard_report.modifiers.LAlt = keydown; break;
 		case VK_RMENU:    keyboard_report.modifiers.RAlt = keydown; break;
-
-			// ✅ Win
 		case VK_LWIN:     keyboard_report.modifiers.LGui = keydown; break;
 		case VK_RWIN:     keyboard_report.modifiers.RGui = keydown; break;
 
@@ -106,7 +71,7 @@ namespace Send::Internal {
 		return driver.report_keyboard(keyboard_report);
 	}
 
-	// 发送鼠标报告（支持移动、滚轮、按键等事件）//////////////////////////////
+	// 发送鼠标报告（支持移动、滚轮、按键等事件）
 	void set_button(LogitechDriver::MouseButton& btn, uint32_t dwFlags, uint32_t downFlag, uint32_t upFlag) {
 		if (dwFlags & (downFlag | upFlag))
 			btn = static_cast<LogitechDriver::MouseButton>((dwFlags & downFlag) != 0);
