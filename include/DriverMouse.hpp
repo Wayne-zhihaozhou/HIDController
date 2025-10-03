@@ -13,8 +13,6 @@ DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags,
 // 销毁发送模块
 DLLAPI void WINAPI IbSendDestroy();
 
-// 同步键盘状态
-DLLAPI void WINAPI IbSendSyncKeyStates();
 
 // -------------------- 鼠标控制 IbSendMouse.hpp --------------------
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy);
@@ -29,7 +27,7 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement);
 // -------------------- 键盘控制 IbSendKeyboard.hpp --------------------
 DLLAPI bool WINAPI KeyDown(uint16_t vk);
 DLLAPI bool WINAPI KeyUp(uint16_t vk);
-DLLAPI bool WINAPI KeyPressOnce(uint16_t vk);
+DLLAPI bool WINAPI KeyPress(uint16_t vk);
 DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys);
 
 

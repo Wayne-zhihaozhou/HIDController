@@ -14,7 +14,6 @@ bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	return true;
 }
 
-// 只按下鼠标按钮
 DLLAPI bool WINAPI MouseDown(Send::MouseButton button) {
 	MOUSEINPUT input{};
 	input.dx = input.dy = 0;
@@ -36,7 +35,6 @@ DLLAPI bool WINAPI MouseDown(Send::MouseButton button) {
 	return send_mouse_input_bulk(&input, 1);
 }
 
-// 只松开鼠标按钮
 DLLAPI bool WINAPI MouseUp(Send::MouseButton button) {
 	MOUSEINPUT input{};
 	input.dx = input.dy = 0;
@@ -58,7 +56,6 @@ DLLAPI bool WINAPI MouseUp(Send::MouseButton button) {
 	return send_mouse_input_bulk(&input, 1);
 }
 
-// 按下然后松开（完整点击）
 DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
 	MOUSEINPUT inputs[2]{};
 
@@ -133,37 +130,6 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
-DLLAPI bool WINAPI MouseWheel(int32_t movement) {
-	const int32_t MAX_DELTA = 120;  // 每个 HID 报告最大滚动量，标准滚轮为 120
-
-	int32_t steps = (std::abs(movement) + MAX_DELTA - 1) / MAX_DELTA;
-	if (steps == 0) steps = 1;
-
-	std::vector<MOUSEINPUT> wheels;
-	wheels.reserve(steps);
-
-	float step_value = static_cast<float>(movement) / steps;
-	float prev_value = 0;
-
-	for (int32_t i = 1; i <= steps; ++i) {
-		float curr_value = step_value * i;
-
-		MOUSEINPUT mi{};
-		mi.dx = 0;
-		mi.dy = 0;
-		mi.dwFlags = MOUSEEVENTF_WHEEL;
-		mi.mouseData = static_cast<DWORD>(curr_value - prev_value + 0.5f);
-		mi.time = 0;
-		mi.dwExtraInfo = 0;
-
-		wheels.push_back(mi);
-		prev_value = curr_value;
-	}
-
-	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
-}
-
-
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
 	// 获取屏幕分辨率
 	//int screen_width = GetSystemMetrics(SM_CXSCREEN);
@@ -195,96 +161,35 @@ DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
 	return true;
 }
 
+DLLAPI bool WINAPI MouseWheel(int32_t movement) {
+	const int32_t MAX_DELTA = 120;  // 每个 HID 报告最大滚动量，标准滚轮为 120
 
-//待修改确认.
-//DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
-//	const uint32_t MAX_DELTA = 128;  // 分步移动最大增量
-//
-//	POINT curr{};
-//	if (!GetCursorPos(&curr)) return false;
-//
-//	int32_t dx = static_cast<int32_t>(x) - curr.x;
-//	int32_t dy = static_cast<int32_t>(y) - curr.y;
-//
-//	int32_t steps = max(
-//		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
-//		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
-//	);
-//	if (steps == 0) steps = 1;
-//
-//	std::vector<MOUSEINPUT> moves;
-//	moves.reserve(steps);
-//
-//	float step_x = static_cast<float>(dx) / steps;
-//	float step_y = static_cast<float>(dy) / steps;
-//	float prev_x = static_cast<float>(curr.x);
-//	float prev_y = static_cast<float>(curr.y);
-//
-//	for (int32_t i = 1; i <= steps; ++i) {
-//		float curr_step_x = curr.x + step_x * i;
-//		float curr_step_y = curr.y + step_y * i;
-//
-//		MOUSEINPUT mi{};
-//		mi.dx = static_cast<int32_t>(curr_step_x + 0.5f);
-//		mi.dy = static_cast<int32_t>(curr_step_y + 0.5f);
-//		mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
-//
-//		moves.push_back(mi);
-//		prev_x = curr_step_x;
-//		prev_y = curr_step_y;
-//	}
-//
-//	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
-//}
+	int32_t steps = (std::abs(movement) + MAX_DELTA - 1) / MAX_DELTA;
+	if (steps == 0) steps = 1;
 
+	std::vector<MOUSEINPUT> wheels;
+	wheels.reserve(steps);
 
+	float step_value = static_cast<float>(movement) / steps;
+	float prev_value = 0;
 
-//待修改
-// 模拟一次鼠标点击（按下 + 抬起）
-//DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
-//	// 初始化按下和抬起事件
-//	INPUT inputs[2];
-//	inputs[0] = inputs[1] = {
-//		.type = INPUT_MOUSE,
-//		.mi {
-//			.dx = 0,
-//			.dy = 0,
-//			.mouseData = 0,
-//			.time = 0,
-//			.dwExtraInfo = 0
-//		}
-//	};
-//
-//	// 根据按键类型设置事件标志
-//	switch (button) {
-//	case Send::MouseButton::Left:
-//		inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
-//		inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
-//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-//	case Send::MouseButton::Right:
-//		inputs[0].mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-//		inputs[1].mi.dwFlags = MOUSEEVENTF_RIGHTUP;
-//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-//	case Send::MouseButton::Middle:
-//		inputs[0].mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN;
-//		inputs[1].mi.dwFlags = MOUSEEVENTF_MIDDLEUP;
-//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-//	case Send::MouseButton::XButton1:
-//		inputs[0].mi.dwFlags = MOUSEEVENTF_XDOWN;
-//		inputs[1].mi.dwFlags = MOUSEEVENTF_XUP;
-//		inputs[0].mi.mouseData = inputs[1].mi.mouseData = XBUTTON1;
-//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-//	case Send::MouseButton::XButton2:
-//		inputs[0].mi.dwFlags = MOUSEEVENTF_XDOWN;
-//		inputs[1].mi.dwFlags = MOUSEEVENTF_XUP;
-//		inputs[0].mi.mouseData = inputs[1].mi.mouseData = XBUTTON2;
-//		return IbSendInput(2, inputs, sizeof(INPUT)) == 2;
-//	default:
-//		// 默认处理自定义标志
-//		inputs[0].mi.dwFlags = static_cast<DWORD>(button);
-//		return IbSendInput(1, inputs, sizeof(INPUT));
-//	}
-//}
+	for (int32_t i = 1; i <= steps; ++i) {
+		float curr_value = step_value * i;
+
+		MOUSEINPUT mi{};
+		mi.dx = 0;
+		mi.dy = 0;
+		mi.dwFlags = MOUSEEVENTF_WHEEL;
+		mi.mouseData = static_cast<DWORD>(curr_value - prev_value + 0.5f);
+		mi.time = 0;
+		mi.dwExtraInfo = 0;
+
+		wheels.push_back(mi);
+		prev_value = curr_value;
+	}
+
+	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
+}
 
 
 

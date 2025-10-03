@@ -3,8 +3,6 @@
 #include "Logitech.hpp"
 #include "SendInputHook.hpp"
 
-
-
 // 初始化发送模块（仅支持 Logitech），创建并保存全局发送对象
 DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument) {
     if (type != Send::SendType::Logitech) {
@@ -18,7 +16,6 @@ DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags,
     Send::g_send = std::move(logitech); 
     return Send::Error::Success;
 }
-
 
 // 销毁发送模块，释放全局发送对象
 DLLAPI void WINAPI IbSendDestroy() {

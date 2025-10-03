@@ -2,8 +2,6 @@
 #include"pch.h"
 #include <Logitech.hpp>
 
-
-
 bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
 	auto logitech = std::make_unique<Send::Internal::Logitech>();
 	logitech->create();
@@ -13,9 +11,6 @@ bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
 	return true;
 }
 
-
-
-// 模拟单个按键按下
 DLLAPI bool WINAPI KeyDown(uint16_t vk) {
 	KEYBDINPUT ki{};
 	ki.wVk = vk;
@@ -27,7 +22,6 @@ DLLAPI bool WINAPI KeyDown(uint16_t vk) {
 	return send_keyboard_input_bulk(&ki, 1);
 }
 
-// 模拟单个按键抬起
 DLLAPI bool WINAPI KeyUp(uint16_t vk) {
 	KEYBDINPUT ki{};
 	ki.wVk = vk;
@@ -39,7 +33,7 @@ DLLAPI bool WINAPI KeyUp(uint16_t vk) {
 	return send_keyboard_input_bulk(&ki, 1);
 }
 
-DLLAPI bool WINAPI KeyPressOnce(uint16_t vk) {
+DLLAPI bool WINAPI KeyPress(uint16_t vk) {
 	// 构建一次性报告数组，先按下再松开
 	KEYBDINPUT inputs[2]{};
 
@@ -61,8 +55,8 @@ DLLAPI bool WINAPI KeyPressOnce(uint16_t vk) {
 	return send_keyboard_input_bulk(inputs, 2);
 }
 
-// 批量发送组合键，比如 Ctrl+Shift+A
 DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
+	// 批量发送组合键，比如 Ctrl+Shift+A
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
