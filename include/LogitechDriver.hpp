@@ -19,7 +19,7 @@ namespace Send::Internal {
 
 		struct MouseReport {
 			union {
-				LogitechDriver::MouseButton button;
+				MouseButton button;
 				uint8_t button_byte;
 			};
 			uint8_t x;

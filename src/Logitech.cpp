@@ -78,12 +78,7 @@ namespace Send::Internal {
 			mouse_report.wheel = (static_cast<int32_t>(mi.mouseData) > 0) ? 1 : -1;
 		}
 
-		// 处理鼠标按键
-		auto set_button = [](LogitechDriver::MouseButton& btn, uint32_t dwFlags, uint32_t downFlag, uint32_t upFlag) {
-			if (dwFlags & (downFlag | upFlag))
-				btn = static_cast<LogitechDriver::MouseButton>((dwFlags & downFlag) != 0);
-			};
-
+		// 处理按键
 		update_mouse_button(mouse_report.button, mi);
 
 		//X 按钮
