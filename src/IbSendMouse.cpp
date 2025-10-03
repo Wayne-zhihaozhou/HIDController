@@ -165,22 +165,11 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 
 
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
-	/**
-	 * 鼠标绝对移动到指定屏幕坐标
-	 *
-	 * Args:
-	 *     target_x (uint32_t): 目标X坐标（屏幕像素）
-	 *     target_y (uint32_t): 目标Y坐标（屏幕像素）
-	 *
-	 * Returns:
-	 *     bool: 成功返回 true，失败返回 false
-	 */
-
-	 // 获取屏幕分辨率
+	// 获取屏幕分辨率
 	int screen_width = GetSystemMetrics(SM_CXSCREEN);
 	int screen_height = GetSystemMetrics(SM_CYSCREEN);
 
-	// 将目标坐标映射到 [0, 65535] 范围
+	// 坐标映射到 HID 逻辑坐标 [0,65535]
 	auto map_to_absolute = [](uint32_t value, int max) -> LONG {
 		return static_cast<LONG>((value * 65535) / max);
 		};
@@ -188,47 +177,23 @@ DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
 	LONG abs_x = map_to_absolute(target_x, screen_width - 1);
 	LONG abs_y = map_to_absolute(target_y, screen_height - 1);
 
-	const int MAX_DELTA = 16;  // 每步最大像素移动，保证 HID 不丢报告
-	POINT curr{};
-	int step_index = 0;
+	MOUSEINPUT mi{};
+	mi.dx = abs_x;
+	mi.dy = abs_y;
+	mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
+	mi.time = 0;
+	mi.dwExtraInfo = 0;
 
-	// 创建 Logitech 对象一次性使用
+	// 创建 Logitech 对象并发送一次 HID 报告
 	auto logitech = std::make_unique<Send::Internal::Logitech>();
 	logitech->create();
 
-	while (true) {
-		if (!GetCursorPos(&curr)) return false;
-
-		int dx = static_cast<int>(target_x) - curr.x;
-		int dy = static_cast<int>(target_y) - curr.y;
-
-		// 已经接近目标位置
-		if (std::abs(dx) <= 1 && std::abs(dy) <= 1) break;
-
-		// 限制每步增量
-		int step_x = (std::abs(dx) > MAX_DELTA) ? (dx > 0 ? MAX_DELTA : -MAX_DELTA) : dx;
-		int step_y = (std::abs(dy) > MAX_DELTA) ? (dy > 0 ? MAX_DELTA : -MAX_DELTA) : dy;
-
-		// 计算绝对坐标
-		LONG move_x = map_to_absolute(curr.x + step_x, screen_width - 1);
-		LONG move_y = map_to_absolute(curr.y + step_y, screen_height - 1);
-
-		MOUSEINPUT mi{};
-		mi.dx = move_x;
-		mi.dy = move_y;
-		mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE;
-		mi.time = 0;
-		mi.dwExtraInfo = 0;
-
-		if (!logitech->send_mouse_report(mi)) return false;
-
-		step_index++;
-		//Sleep(1);  // 给 HID 时间处理
+	if (!logitech->send_mouse_report(mi)) {
+		return false;
 	}
 
 	return true;
 }
-
 
 
 //待修改确认.
