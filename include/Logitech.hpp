@@ -27,9 +27,9 @@ namespace Send::Internal {
 		};
 
 
-
+		//bool send_mouse_report(const MOUSEINPUT& mi);
 		
-		bool send_mouse_report(const MOUSEINPUT& mi);
+		
 
 	public:
 		Logitech();
@@ -39,6 +39,8 @@ namespace Send::Internal {
 		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
 		virtual bool send_mouse_input(const MOUSEINPUT& mi);
 		bool send_keyboard_input(const KEYBDINPUT& ki);
+
+		bool send_mouse_report(const MOUSEINPUT& mi);
 
 
 
