@@ -36,8 +36,8 @@ namespace Send::Internal {
 		Send::Error create();
 		void destroy();
 
-		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
-		virtual bool send_mouse_input(const MOUSEINPUT& mi);
+		//virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
+		//virtual bool send_mouse_input(const MOUSEINPUT& mi);
 		bool send_keyboard_input(const KEYBDINPUT& ki);
 
 		bool send_mouse_report(const MOUSEINPUT& mi);

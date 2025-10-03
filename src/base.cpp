@@ -45,38 +45,38 @@ namespace Send::Internal {
 	}
 
 	// 发送一组输入事件（键盘或鼠标）
-	uint32_t Base::send_input(const INPUT inputs[], uint32_t n) {
-		uint32_t count = 0;
+	//uint32_t Base::send_input(const INPUT inputs[], uint32_t n) {
+	//	uint32_t count = 0;
 
-		for (uint32_t i = 0; i < n; i++) {
-			DWORD type = inputs[i].type;
+	//	for (uint32_t i = 0; i < n; i++) {
+	//		DWORD type = inputs[i].type;
 
-			uint32_t j = i + 1;
-			while (j < n && inputs[j].type == type)
-				j++;
+	//		uint32_t j = i + 1;
+	//		while (j < n && inputs[j].type == type)
+	//			j++;
 
-			switch (type) {
-			case INPUT_KEYBOARD:
-				count += send_keyboard_input(inputs + i, j - i);
-				break;
-			case INPUT_MOUSE:
-				count += send_mouse_input(inputs + i, j - i);
-				break;
-			}
+	//		switch (type) {
+	//		case INPUT_KEYBOARD:
+	//			count += send_keyboard_input(inputs + i, j - i);
+	//			break;
+	//		case INPUT_MOUSE:
+	//			count += send_mouse_input(inputs + i, j - i);
+	//			break;
+	//		}
 
-			i = j;
-		}
+	//		i = j;
+	//	}
 
-		return count;
-	}
+	//	return count;
+	//}
 
 	// 批量发送鼠标输入事件
-	uint32_t Base::send_mouse_input(const INPUT inputs[], uint32_t n) {
-		uint32_t count = 0;
-		for (uint32_t i = 0; i < n; i++)
-			count += send_mouse_input(inputs[i].mi);
-		return count;
-	}
+	//uint32_t Base::send_mouse_input(const INPUT inputs[], uint32_t n) {
+	//	uint32_t count = 0;
+	//	for (uint32_t i = 0; i < n; i++)
+	//		count += send_mouse_input(inputs[i].mi);
+	//	return count;
+	//}
 
 	// 批量发送键盘输入事件
 	uint32_t Base::send_keyboard_input(const INPUT inputs[], uint32_t n) {

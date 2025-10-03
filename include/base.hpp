@@ -49,9 +49,9 @@ namespace Send::Internal {
 		virtual ~Base() = default;
 		virtual void destroy() = 0;
 
-		virtual uint32_t send_input(const INPUT inputs[], uint32_t n);
-		virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
-		virtual bool send_mouse_input(const MOUSEINPUT& mi) = 0;
+		//virtual uint32_t send_input(const INPUT inputs[], uint32_t n);
+		//virtual uint32_t send_mouse_input(const INPUT inputs[], uint32_t n);
+		//virtual bool send_mouse_input(const MOUSEINPUT& mi) = 0;
 		virtual uint32_t send_keyboard_input(const INPUT inputs[], uint32_t n);
 		virtual bool send_keyboard_input(const KEYBDINPUT& ki) = 0;
 

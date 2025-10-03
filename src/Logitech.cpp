@@ -24,22 +24,22 @@ namespace Send::Internal {
 	}
 
 	// 发送一组鼠标输入事件
-	uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
-		uint32_t count = 0;
-		for (uint32_t i = 0; i < n; ++i) {
-			if (inputs[i].type == INPUT_MOUSE) {
-				if (send_mouse_report(inputs[i].mi)) {
-					++count;
-				}
-			}
-		}
-		return count;
-	}
+	//uint32_t Logitech::send_mouse_input(const INPUT inputs[], uint32_t n) {
+	//	uint32_t count = 0;
+	//	for (uint32_t i = 0; i < n; ++i) {
+	//		if (inputs[i].type == INPUT_MOUSE) {
+	//			if (send_mouse_report(inputs[i].mi)) {
+	//				++count;
+	//			}
+	//		}
+	//	}
+	//	return count;
+	//}
 
 	// 发送单个鼠标输入事件
-	bool Logitech::send_mouse_input(const MOUSEINPUT& mi) {
-		return send_mouse_report(mi);
-	}
+	//bool Logitech::send_mouse_input(const MOUSEINPUT& mi) {
+	//	return send_mouse_report(mi);
+	//}
 
 	// 发送键盘输入事件（支持修饰键状态更新）
 	bool Logitech::send_keyboard_input(const KEYBDINPUT& ki) {

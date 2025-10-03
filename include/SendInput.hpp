@@ -13,8 +13,7 @@ extern "C" {
 		_In_ int cbSize
 	);
 
-	// 安装或触发输入钩子
-	void WINAPI IbSendInputHook(Send::HookCode code);
+
 
 #ifdef __cplusplus
 }

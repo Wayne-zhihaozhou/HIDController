@@ -31,7 +31,6 @@ DLLAPI VOID WINAPI IbSend_mouse_event(
 
 bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	auto logitech = std::make_unique<Send::Internal::Logitech>();
-	//logitech->create_base(&SendInputHook::GetAsyncKeyState_real);
 	logitech->create();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech->send_mouse_report(inputs[i])) return false;
@@ -72,21 +71,64 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
-// 模拟鼠标绝对移动
+
+//待修改确认.
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
-	INPUT input{
-		.type = INPUT_MOUSE,
-		.mi = {
-			.dx = std::bit_cast<LONG>(x),
-			.dy = std::bit_cast<LONG>(y),
-			.mouseData = 0,
-			.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK,
-			.time = 0,
-			.dwExtraInfo = 0
-		}
-	};
-	return IbSendInput(1, &input, sizeof(INPUT));
+	const uint32_t MAX_DELTA = 128;  // 分步移动最大增量
+
+	POINT curr{};
+	if (!GetCursorPos(&curr)) return false;
+
+	int32_t dx = static_cast<int32_t>(x) - curr.x;
+	int32_t dy = static_cast<int32_t>(y) - curr.y;
+
+	int32_t steps = max(
+		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
+		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
+	);
+	if (steps == 0) steps = 1;
+
+	std::vector<MOUSEINPUT> moves;
+	moves.reserve(steps);
+
+	float step_x = static_cast<float>(dx) / steps;
+	float step_y = static_cast<float>(dy) / steps;
+	float prev_x = static_cast<float>(curr.x);
+	float prev_y = static_cast<float>(curr.y);
+
+	for (int32_t i = 1; i <= steps; ++i) {
+		float curr_step_x = curr.x + step_x * i;
+		float curr_step_y = curr.y + step_y * i;
+
+		MOUSEINPUT mi{};
+		mi.dx = static_cast<int32_t>(curr_step_x + 0.5f);
+		mi.dy = static_cast<int32_t>(curr_step_y + 0.5f);
+		mi.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK;
+
+		moves.push_back(mi);
+		prev_x = curr_step_x;
+		prev_y = curr_step_y;
+	}
+
+	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
+
+
+// 模拟鼠标绝对移动
+//DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
+//	INPUT input{
+//		.type = INPUT_MOUSE,
+//		.mi = {
+//			.dx = std::bit_cast<LONG>(x),
+//			.dy = std::bit_cast<LONG>(y),
+//			.mouseData = 0,
+//			.dwFlags = MOUSEEVENTF_MOVE | MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_VIRTUALDESK,
+//			.time = 0,
+//			.dwExtraInfo = 0
+//		}
+//	};
+//	return IbSendInput(1, &input, sizeof(INPUT));
+//}
 
 // 模拟鼠标相对移动
 //DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
