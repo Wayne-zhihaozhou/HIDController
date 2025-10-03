@@ -10,7 +10,6 @@
 
 namespace Send::Internal {
 
-	// 构造函数
 	Logitech::Logitech() = default;
 
 	// 初始化 Logitech 驱动
