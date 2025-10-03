@@ -8,12 +8,13 @@
 #include <algorithm>
 
 
+
 namespace Send::Internal {
 
 	Logitech::Logitech() = default;
 
 	// 初始化 Logitech 驱动
-	Send::Error Logitech::create() {
+	bool Logitech::create() {
 		return driver.create();
 	}
 

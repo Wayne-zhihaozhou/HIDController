@@ -37,9 +37,7 @@ namespace Send::Internal {
 
 	class Base {
 	protected:
-		decltype(&::GetAsyncKeyState)* get_key_state_fallback;
 
-		//static bool is_modifier(int vKey);
 		void mouse_absolute_to_screen(POINT& absolute) const;
 		void mouse_virtual_desk_absolute_to_screen(POINT& absolute) const;
 		static void mouse_screen_to_relative(POINT& screen_point);
@@ -49,35 +47,8 @@ namespace Send::Internal {
 		virtual ~Base() = default;
 		virtual void destroy() = 0;
 
-		virtual bool send_keyboard_report(const KEYBDINPUT& ki) = 0;
-
-
 	};
 
-
-	struct KeyboardModifiers {
-		bool LCtrl : 1;
-		bool LShift : 1;
-		bool LAlt : 1;
-		bool LGui : 1;
-		bool RCtrl : 1;
-		bool RShift : 1;
-		bool RAlt : 1;
-		bool RGui : 1;
-	};
-
-	class VirtualKeyStates : public Base {
-		KeyboardModifiers& modifiers;
-		std::mutex& mutex;
-
-	protected:
-		VirtualKeyStates(KeyboardModifiers& modifiers, std::mutex& mutex);
-		void set_modifier_state(int vKey, bool keydown);
-
-	public:
-		//SHORT get_key_state(int vKey) override;
-		//void sync_key_states() override;
-	};
 
 	std::wstring find_device(std::function<bool(std::wstring_view name)> p);
 }

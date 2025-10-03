@@ -19,7 +19,5 @@
 
 // 项目自定义头文件
 #include "base.hpp"
-#include "SendTypes.hpp"
-#include "SendInput.hpp"
 
 

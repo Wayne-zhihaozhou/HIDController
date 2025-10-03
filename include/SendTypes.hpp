@@ -1,5 +1,7 @@
 // SendTypes.hpp
 #pragma once
+#include <WinUser.h>
+#include <cstdint>
 
 //-------------------- 定义DLL导出宏 ----------
 #ifdef DLL1_EXPORTS
@@ -9,82 +11,5 @@
 #endif
 
 
-namespace Send {
-
-
-    enum class Error : uint32_t {
-        Success,
-        InvalidArgument,
-        LibraryNotFound,
-        LibraryLoadFailed,
-        LibraryError,
-        DeviceCreateFailed,
-        DeviceNotFound,
-        DeviceOpenFailed
-    };
-
-    enum class SendType : uint32_t {
-        Logitech = 0,
-    };
-
-    using InitFlags = const uint32_t;
-
-    struct Init {
-        using T = InitFlags;
-    };
-
-    enum class HookCode : uint32_t {
-        Off,
-        On,
-        InitOnly,
-        Destroy
-    };
-
-
-    enum class MoveMode : uint32_t {
-        Absolute,  //0  // 绝对移动模式
-        Relative   //1  // 相对移动模式
-    };
-
-    enum class MouseButton : uint32_t {
-        LeftDown = MOUSEEVENTF_LEFTDOWN,              //0x02
-        LeftUp = MOUSEEVENTF_LEFTUP,                  //0x04
-        Left = LeftDown | LeftUp,                     //0x06
-
-        RightDown = MOUSEEVENTF_RIGHTDOWN,            //0x08
-        RightUp = MOUSEEVENTF_RIGHTUP,                //0x10
-        Right = RightDown | RightUp,                  //0x18
-
-        MiddleDown = MOUSEEVENTF_MIDDLEDOWN,          //0x20
-        MiddleUp = MOUSEEVENTF_MIDDLEUP,              //0x40
-        Middle = MiddleDown | MiddleUp,               //0x60
-
-        XButton1Down = MOUSEEVENTF_XDOWN | XBUTTON1,  //0x81
-        XButton1Up = MOUSEEVENTF_XUP | XBUTTON1,      //0x101
-        XButton1 = XButton1Down | XButton1Up,         //0x181
-
-        XButton2Down = MOUSEEVENTF_XDOWN | XBUTTON2,  //0x82
-        XButton2Up = MOUSEEVENTF_XUP | XBUTTON2,      //0x102
-        XButton2 = XButton2Down | XButton2Up,         //0x182
-    };
-
-    struct KeyboardModifiers {
-        bool LCtrl : 1;   //0x01
-        bool LShift : 1;  //0x02
-        bool LAlt : 1;    //0x04
-        bool LWin : 1;    //0x08
-        bool RCtrl : 1;   //0x10
-        bool RShift : 1;  //0x20  
-        bool RAlt : 1;    //0x40
-        bool RWin : 1;    //0x80
-    };
-
-    // 内部辅助：字符到 VK 映射及是否需要 Shift
-    struct CharMapping {
-        uint16_t vk;
-        bool shift;
-        uint16_t scancode;
-    };
-}
 
 

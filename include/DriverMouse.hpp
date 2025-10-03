@@ -3,12 +3,13 @@
 #include "SendTypes.hpp"
 #include <vector>
 #include <cstdint>
+#include <Logitech.hpp>
 
 
 // -------------------- 初始化/销毁 IbSendBase.hpp --------------------
 
 // 初始化发送模块
-DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument);
+DLLAPI bool WINAPI IbSendInit();
 
 // 销毁发送模块
 DLLAPI void WINAPI IbSendDestroy();
@@ -17,9 +18,9 @@ DLLAPI void WINAPI IbSendDestroy();
 // -------------------- 鼠标控制 IbSendMouse.hpp --------------------
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy);
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y);
-DLLAPI bool WINAPI MouseDown(Send::MouseButton button);
-DLLAPI bool WINAPI MouseUp(Send::MouseButton button);
-DLLAPI bool WINAPI MouseClick(Send::MouseButton button);
+DLLAPI bool WINAPI MouseDown(Send::Internal::Logitech::MouseButton button);
+DLLAPI bool WINAPI MouseUp(Send::Internal::Logitech::MouseButton button);
+DLLAPI bool WINAPI MouseClick(Send::Internal::Logitech::MouseButton button);
 DLLAPI bool WINAPI MouseWheel(int32_t movement);
 
 

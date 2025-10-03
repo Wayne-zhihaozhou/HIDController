@@ -4,17 +4,14 @@
 #include "SendInputHook.hpp"
 
 // 初始化发送模块（仅支持 Logitech），创建并保存全局发送对象
-DLLAPI Send::Error WINAPI IbSendInit(Send::SendType type, Send::InitFlags flags, void* argument) {
-    if (type != Send::SendType::Logitech) {
-        return Send::Error::InvalidArgument;  // 只支持 Logitech
-    }
+DLLAPI bool WINAPI IbSendInit() {
+
     auto logitech = std::make_unique<Send::Internal::Logitech>();//待修改,创建全局变量
-    Send::Error error = logitech->create();
-    if (error != Send::Error::Success)
-        return error;
+    if (!logitech->create())
+        return false;
 
     Send::g_send = std::move(logitech); 
-    return Send::Error::Success;
+    return true;
 }
 
 // 销毁发送模块，释放全局发送对象

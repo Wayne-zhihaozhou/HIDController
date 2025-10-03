@@ -17,14 +17,17 @@ namespace Send::Internal {
 					sv.ends_with(L"#{df31f106-d870-453d-8fa1-ec8ab43fa1d2}"sv) ||
 					sv.ends_with(L"#{dfbedcdb-2148-416d-9e4d-cecc2424128c}"sv) ||
 					sv.ends_with(L"#{5bada891-842b-4296-a496-68ae931aa16c}"sv));
-		});
+			});
 	}
 
 	// 创建 Logitech 驱动设备连接
-	Send::Error LogitechDriver::create() {
+	bool LogitechDriver::create() {
 		// 查找匹配的设备路径
 		std::wstring device_name = find_device();
-		if (device_name.empty()) return Error::DeviceNotFound;
+		if (device_name.empty()) {
+			return false;
+		}
+
 
 		// 打开设备句柄
 		device = CreateFileW(
@@ -33,8 +36,11 @@ namespace Send::Internal {
 			OPEN_EXISTING, 0, NULL
 		);
 
-		// 返回打开结果
-		return (device == INVALID_HANDLE_VALUE) ? Error::DeviceOpenFailed : Error::Success;
+		if (device == INVALID_HANDLE_VALUE) {
+			return false;
+		}
+
+		return true;
 	}
 
 	// 销毁 Logitech 驱动设备连接
@@ -54,7 +60,7 @@ namespace Send::Internal {
 		return DeviceIoControl(
 			device,
 			IOCTL_BUSENUM_PLAY_MOUSEMOVE,
-			const_cast<MouseReport*>(&report), 
+			const_cast<MouseReport*>(&report),
 			sizeof(MouseReport),
 			nullptr,
 			0,
@@ -71,7 +77,7 @@ namespace Send::Internal {
 		return DeviceIoControl(
 			device,
 			0x2A200C,
-			const_cast<KeyboardReport*>(&report), 
+			const_cast<KeyboardReport*>(&report),
 			sizeof(KeyboardReport),
 			nullptr,
 			0,

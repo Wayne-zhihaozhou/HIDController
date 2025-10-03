@@ -39,15 +39,6 @@
     <ClInclude Include="detours\detours.h">
       <Filter>detours</Filter>
     </ClInclude>
-    <ClInclude Include="include\SendTypes.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SendInputHook.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SendInput.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\KeyboardMap.hpp">
       <Filter>include</Filter>
     </ClInclude>

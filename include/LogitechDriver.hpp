@@ -17,6 +17,17 @@ namespace Send::Internal {
 			bool unknown : 3;
 		};
 
+		struct KeyboardModifiers {
+			bool LCtrl : 1;
+			bool LShift : 1;
+			bool LAlt : 1;
+			bool LGui : 1;
+			bool RCtrl : 1;
+			bool RShift : 1;
+			bool RAlt : 1;
+			bool RGui : 1;
+		};
+
 		struct MouseReport {
 			union {
 				MouseButton button;
@@ -44,7 +55,7 @@ namespace Send::Internal {
 		std::wstring find_device();
 
 	public:
-		Send::Error create();
+		bool create();
 		void destroy();
 		bool report_mouse(const MouseReport& report) const;
 		bool report_keyboard(const KeyboardReport& report) const;

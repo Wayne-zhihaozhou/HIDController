@@ -1,7 +1,6 @@
 ﻿//IbSendMouse.cpp
 #include"pch.h"
 #include <Logitech.hpp>
-#include <SendInputHook.hpp>
 
 
 
@@ -14,7 +13,7 @@ bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	return true;
 }
 
-DLLAPI bool WINAPI MouseDown(Send::MouseButton button) {
+DLLAPI bool WINAPI MouseDown(Send::Internal::Logitech::MouseButton button) {
 	MOUSEINPUT input{};
 	input.dx = input.dy = 0;
 	input.mouseData = 0;
@@ -22,11 +21,11 @@ DLLAPI bool WINAPI MouseDown(Send::MouseButton button) {
 	input.time = 0;
 
 	switch (button) {
-	case Send::MouseButton::Left:   input.dwFlags = MOUSEEVENTF_LEFTDOWN; break;
-	case Send::MouseButton::Right:  input.dwFlags = MOUSEEVENTF_RIGHTDOWN; break;
-	case Send::MouseButton::Middle: input.dwFlags = MOUSEEVENTF_MIDDLEDOWN; break;
-	case Send::MouseButton::XButton1: input.dwFlags = MOUSEEVENTF_XDOWN; input.mouseData = XBUTTON1; break;
-	case Send::MouseButton::XButton2: input.dwFlags = MOUSEEVENTF_XDOWN; input.mouseData = XBUTTON2; break;
+	case Send::Internal::Logitech::MouseButton::Left:   input.dwFlags = MOUSEEVENTF_LEFTDOWN; break;
+	case Send::Internal::Logitech::MouseButton::Right:  input.dwFlags = MOUSEEVENTF_RIGHTDOWN; break;
+	case Send::Internal::Logitech::MouseButton::Middle: input.dwFlags = MOUSEEVENTF_MIDDLEDOWN; break;
+	case Send::Internal::Logitech::MouseButton::XButton1: input.dwFlags = MOUSEEVENTF_XDOWN; input.mouseData = XBUTTON1; break;
+	case Send::Internal::Logitech::MouseButton::XButton2: input.dwFlags = MOUSEEVENTF_XDOWN; input.mouseData = XBUTTON2; break;
 	default:
 		input.dwFlags = static_cast<DWORD>(button);
 		break;
@@ -35,7 +34,7 @@ DLLAPI bool WINAPI MouseDown(Send::MouseButton button) {
 	return send_mouse_input_bulk(&input, 1);
 }
 
-DLLAPI bool WINAPI MouseUp(Send::MouseButton button) {
+DLLAPI bool WINAPI MouseUp(Send::Internal::Logitech::MouseButton button) {
 	MOUSEINPUT input{};
 	input.dx = input.dy = 0;
 	input.mouseData = 0;
@@ -43,11 +42,11 @@ DLLAPI bool WINAPI MouseUp(Send::MouseButton button) {
 	input.time = 0;
 
 	switch (button) {
-	case Send::MouseButton::Left:   input.dwFlags = MOUSEEVENTF_LEFTUP; break;
-	case Send::MouseButton::Right:  input.dwFlags = MOUSEEVENTF_RIGHTUP; break;
-	case Send::MouseButton::Middle: input.dwFlags = MOUSEEVENTF_MIDDLEUP; break;
-	case Send::MouseButton::XButton1: input.dwFlags = MOUSEEVENTF_XUP; input.mouseData = XBUTTON1; break;
-	case Send::MouseButton::XButton2: input.dwFlags = MOUSEEVENTF_XUP; input.mouseData = XBUTTON2; break;
+	case Send::Internal::Logitech::MouseButton::Left:   input.dwFlags = MOUSEEVENTF_LEFTUP; break;
+	case Send::Internal::Logitech::MouseButton::Right:  input.dwFlags = MOUSEEVENTF_RIGHTUP; break;
+	case Send::Internal::Logitech::MouseButton::Middle: input.dwFlags = MOUSEEVENTF_MIDDLEUP; break;
+	case Send::Internal::Logitech::MouseButton::XButton1: input.dwFlags = MOUSEEVENTF_XUP; input.mouseData = XBUTTON1; break;
+	case Send::Internal::Logitech::MouseButton::XButton2: input.dwFlags = MOUSEEVENTF_XUP; input.mouseData = XBUTTON2; break;
 	default:
 		input.dwFlags = static_cast<DWORD>(button);
 		break;
@@ -56,7 +55,7 @@ DLLAPI bool WINAPI MouseUp(Send::MouseButton button) {
 	return send_mouse_input_bulk(&input, 1);
 }
 
-DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
+DLLAPI bool WINAPI MouseClick(Send::Internal::Logitech::MouseButton button) {
 	MOUSEINPUT inputs[2]{};
 
 	// 初始化 down/up
@@ -67,24 +66,24 @@ DLLAPI bool WINAPI MouseClick(Send::MouseButton button) {
 	inputs[0].time = inputs[1].time = 0;
 
 	switch (button) {
-	case Send::MouseButton::Left:
+	case Send::Internal::Logitech::MouseButton::Left:
 		inputs[0].dwFlags = MOUSEEVENTF_LEFTDOWN;
 		inputs[1].dwFlags = MOUSEEVENTF_LEFTUP;
 		break;
-	case Send::MouseButton::Right:
+	case Send::Internal::Logitech::MouseButton::Right:
 		inputs[0].dwFlags = MOUSEEVENTF_RIGHTDOWN;
 		inputs[1].dwFlags = MOUSEEVENTF_RIGHTUP;
 		break;
-	case Send::MouseButton::Middle:
+	case Send::Internal::Logitech::MouseButton::Middle:
 		inputs[0].dwFlags = MOUSEEVENTF_MIDDLEDOWN;
 		inputs[1].dwFlags = MOUSEEVENTF_MIDDLEUP;
 		break;
-	case Send::MouseButton::XButton1:
+	case Send::Internal::Logitech::MouseButton::XButton1:
 		inputs[0].dwFlags = MOUSEEVENTF_XDOWN;
 		inputs[1].dwFlags = MOUSEEVENTF_XUP;
 		inputs[0].mouseData = inputs[1].mouseData = XBUTTON1;
 		break;
-	case Send::MouseButton::XButton2:
+	case Send::Internal::Logitech::MouseButton::XButton2:
 		inputs[0].dwFlags = MOUSEEVENTF_XDOWN;
 		inputs[1].dwFlags = MOUSEEVENTF_XUP;
 		inputs[0].mouseData = inputs[1].mouseData = XBUTTON2;

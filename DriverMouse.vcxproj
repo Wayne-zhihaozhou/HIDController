@@ -147,13 +147,10 @@
     <ClInclude Include="detours\detours.h" />
     <ClInclude Include="include\base.hpp" />
     <ClInclude Include="include\DriverMouse.hpp" />
-    <ClInclude Include="include\SendInput.hpp" />
     <ClInclude Include="include\KeyboardMap.hpp" />
     <ClInclude Include="include\Logitech.hpp" />
     <ClInclude Include="include\LogitechDriver.hpp" />
     <ClInclude Include="include\pch.h" />
-    <ClInclude Include="include\SendInputHook.hpp" />
-    <ClInclude Include="include\SendTypes.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\base.cpp" />
