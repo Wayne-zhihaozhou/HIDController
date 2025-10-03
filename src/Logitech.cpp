@@ -28,7 +28,7 @@ namespace Send::Internal {
 		uint32_t count = 0;
 		for (uint32_t i = 0; i < n; ++i) {
 			if (inputs[i].type == INPUT_MOUSE) {
-				if (send_mouse_input(inputs[i].mi)) {
+				if (send_mouse_report(inputs[i].mi)) {
 					++count;
 				}
 			}

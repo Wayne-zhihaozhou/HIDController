@@ -18,7 +18,6 @@ DLLAPI void WINAPI IbSendSyncKeyStates();
 // -------------------- Êó±ê¿ØÖÆ IbSendMouse.hpp --------------------
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy);
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y);
-DLLAPI bool WINAPI MouseMoveRelativeBatch(int32_t dx, int32_t dy);
 DLLAPI bool WINAPI MouseClick(Send::MouseButton button);
 DLLAPI bool WINAPI MouseWheel(int32_t movement);
 

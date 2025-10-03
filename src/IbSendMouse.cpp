@@ -44,38 +44,40 @@ DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y) {
 
 // 模拟鼠标相对移动
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
-	INPUT input{
-		.type = INPUT_MOUSE,
-		.mi = {
-			.dx = std::bit_cast<LONG>(dx),
-			.dy = std::bit_cast<LONG>(dy),
-			.mouseData = 0,
-			.dwFlags = MOUSEEVENTF_MOVE,
-			.time = 0,
-			.dwExtraInfo = 0
-		}
-	};
-	return IbSendInput(1, &input, sizeof(INPUT));
-}
+	const int32_t MAX_DELTA = 128;  // HID 报告单次最大像素限制
 
-DLLAPI bool WINAPI MouseMoveRelativeBatch(int32_t dx, int32_t dy) {
-	const int32_t MAX_DELTA = 128;  // 每条事件最大移动像素
-	std::vector<INPUT> inputs;
-
-	int32_t steps = max(std::ceil(std::abs(dx) / (float)MAX_DELTA),
-		std::ceil(std::abs(dy) / (float)MAX_DELTA));
-
+	// 使用整数向上取整，避免浮点 ceil
+	int32_t steps = max(
+		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
+		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
+	);
 	if (steps == 0) steps = 1;
 
+	// 预分配内存，避免多次动态扩容
+	std::vector<INPUT> inputs;
+	inputs.reserve(steps);
+
+	// 预计算每一步的增量（浮点计算），循环中仅加法
+	float step_x = static_cast<float>(dx) / steps;
+	float step_y = static_cast<float>(dy) / steps;
+
+	float prev_x = 0.0f;
+	float prev_y = 0.0f;
+
 	for (int32_t i = 1; i <= steps; ++i) {
-		// 分段相对移动量
-		int32_t move_x = dx * i / steps - dx * (i - 1) / steps;
-		int32_t move_y = dy * i / steps - dy * (i - 1) / steps;
+		float curr_x = step_x * i;
+		float curr_y = step_y * i;
+
+		int32_t move_x = static_cast<int32_t>(std::round(curr_x - prev_x));
+		int32_t move_y = static_cast<int32_t>(std::round(curr_y - prev_y));
+
+		prev_x = curr_x;
+		prev_y = curr_y;
 
 		INPUT input{};
 		input.type = INPUT_MOUSE;
-		input.mi.dx = std::bit_cast<LONG>(move_x);
-		input.mi.dy = std::bit_cast<LONG>(move_y);
+		input.mi.dx = move_x;
+		input.mi.dy = move_y;
 		input.mi.mouseData = 0;
 		input.mi.dwFlags = MOUSEEVENTF_MOVE;  // 相对移动
 		input.mi.time = 0;
@@ -84,7 +86,7 @@ DLLAPI bool WINAPI MouseMoveRelativeBatch(int32_t dx, int32_t dy) {
 		inputs.push_back(input);
 	}
 
-	// 一次性批量发送所有分段事件
+	// 一次性发送所有分段事件
 	return IbSendInput(static_cast<UINT>(inputs.size()), inputs.data(), sizeof(INPUT)) != 0;
 }
 

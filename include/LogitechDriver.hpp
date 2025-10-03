@@ -6,7 +6,6 @@
 namespace Send::Internal {
 	class LogitechDriver {
 		HANDLE device;
-		bool has_acceleration;//©ии╬ЁЩ?
 
 	public:
 
