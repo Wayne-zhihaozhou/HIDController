@@ -83,6 +83,30 @@ namespace Send::Internal {
 		std::wstring find_device();
 
 	public:
+		// 构造函数：初始化句柄
+		LogitechDriver() : device(INVALID_HANDLE_VALUE) {}
+
+		// 析构函数：销毁资源
+		~LogitechDriver() { destroy(); }
+
+		// 禁止拷贝
+		LogitechDriver(const LogitechDriver&) = delete;
+		LogitechDriver& operator=(const LogitechDriver&) = delete;
+
+		// 支持移动语义
+		LogitechDriver(LogitechDriver&& other) noexcept {
+			device = other.device;
+			other.device = INVALID_HANDLE_VALUE;
+		}
+		LogitechDriver& operator=(LogitechDriver&& other) noexcept {
+			if (this != &other) {
+				destroy();
+				device = other.device;
+				other.device = INVALID_HANDLE_VALUE;
+			}
+			return *this;
+		}
+
 		bool create();
 		void destroy();
 		bool report_mouse(const MouseReport& report) const;

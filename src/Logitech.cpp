@@ -8,23 +8,19 @@
 
 namespace Send::Internal {
 
-	Logitech::Logitech() = default;
-
-	// 初始化 Logitech 驱动
-	bool Logitech::create() {
-		return driver.create();
+	// 构造函数：RAII初始化驱动
+	Logitech::Logitech() {
+		driver.create();
 	}
 
-	// 销毁 Logitech 驱动
-	void Logitech::destroy() {
+	// 析构函数：RAII释放驱动
+	Logitech::~Logitech() {
 		driver.destroy();
 	}
 
-	// 单例实现
+	// 获取单例
 	Logitech& Logitech::getLogitechInstance() {
-		static Logitech instance;  // 延迟初始化，线程安全（C++11+）
-		static bool initialized = instance.create();  // 初始化 Logitech driver
-		(void)initialized;  // 避免未使用警告
+		static Logitech instance; // 延迟初始化，线程安全
 		return instance;
 	}
 
@@ -52,7 +48,6 @@ namespace Send::Internal {
 			if (mi.mouseData == XBUTTON2) btn.XButton2 = false;
 		}
 	}
-
 
 	// 发送鼠标报告（支持移动、滚轮、按键等事件）
 	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {

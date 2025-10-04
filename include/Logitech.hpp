@@ -17,13 +17,21 @@ namespace Send::Internal {
 		LogitechDriver driver{};
 		std::mutex mouse_mutex;
 		std::mutex keyboard_mutex;
-	public:
-		static Logitech& getLogitechInstance();
+
+		// 禁止拷贝
+		Logitech(const Logitech&) = delete;
+		Logitech& operator=(const Logitech&) = delete;
+
+		// 支持移动语义
+		Logitech(Logitech&&) = delete;
+		Logitech& operator=(Logitech&&) = delete;
+
+	private:
+		Logitech();
+		~Logitech();
 
 	public:
-		Logitech();
-		bool create();
-		void destroy();
+		static Logitech& getLogitechInstance();
 		bool send_keyboard_report(const KEYBDINPUT& ki);
 		bool send_mouse_report(const MOUSEINPUT& mi);
 
