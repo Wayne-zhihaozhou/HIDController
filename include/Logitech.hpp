@@ -7,7 +7,7 @@ namespace Send {
 	class Logitech {
 	private:
 		LogitechDriver driver{};
-		LogitechDriver::MouseReport mouse_report{};
+		//LogitechDriver::MouseReport mouse_report{};
 		LogitechDriver::KeyboardReport keyboard_report{};// 键盘报告,记录按键快照状态.
 		std::mutex mouse_mutex;
 		std::mutex keyboard_mutex;

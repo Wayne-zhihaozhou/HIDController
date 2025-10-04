@@ -51,6 +51,13 @@ namespace Send {
 	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
 		std::lock_guard lock(mouse_mutex);
 
+		//初始化
+		Send::LogitechDriver::MouseReport mouse_report{};
+		mouse_report.x = 0;
+		mouse_report.y = 0;
+		mouse_report.wheel = 0;
+		mouse_report.button_byte = 0;
+
 		// 处理鼠标移动
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
 			mouse_report.x = mi.dx;
@@ -71,7 +78,7 @@ namespace Send {
 	// 发送键盘输入事件（支持修饰键状态更新）
 	bool Logitech::send_keyboard_report(const KEYBDINPUT& ki) {
 		std::lock_guard lock(keyboard_mutex);
-
+		/*LogitechDriver::KeyboardReport keyboard_report{};*/
 		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
 
 		switch (ki.wVk) {

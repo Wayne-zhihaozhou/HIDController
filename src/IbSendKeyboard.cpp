@@ -5,14 +5,7 @@
 bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
 	auto& logitech = Send::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
-		const auto& ki = inputs[i];
-		// 打印按键信息
-		printf("send_keyboard_input_bulk: Index %u, VK=0x%X, Flag=%s\n",
-			i,
-			ki.wVk,
-			(ki.dwFlags == 0 ? "DOWN" : "UP"));
 		if (!logitech.send_keyboard_report(inputs[i])) return false;
-		Sleep(1); // 延时 10ms
 	}
 	return true;
 }
@@ -81,15 +74,6 @@ DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
 		ki.dwFlags = KEYEVENTF_KEYUP; // 抬起
 		inputs.push_back(ki);
 	}
-
-	//// 🔹 使用 printf 打印 inputs 内容
-	//printf("KeyCombo 构建的输入顺序:\n");
-	//for (size_t i = 0; i < inputs.size(); ++i) {
-	//	printf("Index %zu: VK=0x%X, Flag=%s\n",
-	//		i,
-	//		inputs[i].wVk,
-	//		(inputs[i].dwFlags == 0 ? "DOWN" : "UP"));
-	//}
 
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
 }
