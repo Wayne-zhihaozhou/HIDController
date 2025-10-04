@@ -55,7 +55,7 @@ DLLAPI bool WINAPI KeyPress(uint16_t vk) {
 }
 
 DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
-	// 构建键盘输入列表
+	//处理带修饰键组合键
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -74,6 +74,28 @@ DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
 		ki.wVk = *it;
 		ki.dwFlags = KEYEVENTF_KEYUP; // 抬起
 		inputs.push_back(ki);
+	}
+
+	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
+}
+
+DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys) {
+	// 处理纯字符按键,按下所有键，然后松开所有键
+	std::vector<KEYBDINPUT> inputs;
+	inputs.reserve(keys.size() * 2);
+
+	for (auto vk : keys) {
+		// 按下
+		KEYBDINPUT kiDown{};
+		kiDown.wVk = vk;
+		kiDown.dwFlags = 0;
+		inputs.push_back(kiDown);
+
+		// 松开
+		KEYBDINPUT kiUp{};
+		kiUp.wVk = vk;
+		kiUp.dwFlags = KEYEVENTF_KEYUP;
+		inputs.push_back(kiUp);
 	}
 
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));

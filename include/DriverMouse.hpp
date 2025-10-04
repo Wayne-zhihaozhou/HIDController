@@ -26,7 +26,7 @@ DLLAPI bool WINAPI KeyDown(uint16_t vk);
 DLLAPI bool WINAPI KeyUp(uint16_t vk);
 DLLAPI bool WINAPI KeyPress(uint16_t vk);
 DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys);
-
+DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys);
 
 
 
