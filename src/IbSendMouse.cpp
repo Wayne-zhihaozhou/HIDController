@@ -94,7 +94,7 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	const int32_t MAX_DELTA = 128;
 
 	//纠正系数
-	double coeff = GetMouseMoveCoefficient();
+	float coeff = GetMouseMoveCoefficient();
 	dx = static_cast<int32_t>(dx * coeff);
 	dy = static_cast<int32_t>(dy * coeff);
 
@@ -225,6 +225,8 @@ DLLAPI float WINAPI AutoCalibrate() {
 	// 7. 还原用户鼠标位置
 	SetCursorPos(userPos.x, userPos.y);
 
+	// 8. 保存系数
+	SetMouseMoveCoefficient(coeffX);
 	printf("自动校准完成,鼠标移动系数: %.6f\n", coeffX); // 打印小数点后6位
 	return coeffX;
 }
