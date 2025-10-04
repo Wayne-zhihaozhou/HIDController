@@ -54,8 +54,8 @@ DLLAPI bool WINAPI KeyPress(uint16_t vk) {
 	return send_keyboard_input_bulk(inputs, 2);
 }
 
-DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
-	// 批量发送组合键，比如 Ctrl+Shift+A
+DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
+	// 构建键盘输入列表
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -68,7 +68,8 @@ DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
 	}
 
 	// 再“反向”抬起所有键（从后到前，保证修饰键最后释放）
-	for (auto it = keys.rbegin(); it != keys.rend(); ++it) {
+	for (auto it = keys.end(); it != keys.begin();) {
+		--it; // 反向迭代
 		KEYBDINPUT ki{};
 		ki.wVk = *it;
 		ki.dwFlags = KEYEVENTF_KEYUP; // 抬起
@@ -77,4 +78,3 @@ DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
 
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
 }
-

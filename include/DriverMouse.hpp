@@ -1,6 +1,5 @@
 //DriveMouse.hpp
 #pragma once
-#include <vector>
 #include <stdint.h>
 #ifdef DLL1_EXPORTS
 #define DLLAPI  extern "C" __declspec(dllexport)
@@ -26,7 +25,8 @@ DLLAPI void EnableMouseAcceleration();
 DLLAPI bool WINAPI KeyDown(uint16_t vk);
 DLLAPI bool WINAPI KeyUp(uint16_t vk);
 DLLAPI bool WINAPI KeyPress(uint16_t vk);
-DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys);
+DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys);
+
 
 
 
