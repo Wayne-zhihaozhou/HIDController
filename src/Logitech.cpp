@@ -53,36 +53,12 @@ namespace Send::Internal {
 		}
 	}
 
-	// 将鼠标绝对坐标转换为主屏幕坐标
-	void mouse_absolute_to_screen(POINT& absolute) {
-		const static int mainScreenWidth = GetSystemMetrics(SM_CXSCREEN);
-		const static int mainScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-		absolute.x = MulDiv(absolute.x, mainScreenWidth, 65536);
-		absolute.y = MulDiv(absolute.y, mainScreenHeight, 65536);
-	}
-
-	// 将鼠标绝对坐标转换为虚拟桌面屏幕坐标
-	void mouse_virtual_desk_absolute_to_screen(POINT& absolute) {
-		const static int virtualDeskWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-		const static int virtualDeskHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-
-		absolute.x = MulDiv(absolute.x, virtualDeskWidth, 65536);
-		absolute.y = MulDiv(absolute.y, virtualDeskHeight, 65536);
-	}
-
-	// 将屏幕坐标转换为相对当前鼠标位置的偏移
-	void mouse_screen_to_relative(POINT& screen_point) {
-		POINT point;
-		GetCursorPos(&point);
-		screen_point.x -= point.x;
-		screen_point.y -= point.y;
-	}
-
+	
 	// 发送鼠标报告（支持移动、滚轮、按键等事件）
 	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
 		std::lock_guard lock(mouse_mutex);
 
+		//初始化
 		Send::Internal::LogitechDriver::MouseReport mouse_report{};
 		mouse_report.x = 0;
 		mouse_report.y = 0;
@@ -92,14 +68,6 @@ namespace Send::Internal {
 		// 处理鼠标移动
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
 			POINT move{ mi.dx, mi.dy };
-
-			if (mi.dwFlags & MOUSEEVENTF_ABSOLUTE) {
-				if (mi.dwFlags & MOUSEEVENTF_VIRTUALDESK)
-					mouse_virtual_desk_absolute_to_screen(move);
-				else
-					mouse_absolute_to_screen(move);
-				mouse_screen_to_relative(move);
-			}
 
 			mouse_report.x = move.x;
 			mouse_report.y = move.y;

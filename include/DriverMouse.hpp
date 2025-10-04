@@ -21,8 +21,8 @@ DLLAPI bool WINAPI MouseClick(uint16_t button);
 DLLAPI bool WINAPI MouseWheel(int32_t movement);
 
 
-
 // -------------------- ¼üÅÌ¿ØÖÆ IbSendKeyboard.hpp --------------------
+
 DLLAPI bool WINAPI KeyDown(uint16_t vk);
 DLLAPI bool WINAPI KeyUp(uint16_t vk);
 DLLAPI bool WINAPI KeyPress(uint16_t vk);

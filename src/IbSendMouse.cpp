@@ -3,7 +3,6 @@
 #include <Logitech.hpp>
 
 
-
 bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	auto& logitech = Send::Internal::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
@@ -121,10 +120,17 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
-
-//待完善
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
-	return false; 
+	//高频连续调用MouseMoveAbsolute函数,GetCursorPos(&current_pos)中的数据来不及更新,因此计算的偏移会有偏差
+	POINT current_pos;
+	if (!GetCursorPos(&current_pos)) {
+		return false;
+	}
+
+	int32_t dx = static_cast<int32_t>(target_x) - current_pos.x;
+	int32_t dy = static_cast<int32_t>(target_y) - current_pos.y;
+
+	return MouseMoveRelative(dx, dy);
 }
 
 DLLAPI bool WINAPI MouseWheel(int32_t movement) {
