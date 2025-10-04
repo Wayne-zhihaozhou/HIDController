@@ -24,9 +24,6 @@
     <ClInclude Include="include\pch.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="detours\detours.h">
-      <Filter>detours</Filter>
-    </ClInclude>
     <ClInclude Include="include\KeyboardMap.hpp">
       <Filter>include</Filter>
     </ClInclude>
@@ -43,9 +40,6 @@
     </Filter>
     <Filter Include="include">
       <UniqueIdentifier>{f7322d68-f8dc-44a1-b2a3-87d47faa184d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="detours">
-      <UniqueIdentifier>{a5035285-2ddd-4ab3-b694-8037aa0c3ac3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
