@@ -38,12 +38,12 @@ namespace Send {
 
 		// X 按钮
 		if (mi.dwFlags & MOUSEEVENTF_XDOWN) {
-			if (mi.mouseData == XBUTTON1) btn.XButton1 = true;
-			if (mi.mouseData == XBUTTON2) btn.XButton2 = true;
+			if (mi.mouseData & XBUTTON1) btn.XButton1 = true;
+			if (mi.mouseData & XBUTTON2) btn.XButton2 = true;
 		}
 		if (mi.dwFlags & MOUSEEVENTF_XUP) {
-			if (mi.mouseData == XBUTTON1) btn.XButton1 = false;
-			if (mi.mouseData == XBUTTON2) btn.XButton2 = false;
+			if (mi.mouseData & XBUTTON1) btn.XButton1 = false;
+			if (mi.mouseData & XBUTTON2) btn.XButton2 = false;
 		}
 	}
 
@@ -52,11 +52,11 @@ namespace Send {
 		std::lock_guard lock(mouse_mutex);
 
 		//初始化
-		Send::LogitechDriver::MouseReport mouse_report{};
-		mouse_report.x = 0;
-		mouse_report.y = 0;
-		mouse_report.wheel = 0;
-		mouse_report.button_byte = 0;
+		//Send::LogitechDriver::MouseReport mouse_report{};
+		//mouse_report.x = 0;
+		//mouse_report.y = 0;
+		//mouse_report.wheel = 0;
+		//mouse_report.button_byte = 0;
 
 		// 处理鼠标移动
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
@@ -69,8 +69,15 @@ namespace Send {
 			mouse_report.wheel = (static_cast<int32_t>(mi.mouseData) > 0) ? 1 : -1;
 		}
 
-		// 处理鼠标按键
-		update_mouse_button(mouse_report.button, mi);
+
+		// 按键
+		if (mi.dwFlags & (MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP |
+			MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP |
+			MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP |
+			MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP))
+		{
+			update_mouse_button(mouse_report.button, mi);
+		}
 
 		return driver.report_mouse(mouse_report);
 	}
@@ -78,7 +85,7 @@ namespace Send {
 	// 发送键盘输入事件（支持修饰键状态更新）
 	bool Logitech::send_keyboard_report(const KEYBDINPUT& ki) {
 		std::lock_guard lock(keyboard_mutex);
-		/*LogitechDriver::KeyboardReport keyboard_report{};*/
+
 		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
 
 		switch (ki.wVk) {

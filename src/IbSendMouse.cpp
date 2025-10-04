@@ -25,74 +25,100 @@ bool SendMouseInputBulk(const MOUSEINPUT* inputs, uint32_t count) {
 }
 
 DLLAPI bool WINAPI MouseDown(uint16_t button) {
-	MOUSEINPUT input{};
-	input.dx = 0;
-	input.dy = 0;
-	input.dwExtraInfo = 0;
-	input.time = 0;
-	input.mouseData = 0;
+	MOUSEINPUT mi{};
+	mi.dx = 0;
+	mi.dy = 0;
+	mi.dwFlags = 0;
+	mi.mouseData = 0;
+	mi.time = 0;
+	mi.dwExtraInfo = 0;
 
-	// 对于 XBUTTON1/XBUTTON2，需要设置 mouseData
-	if (button & (MOUSEEVENTF_XDOWN)) {
-		input.mouseData = (button & 0x100) ? XBUTTON1 : XBUTTON2;  // 0x100 表示 XBUTTON1, 0x200 表示 XBUTTON2
+	// 左/右/中键
+	if (button & MOUSEEVENTF_LEFTDOWN)   mi.dwFlags |= MOUSEEVENTF_LEFTDOWN;
+	if (button & MOUSEEVENTF_RIGHTDOWN)  mi.dwFlags |= MOUSEEVENTF_RIGHTDOWN;
+	if (button & MOUSEEVENTF_MIDDLEDOWN) mi.dwFlags |= MOUSEEVENTF_MIDDLEDOWN;
+
+	// XButton
+	if (button & MOUSEEVENTF_XDOWN) {
+		mi.dwFlags |= MOUSEEVENTF_XDOWN;
+		mi.mouseData = 0;
+		if (button & XBUTTON1) mi.mouseData |= XBUTTON1;
+		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
 	}
 
-	input.dwFlags = static_cast<DWORD>(button);
-
-	return SendMouseInputBulk(&input, 1);
+	return SendMouseInputBulk(&mi, 1);
 }
 
 DLLAPI bool WINAPI MouseUp(uint16_t button) {
-	MOUSEINPUT input{};
-	input.dx = 0;
-	input.dy = 0;
-	input.dwExtraInfo = 0;
-	input.time = 0;
-	input.mouseData = 0;
+	MOUSEINPUT mi{};
+	mi.dx = 0;
+	mi.dy = 0;
+	mi.dwFlags = 0;
+	mi.mouseData = 0;
+	mi.time = 0;
+	mi.dwExtraInfo = 0;
 
-	// 对于 XBUTTON1/XBUTTON2，需要设置 mouseData
-	if (button & (MOUSEEVENTF_XUP)) {
-		input.mouseData = (button & 0x100) ? XBUTTON1 : XBUTTON2;
+	// 左/右/中键
+	if (button & MOUSEEVENTF_LEFTUP)   mi.dwFlags |= MOUSEEVENTF_LEFTUP;
+	if (button & MOUSEEVENTF_RIGHTUP)  mi.dwFlags |= MOUSEEVENTF_RIGHTUP;
+	if (button & MOUSEEVENTF_MIDDLEUP) mi.dwFlags |= MOUSEEVENTF_MIDDLEUP;
+
+	// XButton
+	if (button & MOUSEEVENTF_XUP) {
+		mi.dwFlags |= MOUSEEVENTF_XUP;
+		mi.mouseData = 0;
+		if (button & XBUTTON1) mi.mouseData |= XBUTTON1;
+		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
 	}
 
-	input.dwFlags = static_cast<DWORD>(button);
-
-	return SendMouseInputBulk(&input, 1);
+	return SendMouseInputBulk(&mi, 1);
 }
 
 DLLAPI bool WINAPI MouseClick(uint16_t button) {
 	MOUSEINPUT inputs[2]{};
 
-	// 初始化 down/up
+	// 初始化 MOUSEINPUT
 	for (int i = 0; i < 2; ++i) {
 		inputs[i].dx = 0;
 		inputs[i].dy = 0;
 		inputs[i].mouseData = 0;
+		inputs[i].dwFlags = 0;
 		inputs[i].dwExtraInfo = 0;
 		inputs[i].time = 0;
 	}
 
-	// X按钮特殊处理 mouseData
+	// ---------------- XButton1/2 ----------------
 	if (button & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP)) {
-		inputs[0].mouseData = inputs[1].mouseData = (button & 0x100) ? XBUTTON1 : XBUTTON2;
+		inputs[0].dwFlags = button & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP);
+
+		// 获取 XButton1 或 XButton2
+		uint16_t xbtn = button & (XBUTTON1 | XBUTTON2);
+		inputs[0].mouseData = xbtn;
+
+		// 如果是 DOWN，自动生成 UP
+		if (inputs[0].dwFlags & MOUSEEVENTF_XDOWN) {
+			inputs[1].dwFlags = MOUSEEVENTF_XUP;
+			inputs[1].mouseData = xbtn;
+			return SendMouseInputBulk(inputs, 2);
+		}
+
+		return SendMouseInputBulk(&inputs[0], 1);
 	}
 
-	// 如果传入的是单个 DOWN/UP 就直接发送
-	if (button & (MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_XDOWN)) {
-		inputs[0].dwFlags = static_cast<DWORD>(button);  // DOWN
-		inputs[1].dwFlags = 0;
+	// ---------------- 左/右/中键 ----------------
+	if (button & (MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_MIDDLEDOWN)) {
+		inputs[0].dwFlags = button;  // DOWN
 
-		// 对应 UP
+		// 自动生成 UP
 		if (button == MOUSEEVENTF_LEFTDOWN) inputs[1].dwFlags = MOUSEEVENTF_LEFTUP;
 		else if (button == MOUSEEVENTF_RIGHTDOWN) inputs[1].dwFlags = MOUSEEVENTF_RIGHTUP;
 		else if (button == MOUSEEVENTF_MIDDLEDOWN) inputs[1].dwFlags = MOUSEEVENTF_MIDDLEUP;
-		else if (button & MOUSEEVENTF_XDOWN) inputs[1].dwFlags = MOUSEEVENTF_XUP;
 
 		return SendMouseInputBulk(inputs, 2);
 	}
 
-	// 如果直接传入的是 UP 或 其他宏，直接发送
-	inputs[0].dwFlags = static_cast<DWORD>(button);
+	// ---------------- 其他情况（单独 UP 或其他宏） ----------------
+	inputs[0].dwFlags = button;
 	return SendMouseInputBulk(&inputs[0], 1);
 }
 
@@ -233,7 +259,7 @@ DLLAPI float WINAPI AutoCalibrate() {
 
 	// 8. 保存系数
 	SetMouseMoveCoefficient(coeffX);
-	printf("自动校准完成,鼠标移动系数: %.6f\n", coeffX); // 打印小数点后6位
+	//printf("自动校准完成,鼠标移动系数: %.6f\n", coeffX); // 打印小数点后6位
 	return coeffX;
 }
 
