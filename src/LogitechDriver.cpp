@@ -5,7 +5,7 @@
 
 
 
-namespace Send::Internal {
+namespace Send {
 
 	// 遍历系统设备目录，查找满足条件的设备路径
 	std::wstring find_device(std::function<bool(std::wstring_view name)> p) {
@@ -49,7 +49,7 @@ namespace Send::Internal {
 	// 查找匹配的 Logitech 设备路径
 	std::wstring LogitechDriver::find_device() {
 		// 根据设备名规则过滤设备对象
-		return Internal::find_device([](std::wstring_view sv) {
+		return Send::find_device([](std::wstring_view sv) {
 			using namespace std::literals;
 			return (sv.starts_with(L"ROOT#SYSTEM#"sv) || sv.starts_with(L"Root#SYSTEM#"sv)) &&
 				(sv.ends_with(L"#{1abc05c0-c378-41b9-9cef-df1aba82b015}"sv) ||

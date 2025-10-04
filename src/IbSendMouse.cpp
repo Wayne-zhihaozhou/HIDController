@@ -2,20 +2,16 @@
 #include"pch.h"
 #include <Logitech.hpp>
 
-
 // 全局系数缓存
-static double g_mouseMoveCoefficient = 1.0f;
+static float g_mouseMoveCoefficient = 1.0f;
 
-double GetMouseMoveCoefficient() {
+float GetMouseMoveCoefficient() {
 	return g_mouseMoveCoefficient;
-}
-void SetMouseMoveCoefficient(double coefficient) {
-	g_mouseMoveCoefficient = coefficient;
 }
 
 
 bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
-	auto& logitech = Send::Internal::Logitech::getLogitechInstance();
+	auto& logitech = Send::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech.send_mouse_report(inputs[i])) return false;
 	}
@@ -175,15 +171,19 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
 }
 
-DLLAPI void WINAPI AutoCalibrate() {
-	const int32_t testDx = 500;
+DLLAPI void WINAPI SetMouseMoveCoefficient(float coefficient) {
+	g_mouseMoveCoefficient = coefficient;
+}
+
+DLLAPI float WINAPI AutoCalibrate() {
+	const int32_t testDx = 300;
 	const int32_t testDy = 0;
 
 	// 1. 保存用户当前鼠标位置
 	POINT userPos;
 	if (!GetCursorPos(&userPos)) {
 		printf("无法获取鼠标位置\n");
-		return;
+		return 1.0f;
 	}
 
 	// 2. 移动鼠标到初始校准位置
@@ -191,7 +191,7 @@ DLLAPI void WINAPI AutoCalibrate() {
 	POINT startPos;
 	if (!GetCursorPos(&startPos)) {
 		printf("无法获取校准初始位置\n");
-		return;
+		return 1.0f;
 	}
 
 	// 3. 重置自动系数
@@ -205,28 +205,26 @@ DLLAPI void WINAPI AutoCalibrate() {
 	POINT endPos;
 	if (!GetCursorPos(&endPos)) {
 		printf("无法获取校准结束位置\n");
-		return;
+		SetCursorPos(userPos.x, userPos.y);
+		return 1.0f;
 	}
 
 	// 检查鼠标是否移到屏幕边界
 	if (endPos.x >= GetSystemMetrics(SM_CXSCREEN) - 1) {
 		printf("鼠标灵敏度过高,自动校准失败,请手动设置系数\n");
-		// 还原用户鼠标位置
 		SetCursorPos(userPos.x, userPos.y);
-		return;
+		return 1.0f;
 	}
 
 	// 5. 计算实际偏移
 	int32_t movedX = endPos.x - startPos.x;
-	int32_t movedY = endPos.y - startPos.y;
 
 	// 6. 计算系数
-	double coeffX = (movedX != 0) ? static_cast<double>(testDx) / movedX : 1.0;
-
-	g_mouseMoveCoefficient = coeffX;
-	printf("自动校准完成,鼠标移动系数: %f\n", g_mouseMoveCoefficient);
+	float coeffX = (movedX != 0) ? static_cast<float>(testDx) / movedX : 1.0f;
 
 	// 7. 还原用户鼠标位置
 	SetCursorPos(userPos.x, userPos.y);
-}
 
+	printf("自动校准完成,鼠标移动系数: %.6f\n", coeffX); // 打印小数点后6位
+	return coeffX;
+}

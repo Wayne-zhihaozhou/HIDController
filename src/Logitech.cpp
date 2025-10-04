@@ -4,9 +4,7 @@
 #include "KeyboardMap.hpp"
 
 
-
-
-namespace Send::Internal {
+namespace Send {
 
 	// 构造函数：RAII初始化驱动
 	Logitech::Logitech() {
@@ -54,7 +52,7 @@ namespace Send::Internal {
 		std::lock_guard lock(mouse_mutex);
 
 		//初始化
-		Send::Internal::LogitechDriver::MouseReport mouse_report{};
+		Send::LogitechDriver::MouseReport mouse_report{};
 		mouse_report.x = 0;
 		mouse_report.y = 0;
 		mouse_report.wheel = 0;

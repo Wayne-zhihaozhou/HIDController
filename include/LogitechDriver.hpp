@@ -31,7 +31,7 @@ extern "C" {
 	);
 }
 
-namespace Send::Internal {
+namespace Send {
 	class LogitechDriver {
 	public:
 		HANDLE device;
