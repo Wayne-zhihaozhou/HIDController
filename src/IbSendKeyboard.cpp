@@ -100,3 +100,5 @@ DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys) {
 
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
 }
+
+

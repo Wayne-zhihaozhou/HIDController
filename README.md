@@ -72,6 +72,9 @@ KeyPress(VK_RETURN);
 // 同时按下 Shift + Alt + T 组合键
 KeyCombo({ VK_LSHIFT, VK_MENU, 'T' });
 
+// 连续按键
+KeySeq({ 'Z', 'U', 'H', 'E', 'A', 'N', 'J', 'I', 'A', 'N' });
+
 ```
 
 ## 注意事项

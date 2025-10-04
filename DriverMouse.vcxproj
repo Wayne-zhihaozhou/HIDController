@@ -154,6 +154,7 @@
     <ClInclude Include="include\pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="examples\examples.cpp" />
     <ClCompile Include="src\IbSendKeyboard.cpp" />
     <ClCompile Include="src\IbSendMouse.cpp" />
     <ClCompile Include="src\Logitech.cpp" />
