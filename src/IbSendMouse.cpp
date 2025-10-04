@@ -3,6 +3,17 @@
 #include <Logitech.hpp>
 
 
+// 全局系数缓存
+static double g_mouseMoveCoefficient = 1.0f;
+
+double GetMouseMoveCoefficient() {
+	return g_mouseMoveCoefficient;
+}
+void SetMouseMoveCoefficient(double coefficient) {
+	g_mouseMoveCoefficient = coefficient;
+}
+
+
 bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	auto& logitech = Send::Internal::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
@@ -87,8 +98,9 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	const int32_t MAX_DELTA = 128;
 
 	//纠正系数
-	dx = dx * 4 / 3;
-	dy = dy * 4 / 3;
+	double coeff = GetMouseMoveCoefficient();
+	dx = static_cast<int32_t>(dx * coeff);
+	dy = static_cast<int32_t>(dy * coeff);
 
 	int32_t steps = max(
 		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
@@ -163,5 +175,58 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
 }
 
+DLLAPI void WINAPI AutoCalibrate() {
+	const int32_t testDx = 500;
+	const int32_t testDy = 0;
 
+	// 1. 保存用户当前鼠标位置
+	POINT userPos;
+	if (!GetCursorPos(&userPos)) {
+		printf("无法获取鼠标位置\n");
+		return;
+	}
+
+	// 2. 移动鼠标到初始校准位置
+	SetCursorPos(0, 0);
+	POINT startPos;
+	if (!GetCursorPos(&startPos)) {
+		printf("无法获取校准初始位置\n");
+		return;
+	}
+
+	// 3. 重置自动系数
+	SetMouseMoveCoefficient(1.0f);
+
+	// 4. 原始移动
+	MouseMoveRelative(testDx, testDy);
+	Sleep(1);
+
+	// 获取实际鼠标位置
+	POINT endPos;
+	if (!GetCursorPos(&endPos)) {
+		printf("无法获取校准结束位置\n");
+		return;
+	}
+
+	// 检查鼠标是否移到屏幕边界
+	if (endPos.x >= GetSystemMetrics(SM_CXSCREEN) - 1) {
+		printf("鼠标灵敏度过高,自动校准失败,请手动设置系数\n");
+		// 还原用户鼠标位置
+		SetCursorPos(userPos.x, userPos.y);
+		return;
+	}
+
+	// 5. 计算实际偏移
+	int32_t movedX = endPos.x - startPos.x;
+	int32_t movedY = endPos.y - startPos.y;
+
+	// 6. 计算系数
+	double coeffX = (movedX != 0) ? static_cast<double>(testDx) / movedX : 1.0;
+
+	g_mouseMoveCoefficient = coeffX;
+	printf("自动校准完成,鼠标移动系数: %f\n", g_mouseMoveCoefficient);
+
+	// 7. 还原用户鼠标位置
+	SetCursorPos(userPos.x, userPos.y);
+}
 
