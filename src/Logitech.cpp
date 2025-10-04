@@ -53,7 +53,7 @@ namespace Send::Internal {
 		}
 	}
 
-	
+
 	// 发送鼠标报告（支持移动、滚轮、按键等事件）
 	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
 		std::lock_guard lock(mouse_mutex);
@@ -67,26 +67,17 @@ namespace Send::Internal {
 
 		// 处理鼠标移动
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
-			POINT move{ mi.dx, mi.dy };
-
-			mouse_report.x = move.x;
-			mouse_report.y = move.y;
+			mouse_report.x = mi.dx;
+			mouse_report.y = mi.dy;
 		}
 
-		// 处理滚轮
+		// 处理鼠标滚轮
 		if (mi.dwFlags & MOUSEEVENTF_WHEEL) {
 			mouse_report.wheel = (static_cast<int32_t>(mi.mouseData) > 0) ? 1 : -1;
 		}
 
-		// 处理按键
+		// 处理鼠标按键
 		update_mouse_button(mouse_report.button, mi);
-
-		//X 按钮
-		if (mi.dwFlags & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP)) {
-			bool down = mi.dwFlags & MOUSEEVENTF_XDOWN;
-			if (mi.mouseData == XBUTTON1) mouse_report.button.XButton1 = down;
-			if (mi.mouseData == XBUTTON2) mouse_report.button.XButton2 = down;
-		}
 
 		return driver.report_mouse(mouse_report);
 	}
