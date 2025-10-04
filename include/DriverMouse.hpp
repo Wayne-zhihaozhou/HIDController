@@ -18,7 +18,8 @@ DLLAPI bool WINAPI MouseClick(uint16_t button);
 DLLAPI bool WINAPI MouseWheel(int32_t movement);
 DLLAPI void WINAPI SetMouseMoveCoefficient(float coefficient);
 DLLAPI float WINAPI AutoCalibrate();
-
+DLLAPI void DisableMouseAcceleration();
+DLLAPI void EnableMouseAcceleration();
 
 // -------------------- ¼üÅÌ¿ØÖÆ IbSendKeyboard.hpp --------------------
 
