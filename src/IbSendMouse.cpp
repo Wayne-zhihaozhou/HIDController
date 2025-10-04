@@ -4,13 +4,19 @@
 
 // 全局系数缓存
 static float g_mouseMoveCoefficient = 1.0f;
+int originalParams[3];
+int originalSpeed;
 
 float GetMouseMoveCoefficient() {
 	return g_mouseMoveCoefficient;
 }
 
+void BackupMouseSettings() {
+	SystemParametersInfo(SPI_GETMOUSE, 0, originalParams, 0);
+	SystemParametersInfo(SPI_GETMOUSESPEED, 0, &originalSpeed, 0);
+}
 
-bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
+bool SendMouseInputBulk(const MOUSEINPUT* inputs, uint32_t count) {
 	auto& logitech = Send::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech.send_mouse_report(inputs[i])) return false;
@@ -33,7 +39,7 @@ DLLAPI bool WINAPI MouseDown(uint16_t button) {
 
 	input.dwFlags = static_cast<DWORD>(button);
 
-	return send_mouse_input_bulk(&input, 1);
+	return SendMouseInputBulk(&input, 1);
 }
 
 DLLAPI bool WINAPI MouseUp(uint16_t button) {
@@ -51,7 +57,7 @@ DLLAPI bool WINAPI MouseUp(uint16_t button) {
 
 	input.dwFlags = static_cast<DWORD>(button);
 
-	return send_mouse_input_bulk(&input, 1);
+	return SendMouseInputBulk(&input, 1);
 }
 
 DLLAPI bool WINAPI MouseClick(uint16_t button) {
@@ -82,12 +88,12 @@ DLLAPI bool WINAPI MouseClick(uint16_t button) {
 		else if (button == MOUSEEVENTF_MIDDLEDOWN) inputs[1].dwFlags = MOUSEEVENTF_MIDDLEUP;
 		else if (button & MOUSEEVENTF_XDOWN) inputs[1].dwFlags = MOUSEEVENTF_XUP;
 
-		return send_mouse_input_bulk(inputs, 2);
+		return SendMouseInputBulk(inputs, 2);
 	}
 
 	// 如果直接传入的是 UP 或 其他宏，直接发送
 	inputs[0].dwFlags = static_cast<DWORD>(button);
-	return send_mouse_input_bulk(&inputs[0], 1);
+	return SendMouseInputBulk(&inputs[0], 1);
 }
 
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
@@ -125,7 +131,7 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 		prev_y = curr_y;
 	}
 
-	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
+	return SendMouseInputBulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
@@ -168,7 +174,7 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 		prev_value = curr_value;
 	}
 
-	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
+	return SendMouseInputBulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
 }
 
 DLLAPI void WINAPI SetMouseMoveCoefficient(float coefficient) {
@@ -229,4 +235,19 @@ DLLAPI float WINAPI AutoCalibrate() {
 	SetMouseMoveCoefficient(coeffX);
 	printf("自动校准完成,鼠标移动系数: %.6f\n", coeffX); // 打印小数点后6位
 	return coeffX;
+}
+
+DLLAPI void DisableMouseAcceleration() {
+	// 保存原始设置
+	BackupMouseSettings();
+	// 禁用鼠标加速(系统设置)
+	int mouseParams[3] = { 0, 0, 0 };
+	SystemParametersInfo(SPI_SETMOUSE, 0, mouseParams, SPIF_SENDCHANGE);
+	int speed = 10;
+	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &speed, SPIF_SENDCHANGE);
+}
+
+DLLAPI void EnableMouseAcceleration() {
+	SystemParametersInfo(SPI_SETMOUSE, 0, originalParams, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &originalSpeed, SPIF_SENDCHANGE);
 }
