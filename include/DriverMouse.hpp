@@ -1,6 +1,10 @@
 //DriveMouse.hpp
 #pragma once
 #include <stdint.h>
+#include <initializer_list>
+#ifndef WINAPI
+#define WINAPI __stdcall
+#endif
 #ifdef DLL1_EXPORTS
 #define DLLAPI  extern "C" __declspec(dllexport)
 #else
@@ -16,9 +20,9 @@ DLLAPI bool WINAPI MouseUp(uint16_t button);
 DLLAPI bool WINAPI MouseClick(uint16_t button);
 DLLAPI bool WINAPI MouseWheel(int32_t movement);
 DLLAPI void WINAPI SetMouseMoveCoefficient(float coefficient);
-DLLAPI float WINAPI AutoCalibrate();
-DLLAPI void DisableMouseAcceleration();
-DLLAPI void EnableMouseAcceleration();
+DLLAPI void WINAPI AutoCalibrate();
+DLLAPI void WINAPI DisableMouseAcceleration();
+DLLAPI void WINAPI EnableMouseAcceleration();
 
 // -------------------- ¼üÅÌ¿ØÖÆ IbSendKeyboard.hpp --------------------
 

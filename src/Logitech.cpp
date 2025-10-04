@@ -51,13 +51,6 @@ namespace Send {
 	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
 		std::lock_guard lock(mouse_mutex);
 
-		//初始化
-		//Send::LogitechDriver::MouseReport mouse_report{};
-		//mouse_report.x = 0;
-		//mouse_report.y = 0;
-		//mouse_report.wheel = 0;
-		//mouse_report.button_byte = 0;
-
 		// 处理鼠标移动
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
 			mouse_report.x = mi.dx;
@@ -68,7 +61,6 @@ namespace Send {
 		if (mi.dwFlags & MOUSEEVENTF_WHEEL) {
 			mouse_report.wheel = (static_cast<int32_t>(mi.mouseData) > 0) ? 1 : -1;
 		}
-
 
 		// 按键
 		if (mi.dwFlags & (MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP |

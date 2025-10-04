@@ -207,24 +207,18 @@ DLLAPI void WINAPI SetMouseMoveCoefficient(float coefficient) {
 	g_mouseMoveCoefficient = coefficient;
 }
 
-DLLAPI float WINAPI AutoCalibrate() {
+DLLAPI void WINAPI AutoCalibrate() {
 	const int32_t testDx = 300;
 	const int32_t testDy = 0;
 
 	// 1. 保存用户当前鼠标位置
 	POINT userPos;
-	if (!GetCursorPos(&userPos)) {
-		printf("无法获取鼠标位置\n");
-		return 1.0f;
-	}
+	GetCursorPos(&userPos);
 
 	// 2. 移动鼠标到初始校准位置
 	SetCursorPos(0, 0);
 	POINT startPos;
-	if (!GetCursorPos(&startPos)) {
-		printf("无法获取校准初始位置\n");
-		return 1.0f;
-	}
+	GetCursorPos(&startPos);
 
 	// 3. 重置自动系数
 	SetMouseMoveCoefficient(1.0f);
@@ -235,17 +229,12 @@ DLLAPI float WINAPI AutoCalibrate() {
 
 	// 获取实际鼠标位置
 	POINT endPos;
-	if (!GetCursorPos(&endPos)) {
-		printf("无法获取校准结束位置\n");
-		SetCursorPos(userPos.x, userPos.y);
-		return 1.0f;
-	}
+	GetCursorPos(&endPos);
 
 	// 检查鼠标是否移到屏幕边界
 	if (endPos.x >= GetSystemMetrics(SM_CXSCREEN) - 1) {
 		printf("鼠标灵敏度过高,自动校准失败,请手动设置系数\n");
 		SetCursorPos(userPos.x, userPos.y);
-		return 1.0f;
 	}
 
 	// 5. 计算实际偏移
@@ -259,21 +248,19 @@ DLLAPI float WINAPI AutoCalibrate() {
 
 	// 8. 保存系数
 	SetMouseMoveCoefficient(coeffX);
-	//printf("自动校准完成,鼠标移动系数: %.6f\n", coeffX); // 打印小数点后6位
-	return coeffX;
 }
 
-DLLAPI void DisableMouseAcceleration() {
+DLLAPI void WINAPI DisableMouseAcceleration() {
 	// 保存原始设置
 	BackupMouseSettings();
 	// 禁用鼠标加速(系统设置)
 	int mouseParams[3] = { 0, 0, 0 };
 	SystemParametersInfo(SPI_SETMOUSE, 0, mouseParams, SPIF_SENDCHANGE);
-	int speed = 10;
+	int speed = 10;//（范围 1-20）
 	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &speed, SPIF_SENDCHANGE);
 }
 
-DLLAPI void EnableMouseAcceleration() {
+DLLAPI void WINAPI EnableMouseAcceleration() {
 	SystemParametersInfo(SPI_SETMOUSE, 0, originalParams, SPIF_SENDCHANGE);
 	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &originalSpeed, SPIF_SENDCHANGE);
 }
