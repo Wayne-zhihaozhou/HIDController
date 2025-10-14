@@ -259,7 +259,7 @@ int main() {
 	std::cout << "==== 开始测试 DriverMouse 功能 ====" << std::endl;
 	Sleep(1000);
 
-	TestMouseMoveFunctions();
+	//TestMouseMoveFunctions();
 	//TestMouseClickFunctions();
 	//TestMouseDownFunctions();
 
