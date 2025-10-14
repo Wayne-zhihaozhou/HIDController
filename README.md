@@ -5,13 +5,13 @@
 
 通过向 **Logitech Gaming Software (LGS)** 创建的虚拟驱动发送 **HID 报告** 来模拟输入事件，因此使用前必须安装并启动 LGS 以提供底层环境支持。
 
+
 ## 项目特性
 1. 无需鼠标键盘硬件支持
 2. 更低输入延迟
 3. 过游戏屏蔽
 4. 不容易被游戏检测
 
----
 
 ## 环境依赖
 
@@ -19,7 +19,6 @@
   - 下载地址：[https://filehippo.com/download_logitech-gaming-software/9.02.65/](https://filehippo.com/download_logitech-gaming-software/9.02.65/)  
   - **重要**：系统启动后必须手动运行一次 LGS，否则 DLL 无法正常操作鼠标。
 
----
 
 ## dll使用教程
 1. 将 HIDController 项目中生成的 HIDController.hpp 、HIDController.dll、HIDController.lib 复制到自己项目文件夹中
