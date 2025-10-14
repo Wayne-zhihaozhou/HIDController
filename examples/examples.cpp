@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <iostream>
-#include "DriverMouse.hpp"
+#include "HIDController.hpp"
 
 
 POINT GetMousePosition() {
@@ -212,6 +212,35 @@ void TestKeySequenceFunctions() {
 	KeySeq({ 'Z', 'U', 'H', 'E', 'A', 'N', 'J', 'I', 'A', 'N' });
 }
 
+
+bool IsKeyDownAsync(int vkey) {
+	SHORT s = ::GetAsyncKeyState(vkey);
+	return (s & 0x8000) != 0;
+}
+
+// 测试按键状态检测功能
+void TestKeyStateFunctions() {
+	const int N = 1000;
+	LARGE_INTEGER freq, start, end;
+	QueryPerformanceFrequency(&freq);
+
+	double total_us = 0.0;
+
+	for (int i = 0; i < N; ++i) {
+		QueryPerformanceCounter(&start);
+		// 测量函数调用
+		volatile bool down = IsKeyDownAsync('A');
+		QueryPerformanceCounter(&end);
+
+		double elapsed_us = (end.QuadPart - start.QuadPart) * 1'000'000.0 / freq.QuadPart;
+		total_us += elapsed_us;
+	}
+
+	double avg_us = total_us / N;
+	std::cout << "IsKeyDownAsync 平均耗时: " << avg_us << " 微秒 (" << N << " 次)\n";
+
+}
+
 int main() {
 	std::cout << "==== 开始测试 DriverMouse 功能 ====" << std::endl;
 	Sleep(2000);
@@ -222,6 +251,7 @@ int main() {
 	//TestKeyboardFunctions();
 	//TestKeyComboFunctions();
 	//TestKeySequenceFunctions();
+	TestKeyStateFunctions();
 
 	std::cout << "==== DriverMouse 测试完成 ====" << std::endl;
 	return 0;

@@ -30,7 +30,7 @@
     <ClInclude Include="include\LogitechDriver.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DriverMouse.hpp">
+    <ClInclude Include="include\HIDController.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,5 +41,9 @@
     <Filter Include="include">
       <UniqueIdentifier>{f7322d68-f8dc-44a1-b2a3-87d47faa184d}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="examples\examples.cpp" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>
