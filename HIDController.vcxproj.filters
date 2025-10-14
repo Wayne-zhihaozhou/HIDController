@@ -30,9 +30,6 @@
     <ClInclude Include="include\LogitechDriver.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\HIDController.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -44,5 +41,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="include\HIDController.hpp">
+      <Filter>include</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

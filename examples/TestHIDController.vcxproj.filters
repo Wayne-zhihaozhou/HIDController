@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TestHIDController.cpp">
+    <ClCompile Include="examples.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HIDController", "HIDController.vcxproj", "{C4DC9356-CC6B-403F-A14A-F7B1C5165CFF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestHIDController", "TestHIDController\TestHIDController.vcxproj", "{228D7784-54D9-41E8-8A48-99538936B779}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "examples", "examples\examples.vcxproj", "{228D7784-54D9-41E8-8A48-99538936B779}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C4DC9356-CC6B-403F-A14A-F7B1C5165CFF} = {C4DC9356-CC6B-403F-A14A-F7B1C5165CFF}
 	EndProjectSection

@@ -70,6 +70,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>_obj\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -125,18 +129,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="TestHIDController.cpp" />
+    <ClInclude Include="..\include\HIDController.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\x64\Release\HIDController.dll">
+    <ClCompile Include="examples.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\dll\HIDController.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\dll\HIDController.dll">
       <FileType>Document</FileType>
     </CopyFileToFolders>
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="..\x64\Release\HIDController.lib" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\HIDController.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
