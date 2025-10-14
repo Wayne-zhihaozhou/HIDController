@@ -262,7 +262,7 @@ int main() {
 	//TestMouseClickFunctions();
 	//TestMouseDownFunctions();
 
-	TestContinuousMouseClicks();
+	//TestContinuousMouseClicks();
 
 	//TestKeyboardFunctions();
 	//TestKeyComboFunctions();
