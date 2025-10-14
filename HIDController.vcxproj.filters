@@ -43,7 +43,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="examples\examples.cpp" />
     <None Include="README.md" />
   </ItemGroup>
 </Project>

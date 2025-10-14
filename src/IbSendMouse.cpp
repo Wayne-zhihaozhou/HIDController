@@ -248,6 +248,7 @@ DLLAPI void WINAPI AutoCalibrate() {
 
 	// 8. 保存系数
 	SetMouseMoveCoefficient(coeffX);
+	printf("自动校准成功,系数为%f\n", coeffX);
 }
 
 DLLAPI void WINAPI DisableMouseAcceleration() {
@@ -258,9 +259,11 @@ DLLAPI void WINAPI DisableMouseAcceleration() {
 	SystemParametersInfo(SPI_SETMOUSE, 0, mouseParams, SPIF_SENDCHANGE);
 	int speed = 10;//（范围 1-20）
 	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &speed, SPIF_SENDCHANGE);
+	printf("禁用鼠标加速成功\n");
 }
 
 DLLAPI void WINAPI EnableMouseAcceleration() {
 	SystemParametersInfo(SPI_SETMOUSE, 0, originalParams, SPIF_SENDCHANGE);
 	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &originalSpeed, SPIF_SENDCHANGE);
+	printf("恢复鼠标设置成功\n");
 }

@@ -23,7 +23,7 @@
 
 ```cpp
 //需要提前添加 dll 和 lib 到项目中
-#include "DriverMouse.hpp"
+#include "HIDController.hpp"
 
 // -------------------- 鼠标控制 -------------------
 
