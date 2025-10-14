@@ -5,6 +5,7 @@
 
 
 _obj/
+examples/_obj/
 
 # User-specific files
 *.rsuser
