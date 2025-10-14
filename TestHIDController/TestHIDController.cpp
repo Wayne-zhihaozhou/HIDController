@@ -62,7 +62,7 @@ void TestMouseMoveFunctions() {
 
 void TestMouseClickFunctions() {
 	std::cout << "开始测试鼠标点击功能..." << std::endl;
-	Sleep(2000);
+	Sleep(1000);
 
 	//鼠标点击操作
 	std::cout << "鼠标左键点击..." << std::endl;
@@ -101,15 +101,15 @@ void TestMouseDownFunctions() {
 
 	// 先松开所有按键，确保设备状态一致
 	MouseUp(MOUSEEVENTF_LEFTUP);
-	Sleep(1000);
+	Sleep(100);
 	MouseUp(MOUSEEVENTF_RIGHTUP);
-	Sleep(1000);
+	Sleep(100);
 	MouseUp(MOUSEEVENTF_MIDDLEUP);
-	Sleep(1000);
+	Sleep(100);
 	MouseUp(MOUSEEVENTF_XUP | XBUTTON1);
-	Sleep(1000);
+	Sleep(100);
 	MouseUp(MOUSEEVENTF_XUP | XBUTTON2);
-	Sleep(1000);
+	Sleep(100);
 
 	// 按下鼠标左键
 	std::cout << "按下鼠标左键..." << std::endl;
@@ -247,8 +247,9 @@ void TestKeyStateFunctions() {
 
 void TestContinuousMouseClicks() {
 	std::cout << "开始测试连续鼠标点击功能..." << std::endl;
+	AutoCalibrate();
 	for (int i = 0; i < 100; ++i) {
-		MouseMoveRelative(0, 0);
+		//MouseMoveRelative(0, 0);
 		MouseClick(MOUSEEVENTF_LEFTDOWN);
 		Sleep(10);
 	}

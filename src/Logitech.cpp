@@ -56,6 +56,11 @@ namespace Send {
 			mouse_report.x = mi.dx;
 			mouse_report.y = mi.dy;
 		}
+		else {
+			//鼠标移动状态不需要维护，清零
+			mouse_report.x = 0;
+			mouse_report.y = 0;
+		}
 
 		// 处理鼠标滚轮
 		if (mi.dwFlags & MOUSEEVENTF_WHEEL) {
