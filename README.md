@@ -5,7 +5,11 @@
 
 通过向 **Logitech Gaming Software (LGS)** 创建的虚拟驱动发送 **HID 报告** 来模拟输入事件，因此使用前必须安装并启动 LGS 以提供底层环境支持。
 
-
+## 项目特性
+1. 无需鼠标键盘硬件支持
+2. 更低输入延迟
+3. 过游戏屏蔽
+4. 不容易被游戏检测
 
 ---
 
@@ -17,12 +21,18 @@
 
 ---
 
+## dll使用教程
+1. 将 HIDController 项目中生成的 HIDController.hpp 、HIDController.dll、HIDController.lib 复制到自己项目文件夹中
+2. 设置 HIDController.dll 文件属性，从“不参与生成”改为“复制文件”
+3. 在自己项目中包含头文件 #include "HIDController.hpp"
+4. 启动 LGS 9.02 软件后，正常使用 HIDController.hpp 文件中的接口函数即可
 ## 使用示例
 
 ### 使用时包含唯一头文件：
 
 ```cpp
-//需要提前添加 dll 和 lib 到项目中
+//需要提前添加 dll 、lib、hpp 到项目中
+//如果不知道按键码可以查看 `WinUser.h`标准文件(宏定义)
 #include "HIDController.hpp"
 
 // -------------------- 鼠标控制 -------------------
@@ -41,6 +51,12 @@ MouseUp(MOUSEEVENTF_LEFTUP);
 
 // 鼠标左键点击（按下 + 松开）
 MouseClick(MOUSEEVENTF_LEFTDOWN);
+
+//鼠标 XButton1 点击
+MouseClick(MOUSEEVENTF_XDOWN | XBUTTON1);
+
+//鼠标 XButton2 点击
+MouseClick(MOUSEEVENTF_XDOWN | XBUTTON2); 
 
 // 鼠标向上滚动一个标准单位
 MouseWheel(120);
