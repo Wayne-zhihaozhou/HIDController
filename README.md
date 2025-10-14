@@ -1,7 +1,7 @@
-# DriverMouse DLL
+# HIDController DLL
 
 ## 项目简介
-`DriverMouse.dll` 是一个 C++ 动态链接库，提供鼠标与键盘的底层控制能力，支持相对移动、点击、滚轮操作以及按键模拟等功能。  
+`HIDController.dll` 是一个 C++ 动态链接库，提供鼠标与键盘的底层控制能力，支持相对移动、点击、滚轮操作以及按键模拟等功能。  
 
 通过向 **Logitech Gaming Software (LGS)** 创建的虚拟驱动发送 **HID 报告** 来模拟输入事件，因此使用前必须安装并启动 LGS 以提供底层环境支持。
 
