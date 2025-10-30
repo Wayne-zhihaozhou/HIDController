@@ -199,6 +199,66 @@ void TestKeyboardFunctions() {
 	std::cout << "键盘功能测试完成!" << std::endl;
 }
 
+void TestKeyMultipleFunctions() {
+	std::cout << "开始测试键盘同时按下多个按键功能..." << std::endl;
+
+	//清理按键
+	KeyUp('A');
+	KeyUp('B');
+	KeyUp('C');
+	KeyUp('D');
+	KeyUp('E');
+	KeyUp('F');
+	KeyUp('G');
+	KeyUp('H');
+
+
+	Sleep(2000);
+	// 单个按键操作
+	std::cout << "按下 A/B/C/D/E 键..." << std::endl;
+
+	KeyDown('A');
+	KeyDown('B');
+	KeyDown('C');
+	KeyDown('D');
+	KeyDown('E');
+	KeyDown('F');
+	KeyDown('G');
+	KeyDown('H');
+	Sleep(500);
+
+	std::cout << "点击 P 键..." << std::endl;
+	KeyPress('P');
+	Sleep(500);
+
+
+	//释放按键
+	KeyUp('A');
+	KeyUp('B');
+	KeyUp('C');
+	KeyUp('D');
+	KeyUp('E');
+	KeyUp('F');
+	KeyUp('G');
+	KeyUp('H');
+
+}
+
+void TestKeyRepetitionFunctions() {
+	std::cout << "开始测试键盘同时按下多个相同按键功能..." << std::endl;
+
+	Sleep(2000);
+
+	//清理按键
+	KeyUp('A');
+	for (int i = 0; i < 10; ++i) {
+		KeyDown('A');
+	}
+	//释放
+	KeyUp('A');
+	Sleep(500);
+
+}
 void TestKeyComboFunctions() {
 	std::cout << "开始测试键盘组合按键功能..." << std::endl;
 	Sleep(2000);
@@ -248,9 +308,9 @@ void TestKeyStateFunctions() {
 void TestContinuousMouseClicks() {
 	std::cout << "开始测试连续鼠标点击功能..." << std::endl;
 	AutoCalibrate();
+	MouseClick(MOUSEEVENTF_LEFTDOWN);
 	for (int i = 0; i < 100; ++i) {
-		//MouseMoveRelative(0, 0);
-		MouseClick(MOUSEEVENTF_LEFTDOWN);
+		MouseMoveRelative(1, 0);
 		Sleep(10);
 	}
 }
@@ -259,7 +319,7 @@ int main() {
 	std::cout << "==== 开始测试 DriverMouse 功能 ====" << std::endl;
 	Sleep(1000);
 
-	TestMouseMoveFunctions();
+	//TestMouseMoveFunctions();
 	//TestMouseClickFunctions();
 	//TestMouseDownFunctions();
 
@@ -269,6 +329,9 @@ int main() {
 	//TestKeyComboFunctions();
 	//TestKeySequenceFunctions();
 	//TestKeyStateFunctions();
+
+	//TestKeyMultipleFunctions();
+	TestKeyRepetitionFunctions();
 
 	std::cout << "==== DriverMouse 测试完成 ====" << std::endl;
 	return 0;
