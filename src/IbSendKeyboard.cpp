@@ -102,3 +102,19 @@ DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys) {
 }
 
 
+// -------------------- Dll卸载或者程序关闭时释放所有按下的键 --------------------
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
+{
+	if (fdwReason == DLL_PROCESS_DETACH)
+	{
+		auto& logitech = Send::Logitech::getLogitechInstance();
+
+		// 释放所有键盘按键
+		logitech.release_all_keys();
+
+		// 释放所有鼠标按键
+		logitech.release_all_mouse();
+	}
+
+	return TRUE;
+}

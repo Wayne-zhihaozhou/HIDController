@@ -148,5 +148,33 @@ namespace Send {
 		return driver.report_keyboard(keyboard_report);
 	}
 
+	//释放所有鼠标按键：清空鼠标 HID 报告并提交
+	void Logitech::release_all_mouse() {
+		std::lock_guard lock(mouse_mutex);
+
+		// 清空所有按钮状态
+		mouse_report.button_byte = 0;
+
+		// 清空相对位移与滚轮
+		mouse_report.x = 0;
+		mouse_report.y = 0;
+		mouse_report.wheel = 0;
+
+		// 发送全 0 鼠标报告（所有按钮抬起）
+		driver.report_mouse(mouse_report);
+	}
+
+	//释放所有按下的键：清空 HID 报告并提交
+	void Logitech::release_all_keys() {
+		std::lock_guard lock(keyboard_mutex);
+
+		memset(&keyboard_report.modifiers, 0, sizeof(keyboard_report.modifiers));
+		memset(keyboard_report.keys, 0, sizeof(keyboard_report.keys));
+
+		// 发送全 0 HID 报告告诉系统“没有按键按下”
+		driver.report_keyboard(keyboard_report);
+	}
+
+
 
 }
