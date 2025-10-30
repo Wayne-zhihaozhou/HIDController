@@ -153,6 +153,15 @@ void TestMouseDownFunctions() {
 	std::cout << "鼠标按下功能测试完成!" << std::endl;
 }
 
+void TestMouseButtonReleaseFunctions() {
+	std::cout << "开始测试鼠标释放功能..." << std::endl;
+	MouseUp(MOUSEEVENTF_LEFTDOWN);
+	MouseDown(MOUSEEVENTF_LEFTDOWN);
+
+	Sleep(2000);
+
+}
+
 
 // 测试键盘功能
 void TestKeyboardFunctions() {
@@ -259,6 +268,7 @@ void TestKeyRepetitionFunctions() {
 	Sleep(500);
 
 }
+
 void TestKeyComboFunctions() {
 	std::cout << "开始测试键盘组合按键功能..." << std::endl;
 	Sleep(2000);
@@ -275,6 +285,16 @@ void TestKeySequenceFunctions() {
 	// 序列键操作
 	std::cout << "按下拼音 'ZUHEANJIAN' 序列键..." << std::endl;
 	KeySeq({ 'Z', 'U', 'H', 'E', 'A', 'N', 'J', 'I', 'A', 'N' });
+}
+
+void TestKeyAutoReleaseFunctions() {
+	std::cout << "开始测试键盘自动释放功能..." << std::endl;
+	Sleep(2000);
+	// 自动释放按键
+	std::cout << "按下 'A' 键..." << std::endl;
+	//KeyUp('A');
+	KeyDown('A');
+	Sleep(2000);
 }
 
 bool IsKeyDownAsync(int vkey) {
@@ -331,8 +351,10 @@ int main() {
 	//TestKeyStateFunctions();
 
 	//TestKeyMultipleFunctions();
-	TestKeyRepetitionFunctions();
-
+	//TestKeyRepetitionFunctions();
+	
+	TestKeyAutoReleaseFunctions();
+	//aaTestMouseButtonReleaseFunctions();
 	std::cout << "==== DriverMouse 测试完成 ====" << std::endl;
 	return 0;
 }
