@@ -89,10 +89,10 @@ namespace Send {
 		case VK_CONTROL:  keyboard_report.modifiers.RCtrl = keydown; break;
 		case VK_LCONTROL: keyboard_report.modifiers.LCtrl = keydown; break;
 		case VK_RCONTROL: keyboard_report.modifiers.RCtrl = keydown; break;
-		case VK_SHIFT:	  keyboard_report.modifiers.RShift = keydown; break;
+		case VK_SHIFT:    keyboard_report.modifiers.RShift = keydown; break;
 		case VK_LSHIFT:   keyboard_report.modifiers.LShift = keydown; break;
 		case VK_RSHIFT:   keyboard_report.modifiers.RShift = keydown; break;
-		case VK_MENU:	  keyboard_report.modifiers.RAlt = keydown; break;
+		case VK_MENU:     keyboard_report.modifiers.RAlt = keydown; break;
 		case VK_LMENU:    keyboard_report.modifiers.LAlt = keydown; break;
 		case VK_RMENU:    keyboard_report.modifiers.RAlt = keydown; break;
 		case VK_LWIN:     keyboard_report.modifiers.LGui = keydown; break;
@@ -101,13 +101,35 @@ namespace Send {
 		default:
 			// 普通按键处理
 			uint8_t usage = Usb::keyboard_vk_to_usage((uint8_t)ki.wVk);
+
 			if (keydown) {
-				// 按下：填入空位
+				// 按下：检查是否已经存在，避免重复
+				bool already_pressed = false;
+				for (int i = 0; i < 6; i++) {
+					if (keyboard_report.keys[i] == usage) {
+						already_pressed = true;
+						break;
+					}
+				}
+
+				if (already_pressed) {
+					// 已经按下，不再处理
+					break;
+				}
+
+				// 填入空位
+				bool inserted = false;
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report.keys[i] == 0) {
 						keyboard_report.keys[i] = usage;
+						inserted = true;
 						break;
 					}
+				}
+
+				if (!inserted) {
+					printf("按键数量超过6个限制!\n");
+					OutputDebugStringA("按键数量超过6个限制!\n");
 				}
 			}
 			else {
@@ -125,5 +147,6 @@ namespace Send {
 		// 提交键盘报告
 		return driver.report_keyboard(keyboard_report);
 	}
+
 
 }
