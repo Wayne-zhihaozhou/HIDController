@@ -13,8 +13,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 def test_module_import():
     """测试模块导入"""
     try:
-        import my_input_lib
-        print("✓ 成功导入 my_input_lib 模块")
+        import hid_controller
+        print("✓ 成功导入 hid_controller 模块")
         return True
     except ImportError as e:
         print(f"✗ 导入模块失败: {e}")
@@ -23,37 +23,37 @@ def test_module_import():
 def test_mouse_functions():
     """测试鼠标功能"""
     try:
-        import my_input_lib
+        import hid_controller
         print("\n=== 测试鼠标功能 ===")
         
         # 测试鼠标相对移动
         print("测试鼠标相对移动...")
-        result = my_input_lib.MouseMoveRelative(100, 100)
+        result = hid_controller.MouseMoveRelative(100, 100)
         print(f"  鼠标相对移动结果: {result}")
         
         # 测试鼠标绝对移动
         print("测试鼠标绝对移动...")
-        result = my_input_lib.MouseMoveAbsolute(1000, 500)
+        result = hid_controller.MouseMoveAbsolute(1000, 500)
         print(f"  鼠标绝对移动结果: {result}")
         
         # 测试鼠标按下
         print("测试鼠标按下...")
-        result = my_input_lib.MouseDown(0x01)  # 左键
+        result = hid_controller.MouseDown(0x01)  # 左键
         print(f"  鼠标按下结果: {result}")
         
         # 测试鼠标抬起
         print("测试鼠标抬起...")
-        result = my_input_lib.MouseUp(0x01)  # 左键
+        result = hid_controller.MouseUp(0x01)  # 左键
         print(f"  鼠标抬起结果: {result}")
         
         # 测试鼠标点击
         print("测试鼠标点击...")
-        result = my_input_lib.MouseClick(0x01)  # 左键
+        result = hid_controller.MouseClick(0x01)  # 左键
         print(f"  鼠标点击结果: {result}")
         
         # 测试鼠标滚轮
         print("测试鼠标滚轮...")
-        result = my_input_lib.MouseWheel(120)
+        result = hid_controller.MouseWheel(120)
         print(f"  鼠标滚轮结果: {result}")
         
         print("✓ 所有鼠标功能测试完成")
@@ -66,22 +66,22 @@ def test_mouse_functions():
 def test_keyboard_functions():
     """测试键盘功能"""
     try:
-        import my_input_lib
+        import hid_controller
         print("\n=== 测试键盘功能 ===")
         
         # 测试按键按下
         print("测试按键按下...")
-        result = my_input_lib.KeyDown(0x41)  # A键的虚拟键码
+        result = hid_controller.KeyDown(0x41)  # A键的虚拟键码
         print(f"  按键按下结果: {result}")
         
         # 测试按键抬起
         print("测试按键抬起...")
-        result = my_input_lib.KeyUp(0x41)  # A键的虚拟键码
+        result = hid_controller.KeyUp(0x41)  # A键的虚拟键码
         print(f"  按键抬起结果: {result}")
         
         # 测试按键点击
         print("测试按键点击...")
-        result = my_input_lib.KeyPress(0x41)  # A键的虚拟键码
+        result = hid_controller.KeyPress(0x41)  # A键的虚拟键码
         print(f"  按键点击结果: {result}")
         
         # 测试组合键 (注意：这里我们跳过KeyCombo和KeySeq的测试，因为它们需要特殊处理)

@@ -11,7 +11,7 @@ src_files = [
 # 创建扩展模块
 ext_modules = [
     Pybind11Extension(
-        "my_input_lib",
+        "hid_controller",
         src_files,  # 只包含binding.cpp
         include_dirs=[
             "include",
@@ -26,7 +26,7 @@ ext_modules = [
 from setuptools import setup
 
 setup(
-    name="my_input_lib",
+    name="hid_controller",
     ext_modules=ext_modules,
     cmdclass={"build_ext": build_ext},
     zip_safe=False,

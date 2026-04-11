@@ -5,7 +5,7 @@
 // 直接使用Windows API，避免Logitech类依赖
 namespace py = pybind11;
 
-PYBIND11_MODULE(my_input_lib, m) {
+PYBIND11_MODULE(hid_controller, m) {
     m.doc() = "Python bindings for HIDController using direct Windows API";
 
     // Mouse control functions
