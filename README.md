@@ -8,44 +8,30 @@
 
 ### 环境要求
 
-- Python 3.12+
-- C++ 编译器（Visual Studio Build Tools 或 Visual Studio）
+- Python 3.8+
 - Logitech Gaming Software (LGS)
 
-### 方式 1：直接使用预编译扩展（推荐，Windows x64）
+### 方式 1：通过 pip 安装（推荐）
 
-本项目提供了预编译的 Windows x64 扩展（`hid_controller.*.pyd`），无需编译即可使用。
-
-**步骤 1：将 .pyd 文件链接到 Python 的 site-packages 目录**
+本项目通过 PyPI 发布预编译的 wheel 文件，无需编译即可使用。
 
 ```bash
-# 找到 Python 的 site-packages 目录
-python -c "import site; print(site.getsitepackages()[0])"
-
-# 例如输出：C:\Users\YourName\AppData\Roaming\Python\Python312\site-packages
-
-# 在项目根目录执行（替换路径为实际路径）
-# 使用硬链接（推荐，不需要管理员权限）
-cmd /c mklink /H "C:\Users\YourName\AppData\Roaming\Python\Python312\site-packages\hid_controller.cp312-win_amd64.pyd" "C:\path\to\HIDController\hid_controller.cp312-win_amd64.pyd"
+pip install hid-controller
 ```
 
-或者直接使用复制（不需要管理员权限）：
+### 方式 2：从 GitHub Releases 安装
+
+下载对应平台和 Python 版本的 wheel 文件，然后安装：
 
 ```bash
-cmd /c copy "C:\path\to\HIDController\hid_controller.cp312-win_amd64.pyd" "C:\Users\YourName\AppData\Roaming\Python\Python312\site-packages\hid_controller.cp312-win_amd64.pyd"
+pip install hid_controller-1.0.0-cp312-cp312-win_amd64.whl
 ```
 
-**步骤 2：验证安装**
+### 方式 3：从源码构建安装
 
 ```bash
-python -c "import hid_controller; print(hid_controller.__file__)"
-```
-
-### 方式 2：从源码构建安装
-
-```bash
-# 安装 pybind11 依赖
-pip install pybind11
+# 安装构建依赖
+pip install pybind11 setuptools
 
 # 从源码构建安装
 pip install .
@@ -65,42 +51,42 @@ import hid_controller
 # ==================== 鼠标控制 ====================
 
 # 相对移动
-hid_controller.MouseMoveRelative(100, 50)
+hid_controller.move_mouse_relative(100, 50)
 
 # 绝对移动
-hid_controller.MouseMoveAbsolute(500, 300)
+hid_controller.move_mouse_absolute(500, 300)
 
 # 鼠标按键
-hid_controller.MouseDown(0x02)       # 左键按下
-hid_controller.MouseUp(0x02)         # 左键抬起
-hid_controller.MouseClick(0x02)      # 左键单击
+hid_controller.mouse_down(0x02)       # 左键按下
+hid_controller.mouse_up(0x02)         # 左键抬起
+hid_controller.mouse_click(0x02)      # 左键单击
 
 # 鼠标滚轮
-hid_controller.MouseWheel(120)       # 向上滚动一格
-hid_controller.MouseWheel(-120)      # 向下滚动一格
+hid_controller.mouse_wheel(120)       # 向上滚动一格
+hid_controller.mouse_wheel(-120)      # 向下滚动一格
 
 # 设置鼠标速度系数
-hid_controller.SetMouseMoveCoefficient(1.5)
+hid_controller.set_mouse_move_coefficient(1.5)
 
 # 自动校准鼠标速度
-hid_controller.AutoCalibrate()
+hid_controller.auto_calibrate()
 
 # 禁用/启用鼠标加速
-hid_controller.DisableMouseAcceleration()
-hid_controller.EnableMouseAcceleration()
+hid_controller.disable_mouse_acceleration()
+hid_controller.enable_mouse_acceleration()
 
 # ==================== 键盘控制 ====================
 
 # 按键（支持整数虚拟键码或字符串键名）
-hid_controller.KeyDown('a')          # 按下 'a' 键
-hid_controller.KeyUp('a')            # 抬起 'a' 键
-hid_controller.KeyPress('Enter')     # 按下并抬起 Enter 键
+hid_controller.key_down('a')          # 按下 'a' 键
+hid_controller.key_up('a')            # 抬起 'a' 键
+hid_controller.key_press('Enter')     # 按下并抬起 Enter 键
 
 # 组合键（同时按下多个键，然后反向释放）
-hid_controller.KeyCombo(['lctrl', 'c'])  # Ctrl+C
+hid_controller.key_combo(['lctrl', 'c'])  # Ctrl+C
 
 # 按键序列（依次按下并释放每个键）
-hid_controller.KeySeq(['a', 'b', 'c'])   # 依次按下 a, b, c
+hid_controller.key_seq(['a', 'b', 'c'])   # 依次按下 a, b, c
 
 # 释放所有按键
 hid_controller.release_all_keys()
@@ -112,16 +98,16 @@ hid_controller.release_all_keys()
 
 | 函数 | 参数 | 返回值 | 说明 |
 |------|------|--------|------|
-| `MouseMoveRelative(dx, dy)` | `dx`: int, `dy`: int | `bool` | 相对移动鼠标 |
-| `MouseMoveAbsolute(x, y)` | `x`: int, `y`: int | `bool` | 绝对移动鼠标到指定位置 |
-| `MouseDown(button)` | `button`: int | `bool` | 鼠标按键按下 |
-| `MouseUp(button)` | `button`: int | `bool` | 鼠标按键抬起 |
-| `MouseClick(button)` | `button`: int | `bool` | 鼠标单击（按下+抬起） |
-| `MouseWheel(movement)` | `movement`: int | `bool` | 鼠标滚轮滚动（120 = 一格） |
-| `SetMouseMoveCoefficient(coefficient)` | `coefficient`: float | `bool` | 设置鼠标移动速度系数 |
-| `AutoCalibrate()` | 无 | `bool` | 自动校准鼠标速度系数 |
-| `DisableMouseAcceleration()` | 无 | `bool` | 禁用 Windows 鼠标加速 |
-| `EnableMouseAcceleration()` | 无 | `bool` | 启用 Windows 鼠标加速 |
+| `move_mouse_relative(dx, dy)` | `dx`: int, `dy`: int | `bool` | 相对移动鼠标 |
+| `move_mouse_absolute(x, y)` | `x`: int, `y`: int | `bool` | 绝对移动鼠标到指定位置 |
+| `mouse_down(button)` | `button`: int | `bool` | 鼠标按键按下 |
+| `mouse_up(button)` | `button`: int | `bool` | 鼠标按键抬起 |
+| `mouse_click(button)` | `button`: int | `bool` | 鼠标单击（按下+抬起） |
+| `mouse_wheel(movement)` | `movement`: int | `bool` | 鼠标滚轮滚动（120 = 一格） |
+| `set_mouse_move_coefficient(coefficient)` | `coefficient`: float | `bool` | 设置鼠标移动速度系数 |
+| `auto_calibrate()` | 无 | `bool` | 自动校准鼠标速度系数 |
+| `disable_mouse_acceleration()` | 无 | `bool` | 禁用 Windows 鼠标加速 |
+| `enable_mouse_acceleration()` | 无 | `bool` | 启用 Windows 鼠标加速 |
 
 **鼠标按钮常量**
 
@@ -133,36 +119,36 @@ hid_controller.release_all_keys()
 
 使用示例：
 ```python
-hid_controller.MouseClick(0x02)   # 左键单击
-hid_controller.MouseClick(0x04)   # 右键单击
-hid_controller.MouseClick(0x20)   # 中键单击
+hid_controller.mouse_click(0x02)   # 左键单击
+hid_controller.mouse_click(0x04)   # 右键单击
+hid_controller.mouse_click(0x20)   # 中键单击
 ```
 
 ### 键盘函数
 
 | 函数 | 参数 | 返回值 | 说明 |
 |------|------|--------|------|
-| `KeyDown(vk)` | `vk`: int 或 str | `bool` | 按键按下 |
-| `KeyUp(vk)` | `vk`: int 或 str | `bool` | 按键抬起 |
-| `KeyPress(vk)` | `vk`: int 或 str | `bool` | 按键（按下+抬起） |
-| `KeyCombo(keys)` | `keys`: list[int 或 str] | `bool` | 组合键（同时按下多个键，然后反向释放） |
-| `KeySeq(keys)` | `keys`: list[int 或 str] | `bool` | 按键序列（依次按下并释放每个键） |
+| `key_down(vk)` | `vk`: int 或 str | `bool` | 按键按下 |
+| `key_up(vk)` | `vk`: int 或 str | `bool` | 按键抬起 |
+| `key_press(vk)` | `vk`: int 或 str | `bool` | 按键（按下+抬起） |
+| `key_combo(keys)` | `keys`: list[int 或 str] | `bool` | 组合键（同时按下多个键，然后反向释放） |
+| `key_seq(keys)` | `keys`: list[int 或 str] | `bool` | 按键序列（依次按下并释放每个键） |
 | `release_all_keys()` | 无 | 无 | 释放所有按键 |
 
 **使用字符串键名示例**：
 ```python
-hid_controller.KeyDown('a')           # 按下 'a' 键
-hid_controller.KeyDown('lctrl')       # 按下左 Ctrl
-hid_controller.KeyPress('Enter')      # 按下并抬起 Enter
-hid_controller.KeyCombo(['lctrl', 'c'])  # Ctrl+C 组合键
-hid_controller.KeySeq(['a', 'b', 'c'])   # 依次按下 a, b, c
+hid_controller.key_down('a')           # 按下 'a' 键
+hid_controller.key_down('lctrl')       # 按下左 Ctrl
+hid_controller.key_press('Enter')      # 按下并抬起 Enter
+hid_controller.key_combo(['lctrl', 'c'])  # Ctrl+C 组合键
+hid_controller.key_seq(['a', 'b', 'c'])   # 依次按下 a, b, c
 ```
 
 **使用虚拟键码示例**：
 ```python
-hid_controller.KeyDown(65)            # 按下 'A' 键 (VK_A = 65)
-hid_controller.KeyDown(162)           # 按下左 Ctrl (VK_LCONTROL = 162)
-hid_controller.KeyPress(13)           # Enter (VK_RETURN = 13)
+hid_controller.key_down(65)            # 按下 'A' 键 (VK_A = 65)
+hid_controller.key_down(162)           # 按下左 Ctrl (VK_LCONTROL = 162)
+hid_controller.key_press(13)           # Enter (VK_RETURN = 13)
 ```
 
 ### 支持的键盘键名
@@ -187,13 +173,17 @@ hid_controller.KeyPress(13)           # Enter (VK_RETURN = 13)
 HIDController/
 ├── binding.cpp          # pybind11 绑定
 ├── setup.py             # Python 扩展构建配置
-├── pyproject.toml       # 现代化 Python 包配置
+├── pyproject.toml       # 现代化 Python 包配置（含 cibuildwheel 配置）
 ├── README.md            # 项目文档
 ├── LICENSE              # MIT 许可证
 ├── .gitignore
+├── .github/
+│   └── workflows/
+│       └── build-wheels.yml  # CI 自动构建 wheel
 ├── test_all_api_auto.py         # 完整 API 自动测试
-├── hid_controller.*.pyd   # 预编译的 Windows x64 扩展
-├── include/             # 头文件
+├── hid_controller/      # Python 包
+│   └── __init__.py      # 包入口
+├── include/             # C++ 头文件
 │   ├── HIDController.hpp
 │   ├── KeyboardMap.hpp
 │   ├── Logitech.hpp
@@ -207,17 +197,41 @@ HIDController/
 │   └── pch.cpp
 └── examples/            # 示例代码
     ├── mouse_example.py
-    ├── keyboard_example.py
-    └── advanced_example.py
+    └── keyboard_example.py
 ```
 
 ## 构建
+
+### 本地构建
 
 从源码构建：
 
 ```bash
 python setup.py build_ext --inplace
 ```
+
+### CI 自动构建（cibuildwheel）
+
+项目使用 [cibuildwheel](https://cibuildwheel.readthedocs.io/) + GitHub Actions 自动为不同平台和 Python 版本构建 wheel：
+
+```bash
+# 安装 cibuildwheel
+pip install cibuildwheel
+
+# 构建当前平台支持的 wheel
+cibuildwheel --output-dir dist
+
+# 构建所有平台 wheel（需要 Docker）
+CIBW_BUILD="cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*" cibuildwheel --output-dir dist
+```
+
+**支持的构建目标**：
+
+| 平台 | 架构 | Python 版本 |
+|------|------|-------------|
+| Windows | AMD64 | 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 |
+| Linux | x86_64 | 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 |
+| macOS | x86_64, arm64 | 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 |
 
 ## 测试
 
@@ -230,7 +244,17 @@ python test_all_api_auto.py
 ```bash
 python examples/mouse_example.py
 python examples/keyboard_example.py
-python examples/advanced_example.py
+```
+
+## 常见问题
+
+### Q: 安装时提示找不到匹配的 wheel？
+A: 确保你的 Python 版本在 3.8-3.13 范围内，并且使用的是 64 位 Python。
+
+### Q: 如何手动安装特定平台的 wheel？
+A: 从 [GitHub Releases](https://github.com/Wayne-zhihaozhou/DriverMouse/releases) 下载对应 wheel，然后：
+```bash
+pip install path/to/hid_controller-1.0.0-cp312-cp312-win_amd64.whl
 ```
 
 ## 免责声明

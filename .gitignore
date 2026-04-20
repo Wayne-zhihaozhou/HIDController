@@ -13,12 +13,10 @@ __pycache__/
 dist/
 build/
 pyproject-build/
+*.whl
 
 # Python extensions (compiled)
 *.pyd
-
-# Exception: pre-compiled extension in root (Windows x64)
-!hid_controller.*.pyd
 
 # C/C++ build artifacts
 bin/
