@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-2022]
+        arch: [x86_64, ARM64]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +32,7 @@ jobs:
           cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
-          CIBW_ARCHS_WINDOWS: AMD64
+          CIBW_ARCHS_WINDOWS: ${{ matrix.arch == 'ARM64' && 'ARM64' || 'AMD64' }}
 
       - name: Build source distribution
         run: |
