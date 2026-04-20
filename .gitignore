@@ -365,3 +365,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Python build and distribution
+build/
+dist/
+*.egg-info/
+egg/
+
+# HIDController local build artifacts
+hid_controller/_extension.*
