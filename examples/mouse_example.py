@@ -14,38 +14,38 @@ def main():
 
     # 1. 相对移动
     print("1. 相对移动：鼠标向右移动 100 像素，向下移动 50 像素")
-    hid_controller.MouseMoveRelative(100, 50)
+    hid_controller.move_mouse_relative(100, 50)
     time.sleep(0.5)
 
     # 2. 鼠标按键
     print("2. 鼠标左键单击")
-    hid_controller.MouseClick(0x02)  # MOUSEEVENTF_LEFTDOWN = 0x02
+    hid_controller.mouse_click(0x02)  # MOUSEEVENTF_LEFTDOWN = 0x02
     time.sleep(0.5)
 
     # 3. 鼠标滚轮
     print("3. 鼠标滚轮向上滚动一格")
-    hid_controller.MouseWheel(120)
+    hid_controller.mouse_wheel(120)
     time.sleep(0.5)
     print("4. 鼠标滚轮向下滚动两格")
-    hid_controller.MouseWheel(-240)
+    hid_controller.mouse_wheel(-240)
     time.sleep(0.5)
 
     # 5. 禁用鼠标加速
     print("5. 禁用 Windows 鼠标加速")
-    hid_controller.DisableMouseAcceleration()
+    hid_controller.disable_mouse_acceleration()
 
     # 6. 设置鼠标速度系数
     print("6. 设置鼠标速度系数为 1.5")
-    hid_controller.SetMouseMoveCoefficient(1.5)
+    hid_controller.set_mouse_move_coefficient(1.5)
 
     # 7. 相对移动（使用系数后）
     print("7. 相对移动：鼠标向右移动 200 像素（使用系数 1.5）")
-    hid_controller.MouseMoveRelative(200, 0)
+    hid_controller.move_mouse_relative(200, 0)
     time.sleep(0.5)
 
     # 8. 恢复鼠标设置
     print("8. 恢复 Windows 鼠标设置")
-    hid_controller.EnableMouseAcceleration()
+    hid_controller.enable_mouse_acceleration()
 
     print("\n=== 示例完成 ===")
 
