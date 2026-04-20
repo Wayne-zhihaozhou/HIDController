@@ -33,33 +33,14 @@ jobs:
           CIBW_BUILD: "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
           CIBW_ARCHS_WINDOWS: AMD64
 
-      - name: Build source distribution
+      - name: Create GitHub Release
         run: |
-          python -m build --sdist
-
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dist/*
+          gh release create ${{ github.ref_name }} --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  upload-pypi:
-    name: Publish to PyPI
-    needs: [build-and-release]
-    runs-on: ubuntu-22.04
-    environment:
-      name: pypi
-      url: https://pypi.org/p/hid-controller
-    permissions:
-      id-token: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: wheels-*
-          merge-multiple: true
-          path: dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Upload release assets
+        run: |
+          gh release upload ${{ github.ref_name }} dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
