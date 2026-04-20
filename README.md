@@ -12,7 +12,36 @@
 - C++ 编译器（Visual Studio Build Tools 或 Visual Studio）
 - Logitech Gaming Software (LGS)
 
-### 安装步骤
+### 方式 1：直接使用预编译扩展（推荐，Windows x64）
+
+本项目提供了预编译的 Windows x64 扩展（`hid_controller.*.pyd`），无需编译即可使用。
+
+**步骤 1：将 .pyd 文件链接到 Python 的 site-packages 目录**
+
+```bash
+# 找到 Python 的 site-packages 目录
+python -c "import site; print(site.getsitepackages()[0])"
+
+# 例如输出：C:\Users\YourName\AppData\Roaming\Python\Python312\site-packages
+
+# 在项目根目录执行（替换路径为实际路径）
+# 使用硬链接（推荐，不需要管理员权限）
+cmd /c mklink /H "C:\Users\YourName\AppData\Roaming\Python\Python312\site-packages\hid_controller.cp312-win_amd64.pyd" "C:\path\to\HIDController\hid_controller.cp312-win_amd64.pyd"
+```
+
+或者直接使用复制（不需要管理员权限）：
+
+```bash
+cmd /c copy "C:\path\to\HIDController\hid_controller.cp312-win_amd64.pyd" "C:\Users\YourName\AppData\Roaming\Python\Python312\site-packages\hid_controller.cp312-win_amd64.pyd"
+```
+
+**步骤 2：验证安装**
+
+```bash
+python -c "import hid_controller; print(hid_controller.__file__)"
+```
+
+### 方式 2：从源码构建安装
 
 ```bash
 # 安装 pybind11 依赖
