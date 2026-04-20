@@ -165,8 +165,8 @@
     <ClInclude Include="include\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\IbSendKeyboard.cpp" />
-    <ClCompile Include="src\IbSendMouse.cpp" />
+    <ClCompile Include="src\keyboard_input.cpp" />
+    <ClCompile Include="src\mouse_input.cpp" />
     <ClCompile Include="src\Logitech.cpp" />
     <ClCompile Include="src\LogitechDriver.cpp" />
     <ClCompile Include="src\pch.cpp">

@@ -19,7 +19,7 @@ namespace Send {
 	}
 
 	// 获取单例
-	Logitech& Logitech::getLogitechInstance() {
+	Logitech& Logitech::getInstance() {
 		static Logitech instance; // 延迟初始化，线程安全
 		return instance;
 	}
