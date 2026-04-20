@@ -1,0 +1,65 @@
+# EditorConfig 帮助维护跨编辑器的编码和样式一致
+# https://EditorConfig.org
+
+# 根配置文件
+root = true
+
+# 所有文件
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python 文件
+[*.py]
+indent_style = space
+indent_size = 4
+
+# C/C++ 头文件和源文件
+[*.{h,hpp,cpp,c}]
+indent_style = space
+indent_size = 4
+
+# YAML 文件
+[*.yml]
+indent_style = space
+indent_size = 2
+
+[*.yaml]
+indent_style = space
+indent_size = 2
+
+# JSON 文件
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Markdown 文件
+[*.md]
+indent_style = space
+indent_size = 4
+
+# TOML 文件
+[*.toml]
+indent_style = space
+indent_size = 4
+
+# Git 配置文件
+[*.gitignore]
+indent_style = space
+indent_size = 4
+
+# 配置文件
+[setup.py]
+indent_style = space
+indent_size = 4
+
+# 不需要缩进的文件
+[Makefile]
+indent_style = tab
+
+# README 文件
+[README*]
+indent_style = space
+indent_size = 4
