@@ -1,4 +1,4 @@
-﻿//ibsendkeyboard.cpp
+﻿// IbSendKeyboard.cpp
 #include "pch.h"
 #include <Logitech.hpp>
 #include <vector>
