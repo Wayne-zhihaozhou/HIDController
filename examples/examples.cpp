@@ -336,27 +336,21 @@ void TestContinuousMouseClicks() {
 }
 
 int main() {
-	//std::cout << "==== 开始测试 DriverMouse 功能 ====" << std::endl;
-	//Sleep(1000);
+	std::cout << "==== 开始测试 DriverMouse 功能 ====" << std::endl;
+	Sleep(2000);
 
-	//TestMouseMoveFunctions();
-	//TestMouseClickFunctions();
-	//TestMouseDownFunctions();
+	TestMouseClickFunctions();
+	Sleep(2000);
 
-	//TestContinuousMouseClicks();
+	TestKeyboardFunctions();
+	Sleep(2000);
 
-	//TestKeyboardFunctions();
-	//TestKeyComboFunctions();
-	//TestKeySequenceFunctions();
-	//TestKeyStateFunctions();
+	TestKeyComboFunctions();
+	Sleep(2000);
 
-	//TestKeyMultipleFunctions();
-	//TestKeyRepetitionFunctions();
+	TestKeySequenceFunctions();
 	
-	//TestKeyAutoReleaseFunctions();
-
 	release_all_keys();
-	//aaTestMouseButtonReleaseFunctions();
-	//std::cout << "==== DriverMouse 测试完成 ====" << std::endl;
+	std::cout << "==== DriverMouse 测试完成 ====" << std::endl;
 	return 0;
 }
