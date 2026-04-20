@@ -1,6 +1,7 @@
 ﻿// pch.h
 #pragma once
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 
 // 系统和标准库头文件
 #include <windows.h>
@@ -10,4 +11,3 @@
 #include <filesystem>
 
 #include "HIDController.hpp"
-

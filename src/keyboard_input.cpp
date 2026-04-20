@@ -70,11 +70,12 @@ DLLAPI bool WINAPI KeyPress(uint16_t vk) {
 
 DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
 	// 处理带修饰键组合键
+	std::vector<uint16_t> keys_vec(keys);
 	std::vector<KEYBDINPUT> inputs;
-	inputs.reserve(keys.size() * 2);
+	inputs.reserve(keys_vec.size() * 2);
 
 	// 先按下所有键（从前到后）
-	for (auto vk : keys) {
+	for (auto vk : keys_vec) {
 		KEYBDINPUT ki{};
 		ki.wVk = vk;
 		ki.dwFlags = 0; // 按下
@@ -82,7 +83,7 @@ DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
 	}
 
 	// 再"反向"抬起所有键（从后到前，保证修饰键最后释放）
-	for (auto it = keys.rbegin(); it != keys.rend(); ++it) {
+	for (auto it = keys_vec.rbegin(); it != keys_vec.rend(); ++it) {
 		KEYBDINPUT ki{};
 		ki.wVk = *it;
 		ki.dwFlags = KEYEVENTF_KEYUP; // 抬起

@@ -142,9 +142,11 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 	dx = static_cast<int32_t>(dx * coeff);
 	dy = static_cast<int32_t>(dy * coeff);
 
+	int32_t abs_dx = dx < 0 ? -dx : dx;
+	int32_t abs_dy = dy < 0 ? -dy : dy;
 	int32_t steps = std::max(
-		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
-		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
+		(abs_dx + MAX_DELTA - 1) / MAX_DELTA,
+		(abs_dy + MAX_DELTA - 1) / MAX_DELTA
 	);
 	if (steps == 0) {
 		steps = 1;
@@ -191,7 +193,8 @@ DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
 DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 	const int32_t MAX_DELTA = 120; // 每个 HID 报告最大滚动量，标准滚轮为 120
 
-	int32_t steps = (std::abs(movement) + MAX_DELTA - 1) / MAX_DELTA;
+	int32_t abs_movement = movement < 0 ? -movement : movement;
+	int32_t steps = (abs_movement + MAX_DELTA - 1) / MAX_DELTA;
 	if (steps == 0) {
 		steps = 1;
 	}
