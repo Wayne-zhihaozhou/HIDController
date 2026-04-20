@@ -1,7 +1,7 @@
 //DriveMouse.hpp
 #pragma once
 #include <stdint.h>
-#include <initializer_list>
+#include <vector>
 #ifndef WINAPI
 #define WINAPI __stdcall
 #endif
@@ -11,7 +11,7 @@
 #define DLLAPI  extern "C" __declspec(dllimport)
 #endif
 
-// -------------------- Êó±ê¿ØÖÆ IbSendMouse.hpp --------------------
+// -------------------- ÃŠÃ³Â±ÃªÂ¿Ã˜Ã–Ã† IbSendMouse.hpp --------------------
 
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy);
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y);
@@ -24,16 +24,11 @@ DLLAPI void WINAPI AutoCalibrate();
 DLLAPI void WINAPI DisableMouseAcceleration();
 DLLAPI void WINAPI EnableMouseAcceleration();
 
-// -------------------- ¼üÅÌ¿ØÖÆ IbSendKeyboard.hpp --------------------
+// -------------------- Â¼Ã¼Ã…ÃŒÂ¿Ã˜Ã–Ã† IbSendKeyboard.hpp --------------------
 
 DLLAPI bool WINAPI KeyDown(uint16_t vk);
 DLLAPI bool WINAPI KeyUp(uint16_t vk);
 DLLAPI bool WINAPI KeyPress(uint16_t vk);
-DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys);
-DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys);
+DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys);
+DLLAPI bool WINAPI KeySeq(const std::vector<uint16_t>& keys);
 DLLAPI void WINAPI release_all_keys();
-
-
-
-
-

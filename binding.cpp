@@ -1,138 +1,17 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
+#include <windows.h>
 #include "HIDController.hpp"
 
 namespace py = pybind11;
 
 /*
  * HIDController Python 扩展
- * 
+ *
  * 通过向 Logitech 虚拟驱动发送 HID 报告来控制键盘鼠标。
  * 使用前必须安装并启动 Logitech Gaming Software (LGS)。
  */
-
-PYBIND11_MODULE(hid_controller, m) {
-    m.doc() = "Python bindings for HIDController - Mouse and keyboard control via Logitech HID reports";
-
-    // ==================== 鼠标控制函数 ====================
-
-    m.def("MouseMoveRelative", &MouseMoveRelative,
-          py::arg("dx"), py::arg("dy"),
-          "Move mouse relatively. Args: dx (int), dy (int)");
-
-    m.def("MouseMoveAbsolute", &MouseMoveAbsolute,
-          py::arg("x"), py::arg("y"),
-          "Move mouse absolutely. Args: x (int), y (int)");
-
-    m.def("MouseDown", &MouseDown,
-          py::arg("button"),
-          "Mouse button down. Args: button (int) - MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_RIGHTDOWN, etc.");
-
-    m.def("MouseUp", &MouseUp,
-          py::arg("button"),
-          "Mouse button up. Args: button (int)");
-
-    m.def("MouseClick", &MouseClick,
-          py::arg("button"),
-          "Mouse click (down + up). Args: button (int)");
-
-    m.def("MouseWheel", &MouseWheel,
-          py::arg("movement"),
-          "Mouse wheel scroll. Args: movement (int) - typically 120 for one notch");
-
-    m.def("SetMouseMoveCoefficient", &SetMouseMoveCoefficient,
-          py::arg("coefficient"),
-          "Set mouse move speed coefficient. Args: coefficient (float)");
-
-    m.def("AutoCalibrate", &AutoCalibrate,
-          "Automatically calibrate mouse speed coefficient.");
-
-    m.def("DisableMouseAcceleration", &DisableMouseAcceleration,
-          "Disable Windows mouse acceleration.");
-
-    m.def("EnableMouseAcceleration", &EnableMouseAcceleration,
-          "Restore Windows mouse acceleration.");
-
-    // ==================== 键盘控制函数 ====================
-
-    m.def("KeyDown", [](py::object vk) -> bool {
-        uint16_t vk_code = 0;
-        
-        if (py::isinstance<py::str>(vk)) {
-            std::string key = vk.cast<std::string>();
-            vk_code = key_to_vk(key);
-        } else {
-            vk_code = vk.cast<uint16_t>();
-        }
-        
-        return KeyDown(vk_code);
-    }, py::arg("vk"),
-       "Key down. Args: vk (int or str) - virtual key code or key character/string");
-
-    m.def("KeyUp", [](py::object vk) -> bool {
-        uint16_t vk_code = 0;
-        
-        if (py::isinstance<py::str>(vk)) {
-            std::string key = vk.cast<std::string>();
-            vk_code = key_to_vk(key);
-        } else {
-            vk_code = vk.cast<uint16_t>();
-        }
-        
-        return KeyUp(vk_code);
-    }, py::arg("vk"),
-       "Key up. Args: vk (int or str)");
-
-    m.def("KeyPress", [](py::object vk) -> bool {
-        uint16_t vk_code = 0;
-        
-        if (py::isinstance<py::str>(vk)) {
-            std::string key = vk.cast<std::string>();
-            vk_code = key_to_vk(key);
-        } else {
-            vk_code = vk.cast<uint16_t>();
-        }
-        
-        return KeyPress(vk_code);
-    }, py::arg("vk"),
-       "Key press (down + up). Args: vk (int or str)");
-
-    m.def("KeyCombo", [](py::list keys) -> bool {
-        std::vector<uint16_t> vk_codes;
-        for (auto item : keys) {
-            uint16_t code = 0;
-            if (py::isinstance<py::str>(item)) {
-                std::string key = item.cast<std::string>();
-                code = key_to_vk(key);
-            } else {
-                code = item.cast<uint16_t>();
-            }
-            vk_codes.push_back(code);
-        }
-        return KeyCombo(vk_codes);
-    }, py::arg("keys"),
-       "Key combination (press all then release all in reverse). Args: keys (list of int or str)");
-
-    m.def("KeySeq", [](py::list keys) -> bool {
-        std::vector<uint16_t> vk_codes;
-        for (auto item : keys) {
-            uint16_t code = 0;
-            if (py::isinstance<py::str>(item)) {
-                std::string key = item.cast<std::string>();
-                code = key_to_vk(key);
-            } else {
-                code = item.cast<uint16_t>();
-            }
-            vk_codes.push_back(code);
-        }
-        return KeySeq(vk_codes);
-    }, py::arg("keys"),
-       "Key sequence (press and release each key in order). Args: keys (list of int or str)");
-
-    m.def("release_all_keys", &release_all_keys,
-          "Release all pressed keys.");
-}
 
 // ==================== 辅助函数 ====================
 
@@ -198,4 +77,126 @@ static uint16_t key_to_vk(const std::string& key) {
 
     // 默认返回 0
     return 0;
+}
+
+PYBIND11_MODULE(hid_controller, m) {
+    m.doc() = "Python bindings for HIDController - Mouse and keyboard control via Logitech HID reports";
+
+    // ==================== 鼠标控制函数 ====================
+
+    m.def("MouseMoveRelative", &MouseMoveRelative,
+          py::arg("dx"), py::arg("dy"),
+          "Move mouse relatively. Args: dx (int), dy (int)");
+
+    m.def("MouseMoveAbsolute", &MouseMoveAbsolute,
+          py::arg("x"), py::arg("y"),
+          "Move mouse absolutely. Args: x (int), y (int)");
+
+    m.def("MouseDown", &MouseDown,
+          py::arg("button"),
+          "Mouse button down. Args: button (int) - MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_RIGHTDOWN, etc.");
+
+    m.def("MouseUp", &MouseUp,
+          py::arg("button"),
+          "Mouse button up. Args: button (int)");
+
+    m.def("MouseClick", &MouseClick,
+          py::arg("button"),
+          "Mouse click (down + up). Args: button (int)");
+
+    m.def("MouseWheel", &MouseWheel,
+          py::arg("movement"),
+          "Mouse wheel scroll. Args: movement (int) - typically 120 for one notch");
+
+    m.def("SetMouseMoveCoefficient", &SetMouseMoveCoefficient,
+          py::arg("coefficient"),
+          "Set mouse move speed coefficient. Args: coefficient (float)");
+
+    m.def("AutoCalibrate", &AutoCalibrate,
+          "Automatically calibrate mouse speed coefficient.");
+
+    m.def("DisableMouseAcceleration", &DisableMouseAcceleration,
+          "Disable Windows mouse acceleration.");
+
+    m.def("EnableMouseAcceleration", &EnableMouseAcceleration,
+          "Restore Windows mouse acceleration.");
+
+    // ==================== 键盘控制函数 ====================
+
+    m.def("KeyDown", [](py::object vk) -> bool {
+        uint16_t vk_code = 0;
+
+        if (py::isinstance<py::str>(vk)) {
+            std::string key = vk.cast<std::string>();
+            vk_code = key_to_vk(key);
+        } else {
+            vk_code = vk.cast<uint16_t>();
+        }
+
+        return KeyDown(vk_code);
+    }, py::arg("vk"),
+       "Key down. Args: vk (int or str) - virtual key code or key character/string");
+
+    m.def("KeyUp", [](py::object vk) -> bool {
+        uint16_t vk_code = 0;
+
+        if (py::isinstance<py::str>(vk)) {
+            std::string key = vk.cast<std::string>();
+            vk_code = key_to_vk(key);
+        } else {
+            vk_code = vk.cast<uint16_t>();
+        }
+
+        return KeyUp(vk_code);
+    }, py::arg("vk"),
+       "Key up. Args: vk (int or str)");
+
+    m.def("KeyPress", [](py::object vk) -> bool {
+        uint16_t vk_code = 0;
+
+        if (py::isinstance<py::str>(vk)) {
+            std::string key = vk.cast<std::string>();
+            vk_code = key_to_vk(key);
+        } else {
+            vk_code = vk.cast<uint16_t>();
+        }
+
+        return KeyPress(vk_code);
+    }, py::arg("vk"),
+       "Key press (down + up). Args: vk (int or str)");
+
+    m.def("KeyCombo", [](py::list keys) -> bool {
+        std::vector<uint16_t> vk_codes;
+        for (auto item : keys) {
+            uint16_t code = 0;
+            if (py::isinstance<py::str>(item)) {
+                std::string key = item.cast<std::string>();
+                code = key_to_vk(key);
+            } else {
+                code = item.cast<uint16_t>();
+            }
+            vk_codes.push_back(code);
+        }
+        return KeyCombo(vk_codes);
+    }, py::arg("keys"),
+       "Key combination (press all then release all in reverse). Args: keys (list of int or str)");
+
+    m.def("KeySeq", [](py::list keys) -> bool {
+        std::vector<uint16_t> vk_codes;
+        for (auto item : keys) {
+            uint16_t code = 0;
+            if (py::isinstance<py::str>(item)) {
+                std::string key = item.cast<std::string>();
+                code = key_to_vk(key);
+            } else {
+                code = item.cast<uint16_t>();
+            }
+            vk_codes.push_back(code);
+        }
+        return KeySeq(vk_codes);
+    }, py::arg("keys"),
+       "Key sequence (press and release each key in order). Args: keys (list of int or str)");
+
+    m.def("release_all_keys", &release_all_keys,
+          "Release all pressed keys.");
 }

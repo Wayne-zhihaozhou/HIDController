@@ -11,27 +11,13 @@ pyproject-build/
 
 # Python extensions (compiled)
 *.pyd
-*.so.*
 
-# C++ build artifacts
-obj/
-_obj/
+# C/C++ build artifacts
 bin/
 Debug/
 Release/
 x64/
 x86/
-
-# Visual Studio (legacy DLL project - no longer used)
-*.suo
-*.user
-*.aps
-*.ncb
-*.opendb
-*.opensdf
-*.sdf
-*.vcxproj.user
-.vs/
 
 # IDE
 .vscode/
@@ -43,6 +29,4 @@ x86/
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# MIT License file (keep in repo, don't ignore)
-# MIT License
+.vs/

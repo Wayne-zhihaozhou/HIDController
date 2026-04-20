@@ -136,12 +136,16 @@ HIDController/
 │   ├── Logitech.hpp
 │   ├── LogitechDriver.hpp
 │   └── pch.h
-└── src/                 # C++ 源文件
-    ├── IbSendMouse.cpp
-    ├── IbSendKeyboard.cpp
-    ├── Logitech.cpp
-    ├── LogitechDriver.cpp
-    └── pch.cpp
+├── src/                 # C++ 源文件
+│   ├── IbSendMouse.cpp
+│   ├── IbSendKeyboard.cpp
+│   ├── Logitech.cpp
+│   ├── LogitechDriver.cpp
+│   └── pch.cpp
+└── examples/            # 示例代码
+    ├── mouse_example.py
+    ├── keyboard_example.py
+    └── advanced_example.py
 ```
 
 ## 构建

@@ -6,7 +6,7 @@
 
 
 namespace Send {
-	/** ´ÓÏµÍ³ PATH ÖĞ²éÕÒ³ÌĞò¿ÉÖ´ĞĞÎÄ¼şµÄÍêÕûÂ·¾¶ */
+	/** ä»ç³»ç»Ÿ PATH ä¸­æŸ¥æ‰¾ç¨‹åºå¯æ‰§è¡Œæ–‡ä»¶çš„å®Œæ•´è·¯å¾„ */
 	std::wstring FindExecutableInPath(const std::wstring& exe_name = L"LCore.exe") {
 		wchar_t* path_env = nullptr;
 		size_t len = 0;
@@ -31,7 +31,7 @@ namespace Send {
 		return L"";
 	}
 
-	/** Æô¶¯Ö¸¶¨Â·¾¶µÄ½ø³Ì */
+	/** å¯åŠ¨æŒ‡å®šè·¯å¾„çš„è¿›ç¨‹ */
 	bool StartProcess(const std::wstring& process_path) {
 		STARTUPINFOW si;
 		PROCESS_INFORMATION pi;
@@ -40,28 +40,28 @@ namespace Send {
 		si.cb = sizeof(si);
 		ZeroMemory(&pi, sizeof(pi));
 
-		// µ÷ÓÃ CreateProcessW Æô¶¯½ø³Ì
+		// è°ƒç”¨ CreateProcessW å¯åŠ¨è¿›ç¨‹
 		if (!CreateProcessW(
-			process_path.c_str(),  // ¿ÉÖ´ĞĞÎÄ¼şÂ·¾¶
-			nullptr,               // ÃüÁîĞĞ²ÎÊı
-			nullptr,               // Ä¬ÈÏ°²È«ÊôĞÔ
-			nullptr,               // Ä¬ÈÏÏß³Ì°²È«ÊôĞÔ
-			FALSE,                 // ²»¼Ì³Ğ¾ä±ú
-			0,                     // Ä¬ÈÏ´´½¨±êÖ¾
-			nullptr,               // Ê¹ÓÃ¸¸½ø³ÌµÄ»·¾³
-			nullptr,               // Ê¹ÓÃ¸¸½ø³ÌµÄ¹¤×÷Ä¿Â¼
+			process_path.c_str(),  // å¯æ‰§è¡Œæ–‡ä»¶è·¯å¾„
+			nullptr,               // å‘½ä»¤è¡Œå‚æ•°
+			nullptr,               // é»˜è®¤å®‰å…¨å±æ€§
+			nullptr,               // é»˜è®¤çº¿ç¨‹å®‰å…¨å±æ€§
+			FALSE,                 // ä¸ç»§æ‰¿å¥æŸ„
+			0,                     // é»˜è®¤åˆ›å»ºæ ‡å¿—
+			nullptr,               // ä½¿ç”¨çˆ¶è¿›ç¨‹çš„ç¯å¢ƒ
+			nullptr,               // ä½¿ç”¨çˆ¶è¿›ç¨‹çš„å·¥ä½œç›®å½•
 			&si,
 			&pi)) {
 			return false;
 		}
 
-		// Æô¶¯³É¹¦£¬¹Ø±Õ¾ä±ú
+		// å¯åŠ¨æˆåŠŸï¼Œå…³é—­å¥æŸ„
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 		return true;
 	}
 
-	/** ¼ì²é½ø³ÌÊÇ·ñ´æÔÚ */
+	/** æ£€æŸ¥è¿›ç¨‹æ˜¯å¦å­˜åœ¨ */
 	bool IsProcessRunning(const std::wstring& process_name) {
 		HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 		if (snapshot == INVALID_HANDLE_VALUE) {
@@ -91,7 +91,7 @@ namespace Send {
 		return found;
 	}
 
-	/** ²éÕÒ²¢ÖÕÖ¹Ö¸¶¨½ø³Ì */
+	/** æŸ¥æ‰¾å¹¶ç»ˆæ­¢æŒ‡å®šè¿›ç¨‹ */
 	bool KillProcessByName(const std::wstring& process_name) {
 		HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 		if (snapshot == INVALID_HANDLE_VALUE) {
@@ -126,7 +126,7 @@ namespace Send {
 		return killed;
 	}
 
-	// ±éÀúÏµÍ³Éè±¸Ä¿Â¼£¬²éÕÒÂú×ãÌõ¼şµÄÉè±¸Â·¾¶
+	// éå†ç³»ç»Ÿè®¾å¤‡ç›®å½•ï¼ŒæŸ¥æ‰¾æ»¡è¶³æ¡ä»¶çš„è®¾å¤‡è·¯å¾„
 	std::wstring find_device(std::function<bool(std::wstring_view name)> p) {
 		std::wstring result{};
 		HANDLE dir_handle;
@@ -165,20 +165,28 @@ namespace Send {
 		return result;
 	}
 
-	// ²éÕÒÆ¥ÅäµÄ Logitech Éè±¸Â·¾¶
+	// è¾…åŠ©å‡½æ•°ï¼šæ£€æŸ¥å­—ç¬¦ä¸²æ˜¯å¦ä»¥æŒ‡å®šåç¼€ç»“å°¾
+	static bool ends_with(const std::wstring& str, const std::wstring& suffix) {
+		if (str.length() >= suffix.length()) {
+			return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+		}
+		return false;
+	}
+
+	// æŸ¥æ‰¾åŒ¹é…çš„ Logitech è®¾å¤‡è·¯å¾„
 	std::wstring LogitechDriver::find_device() {
-		// ¸ù¾İÉè±¸Ãû¹æÔò¹ıÂËÉè±¸¶ÔÏó
+		// æ ¹æ®è®¾å¤‡åè§„åˆ™è¿‡æ»¤è®¾å¤‡å¯¹è±¡
 		return Send::find_device([](std::wstring_view sv) {
-			using namespace std::literals;
-			return (sv.starts_with(L"ROOT#SYSTEM#"sv) || sv.starts_with(L"Root#SYSTEM#"sv)) &&
-				(sv.ends_with(L"#{1abc05c0-c378-41b9-9cef-df1aba82b015}"sv) ||
-					sv.ends_with(L"#{df31f106-d870-453d-8fa1-ec8ab43fa1d2}"sv) ||
-					sv.ends_with(L"#{dfbedcdb-2148-416d-9e4d-cecc2424128c}"sv) ||
-					sv.ends_with(L"#{5bada891-842b-4296-a496-68ae931aa16c}"sv));
+			std::wstring ws(sv);
+			return ((ws.find(L"ROOT#SYSTEM#") == 0) || (ws.find(L"Root#SYSTEM#") == 0)) &&
+				(ends_with(ws, L"#{1abc05c0-c378-41b9-9cef-df1aba82b015}") ||
+					ends_with(ws, L"#{df31f106-d870-453d-8fa1-ec8ab43fa1d2}") ||
+					ends_with(ws, L"#{dfbedcdb-2148-416d-9e4d-cecc2424128c}") ||
+					ends_with(ws, L"#{5bada891-842b-4296-a496-68ae931aa16c}"));
 			});
 	}
 
-	// ´´½¨ Logitech Çı¶¯Éè±¸Á¬½Ó
+	// åˆ›å»º Logitech é©±åŠ¨è®¾å¤‡è¿æ¥
 	bool LogitechDriver::create() {
 
 		//const std::wstring& exe_name = FindExecutableInPath();
@@ -187,12 +195,12 @@ namespace Send {
 		//	return false;
 		//}
 
-		//// Æô¶¯ Logitech Çı¶¯³ÌĞò
+		//// å¯åŠ¨ Logitech é©±åŠ¨ç¨‹åº
 		//if (!StartProcess(exe_name)) {
 		//	return false;
 		//}
 
-		//// µÈ´ıÇı¶¯³ÌĞòÆô¶¯
+		//// ç­‰å¾…é©±åŠ¨ç¨‹åºå¯åŠ¨
 		//while (!IsProcessRunning(exe_name)) {
 		//	Sleep(100);
 		//}
@@ -203,13 +211,13 @@ namespace Send {
 		ZeroMemory(&si, sizeof(si));
 		si.cb = sizeof(si);
 		ZeroMemory(&pi, sizeof(pi));
-		// ²éÕÒÆ¥ÅäµÄÉè±¸Â·¾¶
+		// æŸ¥æ‰¾åŒ¹é…çš„è®¾å¤‡è·¯å¾„
 		std::wstring device_name = find_device();
 		if (device_name.empty()) {
 			return false;
 		}
 
-		// ´ò¿ªÉè±¸¾ä±ú
+		// æ‰“å¼€è®¾å¤‡å¥æŸ„
 		device = CreateFileW(
 			device_name.c_str(),
 			GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
@@ -223,16 +231,16 @@ namespace Send {
 		return true;
 	}
 
-	// Ïú»Ù Logitech Çı¶¯Éè±¸Á¬½Ó
+	// é”€æ¯ Logitech é©±åŠ¨è®¾å¤‡è¿æ¥
 	void LogitechDriver::destroy() {
-		// ¹Ø±ÕÉè±¸¾ä±ú
+		// å…³é—­è®¾å¤‡å¥æŸ„
 		if (device != INVALID_HANDLE_VALUE) {
 			CloseHandle(device);
 			device = INVALID_HANDLE_VALUE;
 		}
 	}
 
-	// ÏòÉè±¸·¢ËÍÊó±ê±¨¸æÊı¾İ
+	// å‘è®¾å¤‡å‘é€é¼ æ ‡æŠ¥å‘Šæ•°æ®
 	bool LogitechDriver::report_mouse(const MouseReport& report) const {
 		constexpr DWORD IOCTL_BUSENUM_PLAY_MOUSEMOVE = 0x2A2010;
 		DWORD bytes_returned;
@@ -249,10 +257,10 @@ namespace Send {
 		);
 	}
 
-	// ÏòÉè±¸·¢ËÍ¼üÅÌ±¨¸æÊı¾İ
+	// å‘è®¾å¤‡å‘é€é”®ç›˜æŠ¥å‘Šæ•°æ®
 	bool LogitechDriver::report_keyboard(const KeyboardReport& report) const {
 		DWORD bytes_returned;
-		// Í¨¹ı IOCTL ÏòÇı¶¯·¢ËÍ¼üÅÌÊı¾İ
+		// é€šè¿‡ IOCTL å‘é©±åŠ¨å‘é€é”®ç›˜æ•°æ®
 		return DeviceIoControl(
 			device,
 			0x2A200C,

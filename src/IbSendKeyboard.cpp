@@ -55,8 +55,7 @@ DLLAPI bool WINAPI KeyPress(uint16_t vk) {
 	return send_keyboard_input_bulk(inputs, 2);
 }
 
-// KeyCombo 的 vector 重载版本（用于 Python 绑定）
-bool KeyCombo(const std::vector<uint16_t>& keys) {
+DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -79,14 +78,7 @@ bool KeyCombo(const std::vector<uint16_t>& keys) {
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
 }
 
-// 保留原有的 initializer_list 版本（向后兼容）
-DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
-	std::vector<uint16_t> vec(keys.begin(), keys.end());
-	return KeyCombo(vec);
-}
-
-// KeySeq 的 vector 重载版本（用于 Python 绑定）
-bool KeySeq(const std::vector<uint16_t>& keys) {
+DLLAPI bool WINAPI KeySeq(const std::vector<uint16_t>& keys) {
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -105,12 +97,6 @@ bool KeySeq(const std::vector<uint16_t>& keys) {
 	}
 
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
-}
-
-// 保留原有的 initializer_list 版本（向后兼容）
-DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys) {
-	std::vector<uint16_t> vec(keys.begin(), keys.end());
-	return KeySeq(vec);
 }
 
 DLLAPI void WINAPI release_all_keys() {
