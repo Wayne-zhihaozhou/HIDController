@@ -1,5 +1,6 @@
 # Build outputs
 build/
+_obj/
 dll/*.dll
 dll/*.lib
 hid_controller/*.pyd
