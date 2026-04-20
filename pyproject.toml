@@ -1,14 +1,14 @@
 [build-system]
-requires = ["setuptools>=42", "pybind11>=2.10.0"]
+requires = ["setuptools>=64", "pybind11>=2.10.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hid_controller"
+name = "hid-controller"
 version = "1.0.0"
 description = "Mouse and keyboard control via Logitech HID reports"
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.12"
+requires-python = ">=3.8"
 authors = [
     { name = "HIDController" }
 ]
@@ -17,10 +17,34 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
 [project.urls]
 Homepage = "https://github.com/Wayne-zhihaozhou/DriverMouse"
 Repository = "https://github.com/Wayne-zhihaozhou/DriverMouse"
+
+[tool.setuptools]
+zip-safe = false
+
+[tool.cibuildwheel]
+# 构建哪些平台
+build = "cp311-win-amd64 cp312-win-amd64 cp313-win-amd64 cp311-linux_x86_64 cp312-linux_x86_64 cp313-linux_x86_64 cp311-macosx_x86_64 cp312-macosx_x86_64 cp313-macosx_x86_64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64"
+
+# 跳过不支持的构建
+skip = ["*-musllinux_*", "*-win32", "*-win_arm64"]
+
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]

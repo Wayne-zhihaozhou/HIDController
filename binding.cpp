@@ -79,51 +79,51 @@ static uint16_t key_to_vk(const std::string& key) {
     return 0;
 }
 
-PYBIND11_MODULE(hid_controller, m) {
+PYBIND11_MODULE(_extension, m) {
     m.doc() = "Python bindings for HIDController - Mouse and keyboard control via Logitech HID reports";
 
     // ==================== 鼠标控制函数 ====================
 
-    m.def("MouseMoveRelative", &MouseMoveRelative,
+    m.def("move_mouse_relative", &MouseMoveRelative,
           py::arg("dx"), py::arg("dy"),
           "Move mouse relatively. Args: dx (int), dy (int)");
 
-    m.def("MouseMoveAbsolute", &MouseMoveAbsolute,
+    m.def("move_mouse_absolute", &MouseMoveAbsolute,
           py::arg("x"), py::arg("y"),
           "Move mouse absolutely. Args: x (int), y (int)");
 
-    m.def("MouseDown", &MouseDown,
+    m.def("mouse_down", &MouseDown,
           py::arg("button"),
           "Mouse button down. Args: button (int) - MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_RIGHTDOWN, etc.");
 
-    m.def("MouseUp", &MouseUp,
+    m.def("mouse_up", &MouseUp,
           py::arg("button"),
           "Mouse button up. Args: button (int)");
 
-    m.def("MouseClick", &MouseClick,
+    m.def("mouse_click", &MouseClick,
           py::arg("button"),
           "Mouse click (down + up). Args: button (int)");
 
-    m.def("MouseWheel", &MouseWheel,
+    m.def("mouse_wheel", &MouseWheel,
           py::arg("movement"),
           "Mouse wheel scroll. Args: movement (int) - typically 120 for one notch");
 
-    m.def("SetMouseMoveCoefficient", &SetMouseMoveCoefficient,
+    m.def("set_mouse_move_coefficient", &SetMouseMoveCoefficient,
           py::arg("coefficient"),
           "Set mouse move speed coefficient. Args: coefficient (float)");
 
-    m.def("AutoCalibrate", &AutoCalibrate,
+    m.def("auto_calibrate", &AutoCalibrate,
           "Automatically calibrate mouse speed coefficient.");
 
-    m.def("DisableMouseAcceleration", &DisableMouseAcceleration,
+    m.def("disable_mouse_acceleration", &DisableMouseAcceleration,
           "Disable Windows mouse acceleration.");
 
-    m.def("EnableMouseAcceleration", &EnableMouseAcceleration,
+    m.def("enable_mouse_acceleration", &EnableMouseAcceleration,
           "Restore Windows mouse acceleration.");
 
     // ==================== 键盘控制函数 ====================
 
-    m.def("KeyDown", [](py::object vk) -> bool {
+    m.def("key_down", [](py::object vk) -> bool {
         uint16_t vk_code = 0;
 
         if (py::isinstance<py::str>(vk)) {
@@ -137,7 +137,7 @@ PYBIND11_MODULE(hid_controller, m) {
     }, py::arg("vk"),
        "Key down. Args: vk (int or str) - virtual key code or key character/string");
 
-    m.def("KeyUp", [](py::object vk) -> bool {
+    m.def("key_up", [](py::object vk) -> bool {
         uint16_t vk_code = 0;
 
         if (py::isinstance<py::str>(vk)) {
@@ -151,7 +151,7 @@ PYBIND11_MODULE(hid_controller, m) {
     }, py::arg("vk"),
        "Key up. Args: vk (int or str)");
 
-    m.def("KeyPress", [](py::object vk) -> bool {
+    m.def("key_press", [](py::object vk) -> bool {
         uint16_t vk_code = 0;
 
         if (py::isinstance<py::str>(vk)) {
@@ -165,7 +165,7 @@ PYBIND11_MODULE(hid_controller, m) {
     }, py::arg("vk"),
        "Key press (down + up). Args: vk (int or str)");
 
-    m.def("KeyCombo", [](py::list keys) -> bool {
+    m.def("key_combo", [](py::list keys) -> bool {
         std::vector<uint16_t> vk_codes;
         for (auto item : keys) {
             uint16_t code = 0;
@@ -181,7 +181,7 @@ PYBIND11_MODULE(hid_controller, m) {
     }, py::arg("keys"),
        "Key combination (press all then release all in reverse). Args: keys (list of int or str)");
 
-    m.def("KeySeq", [](py::list keys) -> bool {
+    m.def("key_seq", [](py::list keys) -> bool {
         std::vector<uint16_t> vk_codes;
         for (auto item : keys) {
             uint16_t code = 0;
