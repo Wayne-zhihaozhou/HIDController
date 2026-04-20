@@ -10,7 +10,7 @@ readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"
 authors = [
-    { name = "HIDController" }
+    { name = "zhihao.zhou" }
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -48,3 +48,38 @@ archs = ["x86_64"]
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
+
+# Python 代码规范配置
+[tool.black]
+line-length = 120
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312', 'py313']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | vendor
+    | wheels
+)/
+'''
+
+[tool.flake8]
+max-line-length = 120
+max-complexity = 18
+show-source = true
+ignore = "E203,W503"
+per-file-ignores = "__init__.py:F401"
+count = true
+statistics = true
+
+[tool.isort]
+profile = "black"
+line_length = 120
+multi_line_output = 3

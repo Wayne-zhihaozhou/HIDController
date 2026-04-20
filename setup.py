@@ -1,5 +1,8 @@
-from pybind11.setup_helpers import Pybind11Extension, build_ext
+import sys
+
 import pybind11
+from pybind11.setup_helpers import Pybind11Extension, build_ext
+from setuptools import setup
 
 # 包含所有源文件：binding.cpp + 原有C++实现
 src_files = [
@@ -26,11 +29,9 @@ ext_modules = [
 ]
 
 # Windows 需要链接的库
-import sys
 if sys.platform == "win32":
     ext_modules[0].libraries.extend(["user32", "kernel32", "advapi32", "winmm"])
 
-from setuptools import setup
 
 setup(
     name="hid-controller",
