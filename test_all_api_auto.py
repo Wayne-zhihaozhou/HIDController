@@ -7,8 +7,9 @@ HIDController Python 扩展完整 API 自动测试脚本
 2. 准备好观察鼠标移动和键盘输入效果
 """
 
-import hid_controller
 import time
+
+import hid_controller
 
 
 def print_header(title):
@@ -22,9 +23,9 @@ def test_module_info():
     """测试模块导入和基本功能检查"""
     print_header("模块检查: hid_controller")
 
-    print(f"✓ hid_controller 模块导入成功")
-    print(f"  可用函数:")
-    functions = sorted([f for f in dir(hid_controller) if not f.startswith('_')])
+    print("✓ hid_controller 模块导入成功")
+    print("  可用函数:")
+    functions = sorted([f for f in dir(hid_controller) if not f.startswith("_")])
     for func in functions:
         print(f"    - {func}")
 
@@ -245,15 +246,15 @@ def test_keyboard_simple():
     print_header("测试 8: 键盘简单按键 (key_down/key_up/key_press)")
 
     print("8.1 按下 'a' 键")
-    result = hid_controller.key_down('a')
+    result = hid_controller.key_down("a")
     print(f"  返回值: {result}")
     time.sleep(0.3)
-    result = hid_controller.key_up('a')
+    result = hid_controller.key_up("a")
     print(f"  抬起 'a'，返回值: {result}")
     time.sleep(0.3)
 
     print("8.2 按键 'b' (key_press)")
-    result = hid_controller.key_press('b')
+    result = hid_controller.key_press("b")
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
@@ -270,17 +271,17 @@ def test_keyboard_combo():
     print_header("测试 9: 键盘组合键 (key_combo)")
 
     print("9.1 Ctrl+C 组合键")
-    result = hid_controller.key_combo(['lctrl', 'c'])
+    result = hid_controller.key_combo(["lctrl", "c"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
     print("9.2 Ctrl+V 组合键")
-    result = hid_controller.key_combo(['lctrl', 'v'])
+    result = hid_controller.key_combo(["lctrl", "v"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
     print("9.3 Alt+Tab 组合键")
-    result = hid_controller.key_combo(['lalt', 'tab'])
+    result = hid_controller.key_combo(["lalt", "tab"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
@@ -292,12 +293,12 @@ def test_keyboard_sequence():
     print_header("测试 10: 键盘按键序列 (key_seq)")
 
     print("10.1 依次按下 'x', 'y', 'z'")
-    result = hid_controller.key_seq(['x', 'y', 'z'])
+    result = hid_controller.key_seq(["x", "y", "z"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
     print("10.2 依次按下 '1', '2', '3'")
-    result = hid_controller.key_seq(['1', '2', '3'])
+    result = hid_controller.key_seq(["1", "2", "3"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
@@ -309,8 +310,8 @@ def test_release_all():
     print_header("测试 11: 释放所有按键 (release_all_keys)")
 
     print("11.1 按下几个键")
-    hid_controller.key_down('a')
-    hid_controller.key_down('b')
+    hid_controller.key_down("a")
+    hid_controller.key_down("b")
     time.sleep(0.3)
 
     print("11.2 释放所有按键")
@@ -325,31 +326,31 @@ def test_special_keys():
     print_header("测试 12: 特殊键")
 
     print("12.1 空格键")
-    result = hid_controller.key_press('space')
+    result = hid_controller.key_press("space")
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
     print("12.2 Enter 键")
-    result = hid_controller.key_press('enter')
+    result = hid_controller.key_press("enter")
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
     print("12.3 Escape 键")
-    result = hid_controller.key_press('escape')
+    result = hid_controller.key_press("escape")
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
     print("12.4 F1-F12 功能键")
     for i in range(1, 4):
-        result = hid_controller.key_press(f'f{i}')
+        result = hid_controller.key_press(f"f{i}")
         print(f"  F{i} 返回值: {result}")
         time.sleep(0.2)
 
     print("12.5 方向键")
-    result = hid_controller.key_press('up')
+    result = hid_controller.key_press("up")
     print(f"  上箭头 返回值: {result}")
     time.sleep(0.2)
-    result = hid_controller.key_press('down')
+    result = hid_controller.key_press("down")
     print(f"  下箭头 返回值: {result}")
     time.sleep(0.2)
 

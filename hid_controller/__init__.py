@@ -1,5 +1,6 @@
 """HIDController - Mouse and keyboard control via Logitech HID reports."""
 
+
 # 鼠标事件常量
 class MouseEvent:
     LEFT_DOWN = 0x02
@@ -16,10 +17,12 @@ class MouseEvent:
     WHEEL = 0x0800
     ABSOLUTE = 0x8000
 
+
 # 键盘事件常量
 class KeyEvent:
     KEYUP = 0x0002
     EXTENDED_KEY = 0x0001
+
 
 try:
     from ._extension import (
@@ -41,10 +44,10 @@ try:
         set_mouse_move_coefficient,
     )
 except ImportError:
+
     def _none_func(*args, **kwargs):
         raise RuntimeError(
-            "hid_controller extension not compiled. "
-            "Run: pip install . 或 python setup.py build_ext --inplace"
+            "hid_controller extension not compiled. " "Run: pip install . 或 python setup.py build_ext --inplace"
         )
 
     auto_calibrate = _none_func

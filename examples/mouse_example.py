@@ -5,8 +5,9 @@
 使用前请确保已安装并启动 Logitech Gaming Software (LGS)。
 """
 
-import hid_controller
 import time
+
+import hid_controller
 
 
 def main():

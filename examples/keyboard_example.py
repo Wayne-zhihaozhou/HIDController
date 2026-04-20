@@ -5,8 +5,9 @@
 使用前请确保已安装并启动 Logitech Gaming Software (LGS)。
 """
 
-import hid_controller
 import time
+
+import hid_controller
 
 
 def main():
@@ -14,14 +15,14 @@ def main():
 
     # 1. 单键按下（使用字符串键名）
     print("1. 按下 'a' 键")
-    hid_controller.key_down('a')
+    hid_controller.key_down("a")
     time.sleep(0.3)
-    hid_controller.key_up('a')
+    hid_controller.key_up("a")
     time.sleep(0.3)
 
     # 2. 按键（按下并抬起）
     print("2. 按下 'b' 键")
-    hid_controller.key_press('b')
+    hid_controller.key_press("b")
     time.sleep(0.3)
 
     # 3. 使用虚拟键码
@@ -31,27 +32,27 @@ def main():
 
     # 4. 组合键（Ctrl+C）
     print("4. 组合键：Ctrl+C")
-    hid_controller.key_combo(['lctrl', 'c'])
+    hid_controller.key_combo(["lctrl", "c"])
     time.sleep(0.5)
 
     # 5. 组合键（Ctrl+A）
     print("5. 组合键：Ctrl+A")
-    hid_controller.key_combo(['lctrl', 'a'])
+    hid_controller.key_combo(["lctrl", "a"])
     time.sleep(0.5)
 
     # 6. 按键序列（依次按下并释放）
     print("6. 按键序列：abc")
-    hid_controller.key_seq(['a', 'b', 'c'])
+    hid_controller.key_seq(["a", "b", "c"])
     time.sleep(0.5)
 
     # 7. 功能键
     print("7. 按下 F1 键")
-    hid_controller.key_press('f1')
+    hid_controller.key_press("f1")
     time.sleep(0.5)
 
     # 8. 特殊键
     print("8. 按下空格键")
-    hid_controller.key_press('space')
+    hid_controller.key_press("space")
     time.sleep(0.3)
 
     # 9. 释放所有按键
