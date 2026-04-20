@@ -1,25 +1,28 @@
 from pybind11.setup_helpers import Pybind11Extension, build_ext
-from pybind11 import get_cmake_dir
 import pybind11
 import os
 
-# 只包含binding.cpp，不包含原始项目源文件，因为我们直接使用Windows API
+# 包含所有源文件：binding.cpp + 原有C++实现
 src_files = [
-    "binding.cpp"
+    "binding.cpp",
+    "src/IbSendMouse.cpp",
+    "src/IbSendKeyboard.cpp",
+    "src/Logitech.cpp",
+    "src/LogitechDriver.cpp",
+    "src/pch.cpp",
 ]
 
 # 创建扩展模块
 ext_modules = [
     Pybind11Extension(
         "hid_controller",
-        src_files,  # 只包含binding.cpp
+        src_files,
         include_dirs=[
             "include",
-            "dll"
         ],
         cxx_std=17,
-        define_macros=[("DLL1_EXPORTS", "1")],  # 添加DLL导出定义
-        libraries=["user32", "kernel32", "advapi32", "winmm"],  # 添加Windows API库，移除DLL库
+        define_macros=[("DLL1_EXPORTS", "1")],
+        libraries=["user32", "kernel32", "advapi32", "winmm"],
     ),
 ]
 

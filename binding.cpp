@@ -1,459 +1,201 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <windows.h>
+#include <pybind11/functional.h>
+#include "HIDController.hpp"
 
-// 直接使用Windows API，避免Logitech类依赖
 namespace py = pybind11;
 
+/*
+ * HIDController Python 扩展
+ * 
+ * 通过向 Logitech 虚拟驱动发送 HID 报告来控制键盘鼠标。
+ * 使用前必须安装并启动 Logitech Gaming Software (LGS)。
+ */
+
 PYBIND11_MODULE(hid_controller, m) {
-    m.doc() = "Python bindings for HIDController using direct Windows API";
+    m.doc() = "Python bindings for HIDController - Mouse and keyboard control via Logitech HID reports";
 
-    // Mouse control functions
-    m.def("MouseMoveRelative", [](int32_t dx, int32_t dy) {
-        // 使用SendInput直接发送鼠标移动
-        INPUT input = {0};
-        input.type = INPUT_MOUSE;
-        input.mi.dx = dx;
-        input.mi.dy = dy;
-        input.mi.dwFlags = MOUSEEVENTF_MOVE;
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Move mouse relatively");
+    // ==================== 鼠标控制函数 ====================
 
-    m.def("MouseMoveAbsolute", [](uint32_t x, uint32_t y) {
-        // 使用SendInput直接发送绝对鼠标位置
-        INPUT input = {0};
-        input.type = INPUT_MOUSE;
-        input.mi.dx = x;
-        input.mi.dy = y;
-        input.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Move mouse absolutely");
+    m.def("MouseMoveRelative", &MouseMoveRelative,
+          py::arg("dx"), py::arg("dy"),
+          "Move mouse relatively. Args: dx (int), dy (int)");
 
-    m.def("MouseDown", [](uint16_t button) {
-        // 模拟鼠标按下
-        INPUT input = {0};
-        input.type = INPUT_MOUSE;
-        if (button & 0x01) input.mi.dwFlags |= MOUSEEVENTF_LEFTDOWN;   // 左键
-        if (button & 0x02) input.mi.dwFlags |= MOUSEEVENTF_RIGHTDOWN;  // 右键
-        if (button & 0x04) input.mi.dwFlags |= MOUSEEVENTF_MIDDLEDOWN; // 中键
-        if (button & 0x08) input.mi.dwFlags |= MOUSEEVENTF_XDOWN;      // X键
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Mouse down");
+    m.def("MouseMoveAbsolute", &MouseMoveAbsolute,
+          py::arg("x"), py::arg("y"),
+          "Move mouse absolutely. Args: x (int), y (int)");
 
-    m.def("MouseUp", [](uint16_t button) {
-        // 模拟鼠标抬起
-        INPUT input = {0};
-        input.type = INPUT_MOUSE;
-        if (button & 0x01) input.mi.dwFlags |= MOUSEEVENTF_LEFTUP;   // 左键
-        if (button & 0x02) input.mi.dwFlags |= MOUSEEVENTF_RIGHTUP;  // 右键
-        if (button & 0x04) input.mi.dwFlags |= MOUSEEVENTF_MIDDLEUP; // 中键
-        if (button & 0x08) input.mi.dwFlags |= MOUSEEVENTF_XUP;      // X键
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Mouse up");
+    m.def("MouseDown", &MouseDown,
+          py::arg("button"),
+          "Mouse button down. Args: button (int) - MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_RIGHTDOWN, etc.");
 
-    m.def("MouseClick", [](uint16_t button) {
-        // 模拟鼠标点击（按下然后抬起）
-        // 直接使用SendInput，避免调用未定义的函数
-        INPUT input = {0};
-        input.type = INPUT_MOUSE;
-        if (button & 0x01) input.mi.dwFlags |= MOUSEEVENTF_LEFTDOWN;   // 左键按下
-        if (button & 0x02) input.mi.dwFlags |= MOUSEEVENTF_RIGHTDOWN;  // 右键按下
-        if (button & 0x04) input.mi.dwFlags |= MOUSEEVENTF_MIDDLEDOWN; // 中键按下
-        if (button & 0x08) input.mi.dwFlags |= MOUSEEVENTF_XDOWN;      // X键按下
-        SendInput(1, &input, sizeof(INPUT));
+    m.def("MouseUp", &MouseUp,
+          py::arg("button"),
+          "Mouse button up. Args: button (int)");
+
+    m.def("MouseClick", &MouseClick,
+          py::arg("button"),
+          "Mouse click (down + up). Args: button (int)");
+
+    m.def("MouseWheel", &MouseWheel,
+          py::arg("movement"),
+          "Mouse wheel scroll. Args: movement (int) - typically 120 for one notch");
+
+    m.def("SetMouseMoveCoefficient", &SetMouseMoveCoefficient,
+          py::arg("coefficient"),
+          "Set mouse move speed coefficient. Args: coefficient (float)");
+
+    m.def("AutoCalibrate", &AutoCalibrate,
+          "Automatically calibrate mouse speed coefficient.");
+
+    m.def("DisableMouseAcceleration", &DisableMouseAcceleration,
+          "Disable Windows mouse acceleration.");
+
+    m.def("EnableMouseAcceleration", &EnableMouseAcceleration,
+          "Restore Windows mouse acceleration.");
+
+    // ==================== 键盘控制函数 ====================
+
+    m.def("KeyDown", [](py::object vk) -> bool {
+        uint16_t vk_code = 0;
         
-        // 再抬起
-        input.mi.dwFlags = 0;
-        if (button & 0x01) input.mi.dwFlags |= MOUSEEVENTF_LEFTUP;   // 左键抬起
-        if (button & 0x02) input.mi.dwFlags |= MOUSEEVENTF_RIGHTUP;  // 右键抬起
-        if (button & 0x04) input.mi.dwFlags |= MOUSEEVENTF_MIDDLEUP; // 中键抬起
-        if (button & 0x08) input.mi.dwFlags |= MOUSEEVENTF_XUP;      // X键抬起
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Mouse click");
-
-    m.def("MouseWheel", [](int32_t movement) {
-        // 模拟鼠标滚轮
-        INPUT input = {0};
-        input.type = INPUT_MOUSE;
-        input.mi.dwFlags = MOUSEEVENTF_WHEEL;
-        input.mi.mouseData = movement;
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Mouse wheel");
-
-    // Keyboard control functions
-    m.def("KeyDown", [](py::object vk) {
-        // 模拟按键按下
-        uint16_t vk_code;
-        
-        // 如果是字符串，转换为对应的虚拟键码
         if (py::isinstance<py::str>(vk)) {
             std::string key = vk.cast<std::string>();
-            
-            // 处理特殊字符串表述的修饰键
-            if (key == "space") {
-                vk_code = VK_SPACE;
-            } else if (key == "shift") {
-                vk_code = VK_SHIFT;
-            } else if (key == "ctrl") {
-                vk_code = VK_CONTROL;
-            } else if (key == "alt") {
-                vk_code = VK_MENU;
-            } else if (key == "win") {
-                vk_code = VK_LWIN;  // 左Windows键
-            } else if (key == "enter") {
-                vk_code = VK_RETURN;
-            } else if (key == "escape") {
-                vk_code = VK_ESCAPE;
-            } else if (key == "tab") {
-                vk_code = VK_TAB;
-            } else if (key.length() == 1) {
-                // 单字符处理
-                char c = key[0];
-                if (c >= 'A' && c <= 'Z') {
-                    // 大写字母A-Z
-                    vk_code = c - 'A' + 0x41;
-                } else if (c >= 'a' && c <= 'z') {
-                    // 小写字母a-z
-                    vk_code = c - 'a' + 0x41;
-                } else if (c >= '0' && c <= '9') {
-                    // 数字0-9
-                    vk_code = c - '0' + 0x30;
-                } else {
-                    // 其他字符，尝试使用字符的ASCII码
-                    vk_code = c;
-                }
-            } else {
-                // 不是单字符，直接使用ASCII码
-                vk_code = key[0];
-            }
+            vk_code = key_to_vk(key);
         } else {
-            // 如果是整数，直接使用
             vk_code = vk.cast<uint16_t>();
         }
         
-        INPUT input = {0};
-        input.type = INPUT_KEYBOARD;
-        input.ki.wVk = vk_code;
-        input.ki.dwFlags = 0;  // 按下
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Key down");
+        return KeyDown(vk_code);
+    }, py::arg("vk"),
+       "Key down. Args: vk (int or str) - virtual key code or key character/string");
 
-    m.def("KeyUp", [](py::object vk) {
-        // 模拟按键抬起
-        uint16_t vk_code;
+    m.def("KeyUp", [](py::object vk) -> bool {
+        uint16_t vk_code = 0;
         
-        // 如果是字符串，转换为对应的虚拟键码
         if (py::isinstance<py::str>(vk)) {
             std::string key = vk.cast<std::string>();
-            
-            // 处理特殊字符串表述的修饰键
-            if (key == "space") {
-                vk_code = VK_SPACE;
-            } else if (key == "shift") {
-                vk_code = VK_SHIFT;
-            } else if (key == "ctrl") {
-                vk_code = VK_CONTROL;
-            } else if (key == "alt") {
-                vk_code = VK_MENU;
-            } else if (key == "win") {
-                vk_code = VK_LWIN;  // 左Windows键
-            } else if (key == "enter") {
-                vk_code = VK_RETURN;
-            } else if (key == "escape") {
-                vk_code = VK_ESCAPE;
-            } else if (key == "tab") {
-                vk_code = VK_TAB;
-            } else if (key.length() == 1) {
-                // 单字符处理
-                char c = key[0];
-                if (c >= 'A' && c <= 'Z') {
-                    // 大写字母A-Z
-                    vk_code = c - 'A' + 0x41;
-                } else if (c >= 'a' && c <= 'z') {
-                    // 小写字母a-z
-                    vk_code = c - 'a' + 0x41;
-                } else if (c >= '0' && c <= '9') {
-                    // 数字0-9
-                    vk_code = c - '0' + 0x30;
-                } else {
-                    // 其他字符，尝试使用字符的ASCII码
-                    vk_code = c;
-                }
-            } else {
-                // 不是单字符，直接使用ASCII码
-                vk_code = key[0];
-            }
+            vk_code = key_to_vk(key);
         } else {
-            // 如果是整数，直接使用
             vk_code = vk.cast<uint16_t>();
         }
         
-        INPUT input = {0};
-        input.type = INPUT_KEYBOARD;
-        input.ki.wVk = vk_code;
-        input.ki.dwFlags = KEYEVENTF_KEYUP;  // 抬起
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Key up");
+        return KeyUp(vk_code);
+    }, py::arg("vk"),
+       "Key up. Args: vk (int or str)");
 
-    m.def("KeyPress", [](py::object vk) {
-        // 模拟按键按下和抬起
-        uint16_t vk_code;
+    m.def("KeyPress", [](py::object vk) -> bool {
+        uint16_t vk_code = 0;
         
-        // 如果是字符串，转换为对应的虚拟键码
         if (py::isinstance<py::str>(vk)) {
             std::string key = vk.cast<std::string>();
-            
-            // 处理特殊字符串表述的修饰键
-            if (key == "space") {
-                vk_code = VK_SPACE;
-            } else if (key == "shift") {
-                vk_code = VK_SHIFT;
-            } else if (key == "ctrl") {
-                vk_code = VK_CONTROL;
-            } else if (key == "alt") {
-                vk_code = VK_MENU;
-            } else if (key == "win") {
-                vk_code = VK_LWIN;  // 左Windows键
-            } else if (key == "enter") {
-                vk_code = VK_RETURN;
-            } else if (key == "escape") {
-                vk_code = VK_ESCAPE;
-            } else if (key == "tab") {
-                vk_code = VK_TAB;
-            } else if (key.length() == 1) {
-                // 单字符处理
-                char c = key[0];
-                if (c >= 'A' && c <= 'Z') {
-                    // 大写字母A-Z
-                    vk_code = c - 'A' + 0x41;
-                } else if (c >= 'a' && c <= 'z') {
-                    // 小写字母a-z
-                    vk_code = c - 'a' + 0x41;
-                } else if (c >= '0' && c <= '9') {
-                    // 数字0-9
-                    vk_code = c - '0' + 0x30;
-                } else {
-                    // 其他字符，尝试使用字符的ASCII码
-                    vk_code = c;
-                }
-            } else {
-                // 不是单字符，直接使用ASCII码
-                vk_code = key[0];
-            }
+            vk_code = key_to_vk(key);
         } else {
-            // 如果是整数，直接使用
             vk_code = vk.cast<uint16_t>();
         }
         
-        // 直接使用SendInput，避免调用未定义的函数
-        INPUT input = {0};
-        input.type = INPUT_KEYBOARD;
-        input.ki.wVk = vk_code;
-        input.ki.dwFlags = 0;  // 按下
-        SendInput(1, &input, sizeof(INPUT));
-        
-        input.ki.dwFlags = KEYEVENTF_KEYUP;  // 抬起
-        return SendInput(1, &input, sizeof(INPUT)) > 0;
-    }, "Key press");
+        return KeyPress(vk_code);
+    }, py::arg("vk"),
+       "Key press (down + up). Args: vk (int or str)");
 
-    // 为 KeyCombo 和 KeySeq 使用特殊处理
-    m.def("KeyCombo", [](py::list keys) {
-        // 模拟组合键
-        std::vector<INPUT> inputs;
-        inputs.reserve(py::len(keys) * 2);
-
-        // 先按下所有键
-        for (auto vk : keys) {
-            uint16_t vk_code;
-            
-            // 如果是字符串，转换为对应的虚拟键码
-            if (py::isinstance<py::str>(vk)) {
-                std::string key = vk.cast<std::string>();
-                
-                // 处理特殊字符串表述的修饰键
-                if (key == "space") {
-                    vk_code = VK_SPACE;
-                } else if (key == "shift") {
-                    vk_code = VK_SHIFT;
-                } else if (key == "ctrl") {
-                    vk_code = VK_CONTROL;
-                } else if (key == "alt") {
-                    vk_code = VK_MENU;
-                } else if (key == "win") {
-                    vk_code = VK_LWIN;  // 左Windows键
-                } else if (key == "enter") {
-                    vk_code = VK_RETURN;
-                } else if (key == "escape") {
-                    vk_code = VK_ESCAPE;
-                } else if (key == "tab") {
-                    vk_code = VK_TAB;
-                } else if (key.length() == 1) {
-                    // 单字符处理
-                    char c = key[0];
-                    if (c >= 'A' && c <= 'Z') {
-                        // 大写字母A-Z
-                        vk_code = c - 'A' + 0x41;
-                    } else if (c >= 'a' && c <= 'z') {
-                        // 小写字母a-z
-                        vk_code = c - 'a' + 0x41;
-                    } else if (c >= '0' && c <= '9') {
-                        // 数字0-9
-                        vk_code = c - '0' + 0x30;
-                    } else {
-                        // 其他字符，尝试使用字符的ASCII码
-                        vk_code = c;
-                    }
-                } else {
-                    // 不是单字符，直接使用ASCII码
-                    vk_code = key[0];
-                }
+    m.def("KeyCombo", [](py::list keys) -> bool {
+        std::vector<uint16_t> vk_codes;
+        for (auto item : keys) {
+            uint16_t code = 0;
+            if (py::isinstance<py::str>(item)) {
+                std::string key = item.cast<std::string>();
+                code = key_to_vk(key);
             } else {
-                // 如果是整数，直接使用
-                vk_code = vk.cast<uint16_t>();
+                code = item.cast<uint16_t>();
             }
-            
-            INPUT input = {0};
-            input.type = INPUT_KEYBOARD;
-            input.ki.wVk = vk_code;
-            input.ki.dwFlags = 0;  // 按下
-            inputs.push_back(input);
+            vk_codes.push_back(code);
         }
+        return KeyCombo(vk_codes);
+    }, py::arg("keys"),
+       "Key combination (press all then release all in reverse). Args: keys (list of int or str)");
 
-        // 再抬起所有键
-        for (auto it = keys.end(); it != keys.begin();) {
-            --it;
-            uint16_t vk_code;
-            
-            // 如果是字符串，转换为对应的虚拟键码
-            if (py::isinstance<py::str>(*it)) {
-                std::string key = it->cast<std::string>();
-                
-                // 处理特殊字符串表述的修饰键
-                if (key == "space") {
-                    vk_code = VK_SPACE;
-                } else if (key == "shift") {
-                    vk_code = VK_SHIFT;
-                } else if (key == "ctrl") {
-                    vk_code = VK_CONTROL;
-                } else if (key == "alt") {
-                    vk_code = VK_MENU;
-                } else if (key == "win") {
-                    vk_code = VK_LWIN;  // 左Windows键
-                } else if (key == "enter") {
-                    vk_code = VK_RETURN;
-                } else if (key == "escape") {
-                    vk_code = VK_ESCAPE;
-                } else if (key == "tab") {
-                    vk_code = VK_TAB;
-                } else if (key.length() == 1) {
-                    // 单字符处理
-                    char c = key[0];
-                    if (c >= 'A' && c <= 'Z') {
-                        // 大写字母A-Z
-                        vk_code = c - 'A' + 0x41;
-                    } else if (c >= 'a' && c <= 'z') {
-                        // 小写字母a-z
-                        vk_code = c - 'a' + 0x41;
-                    } else if (c >= '0' && c <= '9') {
-                        // 数字0-9
-                        vk_code = c - '0' + 0x30;
-                    } else {
-                        // 其他字符，尝试使用字符的ASCII码
-                        vk_code = c;
-                    }
-                } else {
-                    // 不是单字符，直接使用ASCII码
-                    vk_code = key[0];
-                }
+    m.def("KeySeq", [](py::list keys) -> bool {
+        std::vector<uint16_t> vk_codes;
+        for (auto item : keys) {
+            uint16_t code = 0;
+            if (py::isinstance<py::str>(item)) {
+                std::string key = item.cast<std::string>();
+                code = key_to_vk(key);
             } else {
-                // 如果是整数，直接使用
-                vk_code = it->cast<uint16_t>();
+                code = item.cast<uint16_t>();
             }
-            
-            INPUT input = {0};
-            input.type = INPUT_KEYBOARD;
-            input.ki.wVk = vk_code;
-            input.ki.dwFlags = KEYEVENTF_KEYUP;  // 抬起
-            inputs.push_back(input);
+            vk_codes.push_back(code);
         }
+        return KeySeq(vk_codes);
+    }, py::arg("keys"),
+       "Key sequence (press and release each key in order). Args: keys (list of int or str)");
 
-        return SendInput(static_cast<UINT>(inputs.size()), inputs.data(), sizeof(INPUT)) > 0;
-    }, "Key combination");
+    m.def("release_all_keys", &release_all_keys,
+          "Release all pressed keys.");
+}
 
-    m.def("KeySeq", [](py::list keys) {
-        // 模拟按键序列
-        std::vector<INPUT> inputs;
-        inputs.reserve(py::len(keys) * 2);
+// ==================== 辅助函数 ====================
 
-        for (auto vk : keys) {
-            uint16_t vk_code;
-            
-            // 如果是字符串，转换为对应的虚拟键码
-            if (py::isinstance<py::str>(vk)) {
-                std::string key = vk.cast<std::string>();
-                
-                // 处理特殊字符串表述的修饰键
-                if (key == "space") {
-                    vk_code = VK_SPACE;
-                } else if (key == "shift") {
-                    vk_code = VK_SHIFT;
-                } else if (key == "ctrl") {
-                    vk_code = VK_CONTROL;
-                } else if (key == "alt") {
-                    vk_code = VK_MENU;
-                } else if (key == "win") {
-                    vk_code = VK_LWIN;  // 左Windows键
-                } else if (key == "enter") {
-                    vk_code = VK_RETURN;
-                } else if (key == "escape") {
-                    vk_code = VK_ESCAPE;
-                } else if (key == "tab") {
-                    vk_code = VK_TAB;
-                } else if (key.length() == 1) {
-                    // 单字符处理
-                    char c = key[0];
-                    if (c >= 'A' && c <= 'Z') {
-                        // 大写字母A-Z
-                        vk_code = c - 'A' + 0x41;
-                    } else if (c >= 'a' && c <= 'z') {
-                        // 小写字母a-z
-                        vk_code = c - 'a' + 0x41;
-                    } else if (c >= '0' && c <= '9') {
-                        // 数字0-9
-                        vk_code = c - '0' + 0x30;
-                    } else {
-                        // 其他字符，尝试使用字符的ASCII码
-                        vk_code = c;
-                    }
-                } else {
-                    // 不是单字符，直接使用ASCII码
-                    vk_code = key[0];
-                }
-            } else {
-                // 如果是整数，直接使用
-                vk_code = vk.cast<uint16_t>();
-            }
-            
-            // 按下
-            INPUT inputDown = {0};
-            inputDown.type = INPUT_KEYBOARD;
-            inputDown.ki.wVk = vk_code;
-            inputDown.ki.dwFlags = 0;
-            inputs.push_back(inputDown);
+/**
+ * 将字符串键名转换为虚拟键码
+ */
+static uint16_t key_to_vk(const std::string& key) {
+    // 特殊修饰键
+    if (key == "space")    return VK_SPACE;
+    if (key == "shift")    return VK_SHIFT;
+    if (key == "lshift")   return VK_LSHIFT;
+    if (key == "rshift")   return VK_RSHIFT;
+    if (key == "ctrl")     return VK_CONTROL;
+    if (key == "lctrl")    return VK_LCONTROL;
+    if (key == "rctrl")    return VK_RCONTROL;
+    if (key == "alt")      return VK_MENU;
+    if (key == "lalt")     return VK_LMENU;
+    if (key == "ralt")     return VK_RMENU;
+    if (key == "win")      return VK_LWIN;
+    if (key == "enter")    return VK_RETURN;
+    if (key == "escape")   return VK_ESCAPE;
+    if (key == "tab")      return VK_TAB;
+    if (key == "back")     return VK_BACK;
+    if (key == "delete")   return VK_DELETE;
+    if (key == "insert")   return VK_INSERT;
+    if (key == "home")     return VK_HOME;
+    if (key == "end")      return VK_END;
+    if (key == "pageup")   return VK_PRIOR;
+    if (key == "pagedown") return VK_NEXT;
+    if (key == "up")       return VK_UP;
+    if (key == "down")     return VK_DOWN;
+    if (key == "left")     return VK_LEFT;
+    if (key == "right")    return VK_RIGHT;
+    if (key == "capslock") return VK_CAPITAL;
+    if (key == "numlock")  return VK_NUMLOCK;
+    if (key == "scrolllock") return VK_SCROLL;
 
-            // 抬起
-            INPUT inputUp = {0};
-            inputUp.type = INPUT_KEYBOARD;
-            inputUp.ki.wVk = vk_code;
-            inputUp.ki.dwFlags = KEYEVENTF_KEYUP;
-            inputs.push_back(inputUp);
-        }
+    // 功能键
+    if (key == "f1") return VK_F1;
+    if (key == "f2") return VK_F2;
+    if (key == "f3") return VK_F3;
+    if (key == "f4") return VK_F4;
+    if (key == "f5") return VK_F5;
+    if (key == "f6") return VK_F6;
+    if (key == "f7") return VK_F7;
+    if (key == "f8") return VK_F8;
+    if (key == "f9") return VK_F9;
+    if (key == "f10") return VK_F10;
+    if (key == "f11") return VK_F11;
+    if (key == "f12") return VK_F12;
 
-        return SendInput(static_cast<UINT>(inputs.size()), inputs.data(), sizeof(INPUT)) > 0;
-    }, "Key sequence");
+    // 单字符处理
+    if (key.length() == 1) {
+        char c = key[0];
+        // 字母 A-Z
+        if (c >= 'a' && c <= 'z') return static_cast<uint16_t>(c);
+        if (c >= 'A' && c <= 'Z') return static_cast<uint16_t>(c);
+        // 数字 0-9
+        if (c >= '0' && c <= '9') return static_cast<uint16_t>(c);
+        // 其他字符
+        return static_cast<uint16_t>(c);
+    }
 
-    m.def("release_all_keys", []() {
-        // 释放所有按键（这个功能比较复杂，暂时不实现）
-        return true;
-    }, "Release all keys");
+    // 默认返回 0
+    return 0;
 }

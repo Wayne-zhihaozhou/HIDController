@@ -1,105 +1,163 @@
-# HIDController DLL
+# HIDController
 
-## 项目简介
-`HIDController.dll` 是一个 C++ 动态链接库，提供鼠标与键盘的底层控制能力，支持相对移动、点击、滚轮操作以及按键模拟等功能。  
+通过 Logitech 虚拟驱动发送 HID 报告来控制键盘鼠标的 Python 扩展。
 
-通过向 **Logitech Gaming Software (LGS)** 创建的虚拟驱动发送 **HID 报告** 来模拟输入事件，因此使用前必须安装并启动 LGS 以提供底层环境支持。
+> **重要提示**：使用前必须安装并启动 [Logitech Gaming Software (LGS)](https://www.logitechg.com/zh-cn/software/lgs)。该扩展通过向 Logitech 虚拟驱动发送 HID 报告来实现键盘鼠标控制，绕过游戏/系统的检测。
 
+## 安装
 
-## 项目特性
-1. 无需鼠标键盘硬件支持
-2. 更低输入延迟
-3. 过游戏屏蔽
-4. 不容易被游戏检测
+### 环境要求
 
+- Python 3.12+
+- C++ 编译器（Visual Studio Build Tools 或 Visual Studio）
+- Logitech Gaming Software (LGS)
 
-## 环境依赖
+### 安装步骤
 
-- **Logitech Gaming Software (LGS)**  
-  - 下载地址：[https://filehippo.com/download_logitech-gaming-software/9.02.65/](https://filehippo.com/download_logitech-gaming-software/9.02.65/)  
-  - **重要**：系统启动后必须手动运行一次 LGS，否则 DLL 无法正常操作鼠标。
+```bash
+# 安装 pybind11 依赖
+pip install pybind11
 
-
-## dll使用教程
-1. 将 HIDController 项目中生成的 HIDController.hpp 、HIDController.dll、HIDController.lib 复制到自己项目文件夹中
-2. 设置 HIDController.dll 文件属性，从“不参与生成”改为“复制文件”
-3. 在自己项目中包含头文件 #include "HIDController.hpp"
-4. 启动 LGS 9.02 软件后，正常使用 HIDController.hpp 文件中的接口函数即可
-## 使用示例
-
-### 使用时包含唯一头文件：
-
-```cpp
-//需要提前添加 dll 、lib、hpp 到项目中
-//如果不知道按键码可以查看 `WinUser.h`标准文件(宏定义)
-#include "HIDController.hpp"
-
-// -------------------- 鼠标控制 -------------------
-
-// 相对当前位置向右移动 500 像素
-MouseMoveRelative(500, 0);
-
-// 移动鼠标到屏幕中心 (分辨率 1920x1080)
-MouseMoveAbsolute(960, 540);
-
-// 按下鼠标左键
-MouseDown(MOUSEEVENTF_LEFTDOWN);
-
-// 松开鼠标左键
-MouseUp(MOUSEEVENTF_LEFTUP);
-
-// 鼠标左键点击（按下 + 松开）
-MouseClick(MOUSEEVENTF_LEFTDOWN);
-
-//鼠标 XButton1 点击
-MouseClick(MOUSEEVENTF_XDOWN | XBUTTON1);
-
-//鼠标 XButton2 点击
-MouseClick(MOUSEEVENTF_XDOWN | XBUTTON2); 
-
-// 鼠标向上滚动一个标准单位
-MouseWheel(120);
-
-// 设置鼠标移动灵敏度系数为 1.5
-SetMouseMoveCoefficient(1.5f);
-
-// 自动校准鼠标
-AutoCalibrate();
-
-// 禁用鼠标加速度
-DisableMouseAcceleration();
-
-// 启用鼠标加速度
-EnableMouseAcceleration();
-
-
-// -------------------- 键盘控制 -------------------
-
-// 按下键盘 "A" 键
-KeyDown('A');
-
-// 松开键盘 "A" 键
-KeyUp('A');
-
-// 点击键盘 "Enter" 键
-KeyPress(VK_RETURN);
-
-// 同时按下 Shift + Alt + T 组合键
-KeyCombo({ VK_LSHIFT, VK_MENU, 'T' });
-
-// 连续按键
-KeySeq({ 'Z', 'U', 'H', 'E', 'A', 'N', 'J', 'I', 'A', 'N' });
-
+# 从源码构建安装
+pip install .
 ```
 
-## 注意事项
+或者使用开发模式（修改代码后无需重新安装）：
 
-1. 使用 **鼠标相对移动** 前，需要校准鼠标灵敏度系数：
-   - 手动校准：`SetMouseMoveCoefficient()`
-   - 自动校准：`AutoCalibrate()`
+```bash
+pip install -e .
+```
 
-2. 使用 **鼠标相对移动** 前，需要禁用 Windows 系统鼠标加速度，否则移动不准确：
-   - 禁用加速度：`DisableMouseAcceleration()`
-   - 恢复加速度：`EnableMouseAcceleration()`
+## 快速开始
 
-3. **鼠标绝对移动** 是通过相对移动实现，可能不准确。
+```python
+import hid_controller
+
+# ==================== 鼠标控制 ====================
+
+# 相对移动
+hid_controller.MouseMoveRelative(100, 50)
+
+# 绝对移动
+hid_controller.MouseMoveAbsolute(500, 300)
+
+# 鼠标按键
+hid_controller.MouseDown(0x02)       # 左键按下
+hid_controller.MouseUp(0x02)         # 左键抬起
+hid_controller.MouseClick(0x02)      # 左键单击
+
+# 鼠标滚轮
+hid_controller.MouseWheel(120)       # 向上滚动一格
+hid_controller.MouseWheel(-120)      # 向下滚动一格
+
+# 设置鼠标速度系数
+hid_controller.SetMouseMoveCoefficient(1.5)
+
+# 自动校准鼠标速度
+hid_controller.AutoCalibrate()
+
+# 禁用/启用鼠标加速
+hid_controller.DisableMouseAcceleration()
+hid_controller.EnableMouseAcceleration()
+
+# ==================== 键盘控制 ====================
+
+# 按键（支持整数虚拟键码或字符串键名）
+hid_controller.KeyDown('a')          # 按下 'a' 键
+hid_controller.KeyUp('a')            # 抬起 'a' 键
+hid_controller.KeyPress('Enter')     # 按下并抬起 Enter 键
+
+# 组合键（同时按下多个键，然后反向释放）
+hid_controller.KeyCombo(['lctrl', 'c'])  # Ctrl+C
+
+# 按键序列（依次按下并释放每个键）
+hid_controller.KeySeq(['a', 'b', 'c'])   # 依次按下 a, b, c
+
+# 释放所有按键
+hid_controller.release_all_keys()
+```
+
+## API 参考
+
+### 鼠标函数
+
+| 函数 | 参数 | 说明 |
+|------|------|------|
+| `MouseMoveRelative(dx, dy)` | `dx`, `dy`: int | 相对移动鼠标 |
+| `MouseMoveAbsolute(x, y)` | `x`, `y`: int | 绝对移动鼠标到指定位置 |
+| `MouseDown(button)` | `button`: int | 鼠标按键按下 |
+| `MouseUp(button)` | `button`: int | 鼠标按键抬起 |
+| `MouseClick(button)` | `button`: int | 鼠标单击（按下+抬起） |
+| `MouseWheel(movement)` | `movement`: int | 鼠标滚轮滚动（120 = 一格） |
+| `SetMouseMoveCoefficient(coeff)` | `coeff`: float | 设置鼠标移动速度系数 |
+| `AutoCalibrate()` | 无 | 自动校准鼠标速度系数 |
+| `DisableMouseAcceleration()` | 无 | 禁用 Windows 鼠标加速 |
+| `EnableMouseAcceleration()` | 无 | 启用 Windows 鼠标加速 |
+
+### 键盘函数
+
+| 函数 | 参数 | 说明 |
+|------|------|------|
+| `KeyDown(vk)` | `vk`: int 或 str | 按键按下 |
+| `KeyUp(vk)` | `vk`: int 或 str | 按键抬起 |
+| `KeyPress(vk)` | `vk`: int 或 str | 按键（按下+抬起） |
+| `KeyCombo(keys)` | `keys`: list[int 或 str] | 组合键 |
+| `KeySeq(keys)` | `keys`: list[int 或 str] | 按键序列 |
+| `release_all_keys()` | 无 | 释放所有按键 |
+
+### 支持的键盘键名
+
+| 键名 | 说明 | 键名 | 说明 |
+|------|------|------|------|
+| `'a'` - `'z'` | 字母 A-Z | `'0'` - `'9'` | 数字 0-9 |
+| `'space'` | 空格 | `'enter'` | Enter |
+| `'shift'` | 左/右 Shift | `'ctrl'` | 左/右 Ctrl |
+| `'alt'` | 左/右 Alt | `'tab'` | Tab |
+| `'escape'` | Esc | `'back'` | Backspace |
+| `'delete'` | Delete | `'insert'` | Insert |
+| `'home'` | Home | `'end'` | End |
+| `'pageup'` | Page Up | `'pagedown'` | Page Down |
+| `'up'`, `'down'`, `'left'`, `'right'` | 方向键 | `'f1'` - `'f12'` | 功能键 |
+| `'lshift'`, `'rshift'` | 左/右 Shift | `'lctrl'`, `'rctrl'` | 左/右 Ctrl |
+| `'lalt'`, `'ralt'` | 左/右 Alt | `'win'` | Win 键 |
+
+## 项目结构
+
+```
+HIDController/
+├── binding.cpp          # pybind11 绑定
+├── setup.py             # Python 扩展构建配置
+├── pyproject.toml       # 现代化 Python 包配置
+├── README.md            # 项目文档
+├── .gitignore
+├── include/             # 头文件
+│   ├── HIDController.hpp
+│   ├── KeyboardMap.hpp
+│   ├── Logitech.hpp
+│   ├── LogitechDriver.hpp
+│   └── pch.h
+└── src/                 # C++ 源文件
+    ├── IbSendMouse.cpp
+    ├── IbSendKeyboard.cpp
+    ├── Logitech.cpp
+    ├── LogitechDriver.cpp
+    └── pch.cpp
+```
+
+## 构建
+
+从源码构建：
+
+```bash
+python setup.py build
+```
+
+构建并打包：
+
+```bash
+python -m build
+```
+
+## 许可证
+
+MIT License

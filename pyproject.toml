@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=42", "pybind11>=2.10.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hid_controller"
+version = "1.0.0"
+description = "Mouse and keyboard control via Logitech HID reports"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [
+    { name = "HIDController" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/Wayne-zhihaozhou/DriverMouse"
+Repository = "https://github.com/Wayne-zhihaozhou/DriverMouse"

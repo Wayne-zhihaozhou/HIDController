@@ -1,6 +1,7 @@
 ﻿//ibsendkeyboard.cpp
 #include"pch.h"
 #include <Logitech.hpp>
+#include <vector>
 
 bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
 	auto& logitech = Send::Logitech::getLogitechInstance();
@@ -54,8 +55,8 @@ DLLAPI bool WINAPI KeyPress(uint16_t vk) {
 	return send_keyboard_input_bulk(inputs, 2);
 }
 
-DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
-	//处理带修饰键组合键
+// KeyCombo 的 vector 重载版本（用于 Python 绑定）
+bool KeyCombo(const std::vector<uint16_t>& keys) {
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -67,9 +68,8 @@ DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
 		inputs.push_back(ki);
 	}
 
-	// 再“反向”抬起所有键（从后到前，保证修饰键最后释放）
-	for (auto it = keys.end(); it != keys.begin();) {
-		--it; // 反向迭代
+	// 再"反向"抬起所有键（从后到前，保证修饰键最后释放）
+	for (auto it = keys.rbegin(); it != keys.rend(); ++it) {
 		KEYBDINPUT ki{};
 		ki.wVk = *it;
 		ki.dwFlags = KEYEVENTF_KEYUP; // 抬起
@@ -79,8 +79,14 @@ DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
 }
 
-DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys) {
-	// 处理纯字符按键,按下所有键，然后松开所有键
+// 保留原有的 initializer_list 版本（向后兼容）
+DLLAPI bool WINAPI KeyCombo(const std::initializer_list<uint16_t>& keys) {
+	std::vector<uint16_t> vec(keys.begin(), keys.end());
+	return KeyCombo(vec);
+}
+
+// KeySeq 的 vector 重载版本（用于 Python 绑定）
+bool KeySeq(const std::vector<uint16_t>& keys) {
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -99,6 +105,12 @@ DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys) {
 	}
 
 	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
+}
+
+// 保留原有的 initializer_list 版本（向后兼容）
+DLLAPI bool WINAPI KeySeq(const std::initializer_list<uint16_t>& keys) {
+	std::vector<uint16_t> vec(keys.begin(), keys.end());
+	return KeySeq(vec);
 }
 
 DLLAPI void WINAPI release_all_keys() {
