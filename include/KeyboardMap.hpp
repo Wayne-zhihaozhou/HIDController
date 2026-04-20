@@ -3,7 +3,7 @@
 #include <cstdint>
 
 namespace Send::Usb {
-    //½« Windows ĞéÄâ¼üÂë£¨VK_*£©×ª»»Îª USB HID ¼üÅÌÓÃµÄ Usage ID£¨¼üÅÌÉ¨ÃèÂë£©
+// å°† Windows è™šæ‹Ÿé”®ç ï¼ˆVK_*ï¼‰è½¬æ¢ä¸º USB HID é”®ç›˜ç”¨çš„ Usage IDï¼ˆé”®ç›˜æ‰«æç ï¼‰
     constexpr uint8_t keyboard_vk_to_usage(uint8_t vkCode) {
         //#TODO: fully test
 
@@ -213,6 +213,3 @@ namespace Send::Usb {
     }
 
 }
-
-
-

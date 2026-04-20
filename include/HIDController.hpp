@@ -11,7 +11,7 @@
 #define DLLAPI  extern "C" __declspec(dllimport)
 #endif
 
-// -------------------- Êó±ê¿ØÖÆ IbSendMouse.hpp --------------------
+// -------------------- 鼠标控制 IbSendMouse.hpp --------------------
 
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy);
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t x, uint32_t y);
@@ -24,7 +24,7 @@ DLLAPI void WINAPI AutoCalibrate();
 DLLAPI void WINAPI DisableMouseAcceleration();
 DLLAPI void WINAPI EnableMouseAcceleration();
 
-// -------------------- ¼üÅÌ¿ØÖÆ IbSendKeyboard.hpp --------------------
+// -------------------- 键盘控制 IbSendKeyboard.hpp --------------------
 
 DLLAPI bool WINAPI KeyDown(uint16_t vk);
 DLLAPI bool WINAPI KeyUp(uint16_t vk);

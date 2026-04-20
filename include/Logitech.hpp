@@ -1,6 +1,6 @@
 ﻿//Logitech.hpp
 #pragma once
-#include <LogitechDriver.hpp>
+#include "LogitechDriver.hpp"
 
 namespace Send {
 
@@ -34,4 +34,3 @@ namespace Send {
 	};
 
 } // namespace Send
-
