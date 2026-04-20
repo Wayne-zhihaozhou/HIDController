@@ -160,7 +160,10 @@ HIDController/
 ├── setup.py             # Python 扩展构建配置
 ├── pyproject.toml       # 现代化 Python 包配置
 ├── README.md            # 项目文档
+├── LICENSE              # MIT 许可证
 ├── .gitignore
+├── test_all_api_auto.py         # 完整 API 自动测试
+├── hid_controller.*.pyd   # 预编译的 Windows x64 扩展
 ├── include/             # 头文件
 │   ├── HIDController.hpp
 │   ├── KeyboardMap.hpp
@@ -184,13 +187,21 @@ HIDController/
 从源码构建：
 
 ```bash
-python setup.py build
+python setup.py build_ext --inplace
 ```
 
-构建并打包：
+## 测试
 
+### 运行完整 API 测试
 ```bash
-python -m build
+python test_all_api_auto.py
+```
+
+### 运行示例代码
+```bash
+python examples/mouse_example.py
+python examples/keyboard_example.py
+python examples/advanced_example.py
 ```
 
 ## 免责声明

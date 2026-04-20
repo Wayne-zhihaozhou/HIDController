@@ -1,3 +1,8 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -12,15 +17,20 @@ pyproject-build/
 # Python extensions (compiled)
 *.pyd
 
+# Exception: pre-compiled extension in root (Windows x64)
+!hid_controller.*.pyd
+
 # C/C++ build artifacts
 bin/
 Debug/
 Release/
 x64/
 x86/
+_obj/
 
 # IDE
 .vscode/
+.vs/
 *.swp
 *.swo
 *~
@@ -29,4 +39,3 @@ x86/
 .DS_Store
 Thumbs.db
 desktop.ini
-.vs/
