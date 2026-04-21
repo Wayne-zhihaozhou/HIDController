@@ -4,16 +4,12 @@
 
 > **重要提示**：使用前必须安装并启动 [Logitech Gaming Software (LGS)](https://www.logitechg.com/zh-cn/software/lgs)。该扩展通过向 Logitech 虚拟驱动发送 HID 报告来实现键盘鼠标控制，绕过游戏/系统的检测。
 
-## 安装
-
-### 环境要求
+## 环境要求
 
 - Python 3.8+
 - Logitech Gaming Software (LGS)
 
-### 安装
-
-通过 pip 安装（推荐）：
+通过 pip 安装：
 
 ```bash
 pip install hid-controller
