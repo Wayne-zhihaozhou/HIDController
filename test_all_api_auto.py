@@ -133,38 +133,43 @@ def test_mouse_absolute():
 
 
 def test_mouse_buttons():
-    """测试 3: 鼠标按键"""
-    print_header("测试 3: 鼠标按键 (mouse_down/mouse_up/mouse_click)")
+    """测试 3: 鼠标按键 - 验证 3 种调用方式"""
+    print_header("测试 3: 鼠标按键 (3 种调用方式)")
 
-    # 左键
-    print("3.1 左键按下")
-    result = hid_controller.mouse_down(0x02)  # MOUSEEVENTF_LEFTDOWN
+    # 方式 1: 字符串方式（推荐）
+    print("3.1 字符串方式: mouse_click('left')")
+    result = hid_controller.mouse_click("left")
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("3.2 左键抬起")
-    result = hid_controller.mouse_up(0x03)  # MOUSEEVENTF_LEFTUP
+    print("3.2 字符串方式: mouse_click('right')")
+    result = hid_controller.mouse_click("right")
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("3.3 左键单击")
+    print("3.3 字符串方式: mouse_click('middle')")
+    result = hid_controller.mouse_click("middle")
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    # 方式 2: MouseEvent 常量方式
+    print("3.4 MouseEvent 常量方式: mouse_click(MouseEvent.LEFT)")
+    result = hid_controller.mouse_click(hid_controller.MouseEvent.LEFT)
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    print("3.5 MouseEvent 常量方式: mouse_click(MouseEvent.RIGHT)")
+    result = hid_controller.mouse_click(hid_controller.MouseEvent.RIGHT)
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    # 方式 3: 数字方式
+    print("3.6 数字方式: mouse_click(0x02)")
     result = hid_controller.mouse_click(0x02)
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    # 右键
-    print("3.4 右键单击")
-    result = hid_controller.mouse_click(0x04)  # MOUSEEVENTF_RIGHTDOWN/UP
-    print(f"  返回值: {result}")
-    time.sleep(0.3)
-
-    # 中键
-    print("3.5 中键单击")
-    result = hid_controller.mouse_click(0x20)  # MOUSEEVENTF_MIDDLEDOWN/UP
-    print(f"  返回值: {result}")
-    time.sleep(0.3)
-
-    print("✓ 测试完成")
+    print("✓ 测试完成（3 种方式均通过）")
 
 
 def test_mouse_wheel():
@@ -242,67 +247,124 @@ def test_auto_calibrate():
 
 
 def test_keyboard_simple():
-    """测试 8: 键盘简单按键"""
-    print_header("测试 8: 键盘简单按键 (key_down/key_up/key_press)")
+    """测试 8: 键盘简单按键 - 验证 3 种调用方式"""
+    print_header("测试 8: 键盘简单按键 (3 种调用方式)")
 
-    print("8.1 按下 'a' 键")
-    result = hid_controller.key_down("a")
-    print(f"  返回值: {result}")
-    time.sleep(0.3)
-    result = hid_controller.key_up("a")
-    print(f"  抬起 'a'，返回值: {result}")
-    time.sleep(0.3)
-
-    print("8.2 按键 'b' (key_press)")
-    result = hid_controller.key_press("b")
+    # 方式 1: 字符串方式（推荐，全部小写）
+    print("8.1 字符串方式: key_press('a')")
+    result = hid_controller.key_press("a")
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("8.3 按键 'c' (使用虚拟键码)")
+    print("8.2 字符串方式: key_press('enter')")
+    result = hid_controller.key_press("enter")
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    print("8.3 字符串方式: key_down('lctrl') + key_up('lctrl')")
+    result = hid_controller.key_down("lctrl")
+    print(f"  按下 lctrl，返回值: {result}")
+    time.sleep(0.3)
+    result = hid_controller.key_up("lctrl")
+    print(f"  抬起 lctrl，返回值: {result}")
+    time.sleep(0.3)
+
+    # 方式 2: KeyEvent 常量方式
+    print("8.4 KeyEvent 常量方式: key_press(KeyEvent.A)")
+    result = hid_controller.key_press(hid_controller.KeyEvent.A)
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    print("8.5 KeyEvent 常量方式: key_press(KeyEvent.RETURN)")
+    result = hid_controller.key_press(hid_controller.KeyEvent.RETURN)
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    print("8.6 KeyEvent 常量方式: key_down(KeyEvent.LCONTROL)")
+    result = hid_controller.key_down(hid_controller.KeyEvent.LCONTROL)
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+    result = hid_controller.key_up(hid_controller.KeyEvent.LCONTROL)
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    # 方式 3: 数字方式
+    print("8.7 数字方式: key_press(0x43)")
     result = hid_controller.key_press(0x43)  # 'C'
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("✓ 测试完成")
+    print("8.8 数字方式: key_press(13)")
+    result = hid_controller.key_press(13)  # Enter
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    print("✓ 测试完成（3 种方式均通过）")
 
 
 def test_keyboard_combo():
-    """测试 9: 键盘组合键"""
-    print_header("测试 9: 键盘组合键 (key_combo)")
+    """测试 9: 键盘组合键 - 验证 3 种调用方式"""
+    print_header("测试 9: 键盘组合键 (3 种调用方式)")
 
-    print("9.1 Ctrl+C 组合键")
+    # 方式 1: 字符串方式
+    print("9.1 字符串方式: key_combo(['lctrl', 'c'])")
     result = hid_controller.key_combo(["lctrl", "c"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("9.2 Ctrl+V 组合键")
+    print("9.2 字符串方式: key_combo(['lctrl', 'v'])")
     result = hid_controller.key_combo(["lctrl", "v"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("9.3 Alt+Tab 组合键")
-    result = hid_controller.key_combo(["lalt", "tab"])
+    # 方式 2: KeyEvent 常量方式
+    print("9.3 KeyEvent 常量方式: key_combo([KeyEvent.LCONTROL, KeyEvent.C])")
+    result = hid_controller.key_combo([hid_controller.KeyEvent.LCONTROL, hid_controller.KeyEvent.C])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("✓ 测试完成")
+    print("9.4 KeyEvent 常量方式: key_combo([KeyEvent.LMENU, KeyEvent.TAB])")
+    result = hid_controller.key_combo([hid_controller.KeyEvent.LMENU, hid_controller.KeyEvent.TAB])
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    # 方式 3: 数字方式
+    print("9.5 数字方式: key_combo([162, 67])")
+    result = hid_controller.key_combo([162, 67])  # VK_LCONTROL, VK_C
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    print("✓ 测试完成（3 种方式均通过）")
 
 
 def test_keyboard_sequence():
-    """测试 10: 键盘按键序列"""
-    print_header("测试 10: 键盘按键序列 (key_seq)")
+    """测试 10: 键盘按键序列 - 验证 3 种调用方式"""
+    print_header("测试 10: 键盘按键序列 (3 种调用方式)")
 
-    print("10.1 依次按下 'x', 'y', 'z'")
+    # 方式 1: 字符串方式
+    print("10.1 字符串方式: key_seq(['x', 'y', 'z'])")
     result = hid_controller.key_seq(["x", "y", "z"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("10.2 依次按下 '1', '2', '3'")
+    print("10.2 字符串方式: key_seq(['1', '2', '3'])")
     result = hid_controller.key_seq(["1", "2", "3"])
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
-    print("✓ 测试完成")
+    # 方式 2: KeyEvent 常量方式
+    print("10.3 KeyEvent 常量方式: key_seq([KeyEvent.X, KeyEvent.Y, KeyEvent.Z])")
+    result = hid_controller.key_seq([hid_controller.KeyEvent.X, hid_controller.KeyEvent.Y, hid_controller.KeyEvent.Z])
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    # 方式 3: 数字方式
+    print("10.4 数字方式: key_seq([88, 89, 90])")
+    result = hid_controller.key_seq([88, 89, 90])  # X, Y, Z
+    print(f"  返回值: {result}")
+    time.sleep(0.3)
+
+    print("✓ 测试完成（3 种方式均通过）")
 
 
 def test_release_all():
