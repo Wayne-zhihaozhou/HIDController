@@ -54,7 +54,7 @@ hid_controller.move_mouse_relative(100, 50)   # 相对移动
 hid_controller.mouse_wheel(120)               # 滚轮向上
 ```
 
-**使用 MouseEvent 常量方式**：
+**使用 MouseEvent 常量方式(有 IDE 补全)**：
 ```python
 hid_controller.mouse_click(hid_controller.MouseEvent.LEFT)    # 左键单击
 hid_controller.mouse_click(hid_controller.MouseEvent.RIGHT)   # 右键单击
@@ -78,23 +78,44 @@ hid_controller.mouse_wheel(120)               # 滚轮向上
 | `key_seq(keys)` | `keys`: list[int 或 str] | `bool` | 按键序列（依次按下并释放每个键） |
 | `release_all_keys()` | 无 | 无 | 释放所有按键 |
 
-**使用字符串键名示例**：
+**键盘键码常量（KeyEvent 类）**
+
+| 常量组 | 包含的常量 |
+|--------|-----------|
+| 修饰键 | `LCONTROL`, `RCONTROL`, `LSHIFT`, `RSHIFT`, `LMENU`, `RMENU`, `LWIN`, `RWIN`, `CONTROL`, `SHIFT`, `MENU` |
+| 功能键 | `F1` - `F12` |
+| 控制键 | `RETURN`, `ESCAPE`, `TAB`, `BACK`, `DELETE`, `INSERT`, `HOME`, `END`, `PRIOR`, `NEXT`, `SPACE` |
+| 方向键 | `UP`, `DOWN`, `LEFT`, `RIGHT` |
+| 状态键 | `CAPITAL`, `NUMLOCK`, `SCROLL` |
+| 字母 | `A` - `Z` |
+| 数字 | `KEY_0` - `KEY_9` |
+
+**使用字符串方式（推荐，简单易记）**：
 ```python
-hid_controller.key_down('a')           # 按下 'a' 键
-hid_controller.key_down('lctrl')       # 按下左 Ctrl
-hid_controller.key_press('Enter')      # 按下并抬起 Enter
+hid_controller.key_down('a')              # 按下 'a' 键
+hid_controller.key_down('lctrl')          # 按下左 Ctrl
+hid_controller.key_press('Enter')         # 按下并抬起 Enter
 hid_controller.key_combo(['lctrl', 'c'])  # Ctrl+C 组合键
 hid_controller.key_seq(['a', 'b', 'c'])   # 依次按下 a, b, c
 ```
 
-**使用虚拟键码示例**：
+**使用 KeyEvent 常量方式（有 IDE 补全）**：
+```python
+hid_controller.key_press(hid_controller.KeyEvent.A)           # 按下 'A' 键
+hid_controller.key_down(hid_controller.KeyEvent.LCONTROL)     # 按下左 Ctrl
+hid_controller.key_press(hid_controller.KeyEvent.RETURN)      # Enter
+hid_controller.key_combo([hid_controller.KeyEvent.LCONTROL, hid_controller.KeyEvent.C])  # Ctrl+C
+hid_controller.key_seq([hid_controller.KeyEvent.KEY_1, hid_controller.KeyEvent.KEY_2])  # 按下 1, 2
+```
+
+**使用虚拟键码方式（传统方式，仍然支持）**：
 ```python
 hid_controller.key_down(65)            # 按下 'A' 键 (VK_A = 65)
 hid_controller.key_down(162)           # 按下左 Ctrl (VK_LCONTROL = 162)
 hid_controller.key_press(13)           # Enter (VK_RETURN = 13)
 ```
 
-### 支持的键盘键名
+**支持的字符串键名**：
 
 | 键名 | 说明 | 键名 | 说明 |
 |------|------|------|------|
