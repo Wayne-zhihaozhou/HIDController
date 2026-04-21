@@ -11,36 +11,12 @@
 - Python 3.8+
 - Logitech Gaming Software (LGS)
 
-### 方式 1：通过 pip 安装（推荐）
+### 安装
 
-本项目通过 PyPI 发布预编译的 wheel 文件，无需编译即可使用。
+通过 pip 安装（推荐）：
 
 ```bash
 pip install hid-controller
-```
-
-### 方式 2：从 GitHub Releases 安装
-
-下载对应平台和 Python 版本的 wheel 文件，然后安装：
-
-```bash
-pip install hid_controller-1.0.0-cp312-cp312-win_amd64.whl
-```
-
-### 方式 3：从源码构建安装
-
-```bash
-# 安装构建依赖
-pip install pybind11 setuptools
-
-# 从源码构建安装
-pip install .
-```
-
-或者使用开发模式（修改代码后无需重新安装）：
-
-```bash
-pip install -e .
 ```
 
 ## 快速开始
@@ -177,9 +153,6 @@ HIDController/
 ├── README.md            # 项目文档
 ├── LICENSE              # MIT 许可证
 ├── .gitignore
-├── .github/
-│   └── workflows/
-│       └── build-wheels.yml  # CI 自动构建 wheel
 ├── test_all_api_auto.py         # 完整 API 自动测试
 ├── hid_controller/      # Python 包
 │   └── __init__.py      # 包入口
@@ -202,36 +175,12 @@ HIDController/
 
 ## 构建
 
-### 本地构建
-
-从源码构建：
-
 ```bash
-python setup.py build_ext --inplace
+pip install pybind11 setuptools wheel
+python setup.py bdist_wheel
 ```
 
-### CI 自动构建（cibuildwheel）
-
-项目使用 [cibuildwheel](https://cibuildwheel.readthedocs.io/) + GitHub Actions 自动为不同平台和 Python 版本构建 wheel：
-
-```bash
-# 安装 cibuildwheel
-pip install cibuildwheel
-
-# 构建当前平台支持的 wheel
-cibuildwheel --output-dir dist
-
-# 构建所有平台 wheel（需要 Docker）
-CIBW_BUILD="cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*" cibuildwheel --output-dir dist
-```
-
-**支持的构建目标**：
-
-| 平台 | 架构 | Python 版本 |
-|------|------|-------------|
-| Windows | AMD64 | 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 |
-| Linux | x86_64 | 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 |
-| macOS | x86_64, arm64 | 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 |
+wheel 包生成在 `dist/` 目录下。
 
 ## 测试
 
@@ -244,17 +193,6 @@ python test_all_api_auto.py
 ```bash
 python examples/mouse_example.py
 python examples/keyboard_example.py
-```
-
-## 常见问题
-
-### Q: 安装时提示找不到匹配的 wheel？
-A: 确保你的 Python 版本在 3.8-3.13 范围内，并且使用的是 64 位 Python。
-
-### Q: 如何手动安装特定平台的 wheel？
-A: 从 [GitHub Releases](https://github.com/Wayne-zhihaozhou/DriverMouse/releases) 下载对应 wheel，然后：
-```bash
-pip install path/to/hid_controller-1.0.0-cp312-cp312-win_amd64.whl
 ```
 
 ## 免责声明
