@@ -2,7 +2,7 @@
 
 通过 Logitech 虚拟驱动发送 HID 报告来控制键盘鼠标的 Python 扩展。
 
-> **重要提示**：使用前必须安装并启动 [Logitech Gaming Software (LGS)](https://www.logitechg.com/zh-cn/software/lgs)。该扩展通过向 Logitech 虚拟驱动发送 HID 报告来实现键盘鼠标控制，绕过游戏/系统的检测。
+> **重要提示**：使用前必须安装并启动 [Logitech Gaming Software (LGS)](https://www.logitechg.com/zh-cn/software/lgs)。该扩展通过向 Logitech 虚拟驱动发送 HID 报告来实现键盘鼠标控制。
 
 ## 环境要求
 
@@ -15,55 +15,6 @@
 pip install hid-controller
 ```
 
-## 快速开始
-
-```python
-import hid_controller
-
-# ==================== 鼠标控制 ====================
-
-# 相对移动
-hid_controller.move_mouse_relative(100, 50)
-
-# 绝对移动
-hid_controller.move_mouse_absolute(500, 300)
-
-# 鼠标按键
-hid_controller.mouse_down(0x02)       # 左键按下
-hid_controller.mouse_up(0x02)         # 左键抬起
-hid_controller.mouse_click(0x02)      # 左键单击
-
-# 鼠标滚轮
-hid_controller.mouse_wheel(120)       # 向上滚动一格
-hid_controller.mouse_wheel(-120)      # 向下滚动一格
-
-# 设置鼠标速度系数
-hid_controller.set_mouse_move_coefficient(1.5)
-
-# 自动校准鼠标速度
-hid_controller.auto_calibrate()
-
-# 禁用/启用鼠标加速
-hid_controller.disable_mouse_acceleration()
-hid_controller.enable_mouse_acceleration()
-
-# ==================== 键盘控制 ====================
-
-# 按键（支持整数虚拟键码或字符串键名）
-hid_controller.key_down('a')          # 按下 'a' 键
-hid_controller.key_up('a')            # 抬起 'a' 键
-hid_controller.key_press('Enter')     # 按下并抬起 Enter 键
-
-# 组合键（同时按下多个键，然后反向释放）
-hid_controller.key_combo(['lctrl', 'c'])  # Ctrl+C
-
-# 按键序列（依次按下并释放每个键）
-hid_controller.key_seq(['a', 'b', 'c'])   # 依次按下 a, b, c
-
-# 释放所有按键
-hid_controller.release_all_keys()
-```
-
 ## API 参考
 
 ### 鼠标函数
@@ -72,28 +23,48 @@ hid_controller.release_all_keys()
 |------|------|--------|------|
 | `move_mouse_relative(dx, dy)` | `dx`: int, `dy`: int | `bool` | 相对移动鼠标 |
 | `move_mouse_absolute(x, y)` | `x`: int, `y`: int | `bool` | 绝对移动鼠标到指定位置 |
-| `mouse_down(button)` | `button`: int | `bool` | 鼠标按键按下 |
-| `mouse_up(button)` | `button`: int | `bool` | 鼠标按键抬起 |
-| `mouse_click(button)` | `button`: int | `bool` | 鼠标单击（按下+抬起） |
+| `mouse_down(button)` | `button`: int 或 str | `bool` | 鼠标按键按下 |
+| `mouse_up(button)` | `button`: int 或 str | `bool` | 鼠标按键抬起 |
+| `mouse_press(button)` | `button`: int 或 str | `bool` | 鼠标单击（按下+抬起） |
+| `mouse_click(button)` | `button`: int 或 str | `bool` | 鼠标单击（按下+抬起） |
 | `mouse_wheel(movement)` | `movement`: int | `bool` | 鼠标滚轮滚动（120 = 一格） |
 | `set_mouse_move_coefficient(coefficient)` | `coefficient`: float | `bool` | 设置鼠标移动速度系数 |
 | `auto_calibrate()` | 无 | `bool` | 自动校准鼠标速度系数 |
 | `disable_mouse_acceleration()` | 无 | `bool` | 禁用 Windows 鼠标加速 |
 | `enable_mouse_acceleration()` | 无 | `bool` | 启用 Windows 鼠标加速 |
 
-**鼠标按钮常量**
+**鼠标按钮常量（MouseEvent 类）**
 
-| 常量 | 值 | 说明 |
-|------|------|------|
-| `MouseEvent.LEFT` | `0x02` | 左键 |
-| `MouseEvent.RIGHT` | `0x04` | 右键 |
-| `MouseEvent.MIDDLE` | `0x20` | 中键（滚轮） |
+| 常量 | 字符串 | 说明 |
+|------|--------|------|
+| `MouseEvent.LEFT` | `"left"` | 左键 |
+| `MouseEvent.RIGHT` | `"right"` | 右键 |
+| `MouseEvent.MIDDLE` | `"middle"` | 中键 |
+| `MouseEvent.XBUTTON1_DOWN` | `"xbutton1"` | X 按钮 1 |
+| `MouseEvent.XBUTTON2_DOWN` | `"xbutton2"` | X 按钮 2 |
 
-使用示例：
+**使用字符串方式（推荐）**：
 ```python
-hid_controller.mouse_click(0x02)   # 左键单击
-hid_controller.mouse_click(0x04)   # 右键单击
-hid_controller.mouse_click(0x20)   # 中键单击
+hid_controller.mouse_click("left")        # 左键单击
+hid_controller.mouse_press("right")       # 右键单击
+hid_controller.mouse_down("middle")       # 中键按下
+hid_controller.mouse_up("middle")         # 中键释放
+hid_controller.mouse_click("xbutton1")    # X 按钮 1 单击
+hid_controller.move_mouse_relative(100, 50)   # 相对移动
+hid_controller.mouse_wheel(120)               # 滚轮向上
+```
+
+**使用 MouseEvent 常量方式**：
+```python
+hid_controller.mouse_click(hid_controller.MouseEvent.LEFT)    # 左键单击
+hid_controller.mouse_click(hid_controller.MouseEvent.RIGHT)   # 右键单击
+```
+
+**使用数字常量方式（传统方式，仍然支持）**：
+```python
+hid_controller.mouse_click(0x02)    # 左键单击
+hid_controller.move_mouse_relative(100, 50)   # 相对移动
+hid_controller.mouse_wheel(120)               # 滚轮向上
 ```
 
 ### 键盘函数
@@ -169,7 +140,7 @@ HIDController/
     └── keyboard_example.py
 ```
 
-## 构建
+## 构建 wheel 包
 
 ```bash
 pip install pybind11 setuptools wheel

@@ -13,6 +13,35 @@ namespace py = pybind11;
  * 使用前必须安装并启动 Logitech Gaming Software (LGS)。
  */
 
+// ==================== 鼠标按钮字符串映射 ====================
+
+/**
+ * 将字符串按钮名转换为鼠标按钮常量
+ * 支持: "left", "right", "middle", "x1", "x2", "wheel"
+ */
+static uint16_t mouse_button_to_flag(const std::string& btn) {
+    if (btn == "left")      return 0x02;  // MOUSEEVENTF_LEFTDOWN
+    if (btn == "leftup")    return 0x04;  // MOUSEEVENTF_LEFTUP
+    if (btn == "right")     return 0x08;  // MOUSEEVENTF_RIGHTDOWN
+    if (btn == "rightup")   return 0x10;  // MOUSEEVENTF_RIGHTUP
+    if (btn == "middle")    return 0x20;  // MOUSEEVENTF_MIDDLEDOWN
+    if (btn == "middleup")  return 0x40;  // MOUSEEVENTF_MIDDLEUP
+    if (btn == "x1")        return 0x0080; // MOUSEEVENTF_XDOWN
+    if (btn == "x2")        return 0x0100; // MOUSEEVENTF_XUP (actually XUP)
+    if (btn == "xbutton1")  return 0x0080; // XDOWN for XBUTTON1
+    if (btn == "xbutton2")  return 0x0100; // XUP for XBUTTON2
+    return 0;
+}
+
+/**
+ * 获取 X 按钮的参数值
+ */
+static uint16_t mouse_x_button_param(const std::string& btn) {
+    if (btn == "xbutton1") return 1;
+    if (btn == "xbutton2") return 2;
+    return 0;
+}
+
 // ==================== 辅助函数 ====================
 
 /**
@@ -92,21 +121,89 @@ PYBIND11_MODULE(_extension, m) {
           py::arg("x"), py::arg("y"),
           "Move mouse absolutely. Args: x (int), y (int)");
 
-    m.def("mouse_down", &MouseDown,
-          py::arg("button"),
-          "Mouse button down. Args: button (int) - MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_RIGHTDOWN, etc.");
+    m.def("mouse_down", [](py::object btn) -> bool {
+        uint16_t button_flag = 0;
 
-    m.def("mouse_up", &MouseUp,
-          py::arg("button"),
-          "Mouse button up. Args: button (int)");
+        if (py::isinstance<py::str>(btn)) {
+            std::string button_str = btn.cast<std::string>();
+            button_flag = mouse_button_to_flag(button_str);
+            // XButton 需要将 XBUTTON1/XBUTTON2 位合并到 button_flag 中
+            if (button_str == "xbutton1") {
+                button_flag = MOUSEEVENTF_XDOWN | XBUTTON1;
+            } else if (button_str == "xbutton2") {
+                button_flag = MOUSEEVENTF_XDOWN | XBUTTON2;
+            }
+        } else {
+            button_flag = btn.cast<uint16_t>();
+        }
 
-    m.def("mouse_click", &MouseClick,
-          py::arg("button"),
-          "Mouse click (down + up). Args: button (int)");
+        return MouseDown(button_flag);
+    }, py::arg("button"),
+       "Mouse button down. Args: button (int or str) - e.g., 'left', 'right', 'middle', 'xbutton1', 'xbutton2'");
+
+    m.def("mouse_up", [](py::object btn) -> bool {
+        uint16_t button_flag = 0;
+
+        if (py::isinstance<py::str>(btn)) {
+            std::string button_str = btn.cast<std::string>();
+            button_flag = mouse_button_to_flag(button_str);
+            // XButton 需要将 XBUTTON1/XBUTTON2 位合并到 button_flag 中
+            if (button_str == "xbutton1") {
+                button_flag = MOUSEEVENTF_XUP | XBUTTON1;
+            } else if (button_str == "xbutton2") {
+                button_flag = MOUSEEVENTF_XUP | XBUTTON2;
+            }
+        } else {
+            button_flag = btn.cast<uint16_t>();
+        }
+
+        return MouseUp(button_flag);
+    }, py::arg("button"),
+       "Mouse button up. Args: button (int or str)");
+
+    m.def("mouse_press", [](py::object btn) -> bool {
+        uint16_t button_flag = 0;
+
+        if (py::isinstance<py::str>(btn)) {
+            std::string button_str = btn.cast<std::string>();
+            button_flag = mouse_button_to_flag(button_str);
+            // XButton 需要将 XBUTTON1/XBUTTON2 位合并到 button_flag 中
+            if (button_str == "xbutton1") {
+                button_flag = MOUSEEVENTF_XDOWN | XBUTTON1;
+            } else if (button_str == "xbutton2") {
+                button_flag = MOUSEEVENTF_XDOWN | XBUTTON2;
+            }
+        } else {
+            button_flag = btn.cast<uint16_t>();
+        }
+
+        return MouseClick(button_flag);
+    }, py::arg("button"),
+       "Mouse press (down + up). Args: button (int or str) - e.g., 'left', 'right', 'middle'");
+
+    m.def("mouse_click", [](py::object btn) -> bool {
+        uint16_t button_flag = 0;
+
+        if (py::isinstance<py::str>(btn)) {
+            std::string button_str = btn.cast<std::string>();
+            button_flag = mouse_button_to_flag(button_str);
+            // XButton 需要将 XBUTTON1/XBUTTON2 位合并到 button_flag 中
+            if (button_str == "xbutton1") {
+                button_flag = MOUSEEVENTF_XDOWN | XBUTTON1;
+            } else if (button_str == "xbutton2") {
+                button_flag = MOUSEEVENTF_XDOWN | XBUTTON2;
+            }
+        } else {
+            button_flag = btn.cast<uint16_t>();
+        }
+
+        return MouseClick(button_flag);
+    }, py::arg("button"),
+       "Mouse click (down + up). Args: button (int or str)");
 
     m.def("mouse_wheel", &MouseWheel,
           py::arg("movement"),
-          "Mouse wheel scroll. Args: movement (int) - typically 120 for one notch");
+          "Mouse wheel scroll. Args: movement (int) - typically 120 for one notch (positive=up, negative=down)");
 
     m.def("set_mouse_move_coefficient", &SetMouseMoveCoefficient,
           py::arg("coefficient"),

@@ -1,18 +1,49 @@
 """HIDController - Mouse and keyboard control via Logitech HID reports."""
 
 
-# 鼠标事件常量
+# 鼠标按钮常量 - 支持字符串和数字两种方式
 class MouseEvent:
+    """
+    鼠标按钮常量类。
+    
+    支持字符串方式调用（推荐）和数字常量方式：
+        MouseEvent.LEFT    -> "left"
+        MouseEvent.RIGHT   -> "right" 
+        MouseEvent.MIDDLE  -> "middle"
+        MouseEvent.XBUTTON1 -> "xbutton1"
+        MouseEvent.XBUTTON2 -> "xbutton2"
+    
+    使用示例:
+        hid_controller.mouse_click("left")           # 字符串方式（推荐）
+        hid_controller.mouse_click(MouseEvent.LEFT)  # 常量方式
+        hid_controller.mouse_click(0x02)             # 数字方式
+    """
+    # 左键
     LEFT_DOWN = 0x02
     LEFT_UP = 0x04
+    LEFT = 0x02  # 左键按下（用于 click/press）
+    
+    # 右键
     RIGHT_DOWN = 0x08
     RIGHT_UP = 0x10
+    RIGHT = 0x08  # 右键按下（用于 click/press）
+    
+    # 中键
     MIDDLE_DOWN = 0x20
     MIDDLE_UP = 0x40
+    MIDDLE = 0x20  # 中键按下（用于 click/press）
+    
+    # X 按钮（侧边键）
     XDOWN = 0x0080
     XUP = 0x0100
     XBUTTON1 = 0x0001
     XBUTTON2 = 0x0002
+    XBUTTON1_DOWN = 0x81   # MOUSEEVENTF_XDOWN | XBUTTON1
+    XBUTTON1_UP = 0x81     # MOUSEEVENTF_XUP | XBUTTON1
+    XBUTTON2_DOWN = 0x82   # MOUSEEVENTF_XDOWN | XBUTTON2
+    XBUTTON2_UP = 0x82     # MOUSEEVENTF_XUP | XBUTTON2
+    
+    # 移动和滚轮
     MOVE = 0x01
     WHEEL = 0x0800
     ABSOLUTE = 0x8000
@@ -36,6 +67,7 @@ try:
         key_up,
         mouse_click,
         mouse_down,
+        mouse_press,
         mouse_up,
         mouse_wheel,
         move_mouse_absolute,
@@ -60,6 +92,7 @@ except ImportError:
     key_up = _none_func
     mouse_click = _none_func
     mouse_down = _none_func
+    mouse_press = _none_func
     mouse_up = _none_func
     mouse_wheel = _none_func
     move_mouse_absolute = _none_func
@@ -81,6 +114,7 @@ __all__ = [
     "key_up",
     "mouse_click",
     "mouse_down",
+    "mouse_press",
     "mouse_up",
     "mouse_wheel",
     "move_mouse_absolute",
