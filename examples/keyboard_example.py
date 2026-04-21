@@ -4,9 +4,9 @@
 演示如何使用 hid_controller 控制键盘。
 使用前请确保已安装并启动 Logitech Gaming Software (LGS)。
 
-三种调用方式：
-    1. 字符串方式（推荐）：hid_controller.key_press("Enter")
-    2. KeyEvent 常量方式：hid_controller.key_press(KeyEvent.ENTER)
+三种调用方式（全部小写字符串）：
+    1. 字符串方式（推荐）：hid_controller.key_press("enter")
+    2. KeyEvent 常量方式：hid_controller.key_press(KeyEvent.RETURN)
     3. 数字方式：hid_controller.key_press(13)
 """
 
@@ -25,8 +25,8 @@ def main():
     hid_controller.key_press("a")
     time.sleep(0.3)
 
-    print("2. 按下 Enter 键（字符串）")
-    hid_controller.key_press("Enter")
+    print("2. 按下 Enter 键（字符串 'enter'）")
+    hid_controller.key_press("enter")
     time.sleep(0.3)
 
     print("3. 组合键：Ctrl+C（字符串）")

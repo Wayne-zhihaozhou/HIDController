@@ -90,11 +90,11 @@ hid_controller.mouse_wheel(120)               # 滚轮向上
 | 字母 | `A` - `Z` |
 | 数字 | `KEY_0` - `KEY_9` |
 
-**使用字符串方式（推荐，简单易记）**：
+**使用字符串方式（推荐，简单易记，全部小写）**：
 ```python
 hid_controller.key_down('a')              # 按下 'a' 键
 hid_controller.key_down('lctrl')          # 按下左 Ctrl
-hid_controller.key_press('Enter')         # 按下并抬起 Enter
+hid_controller.key_press('enter')         # 按下并抬起 Enter
 hid_controller.key_combo(['lctrl', 'c'])  # Ctrl+C 组合键
 hid_controller.key_seq(['a', 'b', 'c'])   # 依次按下 a, b, c
 ```
