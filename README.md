@@ -25,88 +25,7 @@
 pip install hid-controller
 ```
 
-## input_tracker API 参考（输入检测）
-
-### 函数列表
-
-| 函数 | 参数 | 返回值 | 说明 |
-|------|------|--------|------|
-| `start(mouse_callback, key_callback, mouse_button_callback)` | 回调函数 | `None` | 开始跟踪键盘鼠标事件 |
-| `stop()` | 无 | `None` | 停止跟踪 |
-| `is_tracking()` | 无 | `bool` | 检查是否正在跟踪 |
-| `get_mouse_delta()` | 无 | `(dx, dy)` | 获取鼠标增量（轮询模式） |
-| `get_pressed_keys()` | 无 | `list` | 获取当前按下的键（轮询模式） |
-
-### 回调函数签名
-
-```python
-def mouse_callback(device_handle: int, dx: int, dy: int) -> None
-def key_callback(device_handle: int, vkey: int, is_down: bool) -> None
-def mouse_button_callback(device_handle: int, button: int, is_down: bool) -> None
-```
-
-**参数说明**：
-- `device_handle`: 设备句柄（uintptr_t）
-- `dx`, `dy`: 鼠标位移量
-- `vkey`: 虚拟键码 (VK_*)
-- `is_down`: True=按下, False=抬起
-- `button`: 1=左键, 2=右键, 3=中键
-
-### 使用示例
-
-**回调模式（事件驱动，推荐）**：
-```python
-import hid_controller.input_tracker as tracker
-
-def on_mouse(device, dx, dy):
-    print(f"Mouse: dx={dx}, dy={dy}")
-
-def on_key(device, vkey, is_down):
-    state = "DOWN" if is_down else "UP"
-    print(f"Key {state}: vkey={vkey}")
-
-def on_mouse_button(device, button, is_down):
-    btn = {1: "Left", 2: "Right", 3: "Middle"}.get(button, str(button))
-    state = "DOWN" if is_down else "UP"
-    print(f"Mouse {btn} {state}")
-
-# 启动跟踪
-tracker.start(on_mouse, on_key, on_mouse_button)
-
-# ... 运行你的代码 ...
-
-# 停止跟踪
-tracker.stop()
-```
-
-**轮询模式（主动查询）**：
-```python
-import hid_controller.input_tracker as tracker
-
-# 启动跟踪（不传回调）
-tracker.start()
-
-# 运行你的代码...
-dx, dy = tracker.get_mouse_delta()
-keys = tracker.get_pressed_keys()
-
-# 停止跟踪
-tracker.stop()
-```
-
-### 通过主模块访问
-
-```python
-import hid_controller
-
-# 方式 1: 直接导入子模块
-import hid_controller.input_tracker as tracker
-
-# 方式 2: 通过主模块访问
-tracker = hid_controller._get_input_tracker()
-```
-
-## API 参考（主模块 - 输出控制）
+## API 参考
 
 ### 鼠标函数
 
@@ -222,6 +141,87 @@ hid_controller.key_press(13)           # Enter (VK_RETURN = 13)
 | `'lshift'`, `'rshift'` | 左/右 Shift | `'lctrl'`, `'rctrl'` | 左/右 Ctrl |
 | `'lalt'`, `'ralt'` | 左/右 Alt | `'win'` | Win 键 |
 
+## input_tracker API 参考（输入检测）
+
+### 函数列表
+
+| 函数 | 参数 | 返回值 | 说明 |
+|------|------|--------|------|
+| `start(mouse_callback, key_callback, mouse_button_callback)` | 回调函数 | `None` | 开始跟踪键盘鼠标事件 |
+| `stop()` | 无 | `None` | 停止跟踪 |
+| `is_tracking()` | 无 | `bool` | 检查是否正在跟踪 |
+| `get_mouse_delta()` | 无 | `(dx, dy)` | 获取鼠标增量（轮询模式） |
+| `get_pressed_keys()` | 无 | `list` | 获取当前按下的键（轮询模式） |
+
+### 回调函数签名
+
+```python
+def mouse_callback(device_handle: int, dx: int, dy: int) -> None
+def key_callback(device_handle: int, vkey: int, is_down: bool) -> None
+def mouse_button_callback(device_handle: int, button: int, is_down: bool) -> None
+```
+
+**参数说明**：
+- `device_handle`: 设备句柄（uintptr_t）
+- `dx`, `dy`: 鼠标位移量
+- `vkey`: 虚拟键码 (VK_*)
+- `is_down`: True=按下, False=抬起
+- `button`: 1=左键, 2=右键, 3=中键
+
+### 使用示例
+
+**回调模式（事件驱动，推荐）**：
+```python
+import hid_controller.input_tracker as tracker
+
+def on_mouse(device, dx, dy):
+    print(f"Mouse: dx={dx}, dy={dy}")
+
+def on_key(device, vkey, is_down):
+    state = "DOWN" if is_down else "UP"
+    print(f"Key {state}: vkey={vkey}")
+
+def on_mouse_button(device, button, is_down):
+    btn = {1: "Left", 2: "Right", 3: "Middle"}.get(button, str(button))
+    state = "DOWN" if is_down else "UP"
+    print(f"Mouse {btn} {state}")
+
+# 启动跟踪
+tracker.start(on_mouse, on_key, on_mouse_button)
+
+# ... 运行你的代码 ...
+
+# 停止跟踪
+tracker.stop()
+```
+
+**轮询模式（主动查询）**：
+```python
+import hid_controller.input_tracker as tracker
+
+# 启动跟踪（不传回调）
+tracker.start()
+
+# 运行你的代码...
+dx, dy = tracker.get_mouse_delta()
+keys = tracker.get_pressed_keys()
+
+# 停止跟踪
+tracker.stop()
+```
+
+### 通过主模块访问
+
+```python
+import hid_controller
+
+# 方式 1: 直接导入子模块
+import hid_controller.input_tracker as tracker
+
+# 方式 2: 通过主模块访问
+tracker = hid_controller._get_input_tracker()
+```
+
 ## 项目结构
 
 ```
@@ -266,9 +266,9 @@ wheel 包生成在 `dist/` 目录下。
 
 ## 测试
 
-### 运行完整 API 测试
+### API 测试
 ```bash
-python test_all_api_auto.py
+python test_detection.py
 ```
 
 ### 运行示例代码
@@ -278,11 +278,7 @@ python examples/keyboard_example.py
 python examples/input_tracker_example.py
 ```
 
-### 测试 input_tracker
-```bash
-# 回调模式示例
-python examples/input_tracker_example.py
-```
+
 
 ## 免责声明
 
