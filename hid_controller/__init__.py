@@ -1,8 +1,16 @@
 """HIDController - Mouse and keyboard control via Logitech HID reports."""
 
 
+class _ConstantClassMeta(type):
+    """元类：过滤 dir() 输出，只显示类中明确定义的属性"""
+    def __dir__(cls):
+        """自定义类的 dir() 输出，只显示类中明确定义的属性（过滤 __ 开头的）"""
+        # 只返回类字典中定义的属性，不包含元类继承的属性
+        return [name for name in cls.__dict__ if not name.startswith('_')]
+
+
 # 鼠标按钮常量 - 支持字符串和数字两种方式
-class MouseEvent:
+class MouseEvent(metaclass=_ConstantClassMeta):
     """
     鼠标按钮常量类。
     
@@ -18,6 +26,11 @@ class MouseEvent:
         hid_controller.mouse_click(MouseEvent.LEFT)  # 常量方式
         hid_controller.mouse_click(0x02)             # 数字方式
     """
+    
+    def __dir__(self):
+        """自定义 dir() 输出，过滤掉双下划线开头的内部属性"""
+        return [item for item in super().__dir__() if not item.startswith('__')]
+    
     # 左键
     LEFT_DOWN = 0x02
     LEFT_UP = 0x04
@@ -50,7 +63,7 @@ class MouseEvent:
 
 
 # 键盘键码常量 - 支持字符串、常量和数字三种方式
-class KeyEvent:
+class KeyEvent(metaclass=_ConstantClassMeta):
     """
     键盘键码常量类。
     
@@ -64,6 +77,7 @@ class KeyEvent:
         hid_controller.key_press(KeyEvent.ENTER)   # 常量方式（编辑器提示）
         hid_controller.key_press(13)               # 数字方式
     """
+    
     KEYUP = 0x0002
     EXTENDED_KEY = 0x0001
     

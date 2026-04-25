@@ -271,7 +271,7 @@ def test_keyboard_simple():
 
     # 方式 2: KeyEvent 常量方式
     print("8.4 KeyEvent 常量方式: key_press(KeyEvent.A)")
-    result = hid_controller.key_press(hid_controller.KeyEvent.A)
+    result = hid_controller.key_press(hid_controller.KeyEvent.)
     print(f"  返回值: {result}")
     time.sleep(0.3)
 
