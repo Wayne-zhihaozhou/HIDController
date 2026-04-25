@@ -25,6 +25,8 @@ Release/
 x64/
 x86/
 _obj/
+build-vs2026/
+build-dist/
 
 # IDE
 .vscode/
