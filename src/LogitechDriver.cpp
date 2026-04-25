@@ -7,7 +7,7 @@
 
 namespace Send {
 	/** 从系统 PATH 中查找程序可执行文件的完整路径 */
-	std::wstring FindExecutableInPath(const std::wstring& exe_name = L"LCore.exe") {
+	std::wstring findExecutableInPath(const std::wstring& exe_name = L"LCore.exe") {
 		wchar_t* path_env = nullptr;
 		size_t len = 0;
 
@@ -189,7 +189,7 @@ namespace Send {
 	// 创建 Logitech 驱动设备连接
 	bool LogitechDriver::create() {
 
-		//const std::wstring& exe_name = FindExecutableInPath();
+		//const std::wstring& exe_name = findExecutableInPath();
 		//if (exe_name.empty()) {
 		//	printf("Cannot find LCore.exe in PATH\n");
 		//	return false;

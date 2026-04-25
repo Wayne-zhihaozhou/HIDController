@@ -24,8 +24,8 @@ namespace Send {
 		return instance;
 	}
 
-	//辅助函数
-	void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi) {
+// 辅助函数
+void UpdateMouseButton(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi) {
 		// 左键
 		if (mi.dwFlags & MOUSEEVENTF_LEFTDOWN) btn.LButton = true;
 		if (mi.dwFlags & MOUSEEVENTF_LEFTUP)   btn.LButton = false;
@@ -75,7 +75,7 @@ namespace Send {
 			MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP |
 			MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP))
 		{
-			update_mouse_button(mouse_report.button, mi);
+			UpdateMouseButton(mouse_report.button, mi);
 		}
 
 		return driver.report_mouse(mouse_report);
@@ -102,7 +102,7 @@ namespace Send {
 
 		default:
 			// 普通按键处理
-			uint8_t usage = Usb::keyboard_vk_to_usage((uint8_t)ki.wVk);
+			uint8_t usage = Usb::KeyboardVkToUsage((uint8_t)ki.wVk);
 
 			if (keydown) {
 				// 按下：检查是否已经存在，避免重复

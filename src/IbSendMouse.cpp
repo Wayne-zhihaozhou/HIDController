@@ -16,7 +16,7 @@ void BackupMouseSettings() {
 	SystemParametersInfo(SPI_GETMOUSESPEED, 0, &originalSpeed, 0);
 }
 
-bool SendMouseInputBulk(const MOUSEINPUT* inputs, uint32_t count) {
+bool sendMouseInputBulk(const MOUSEINPUT* inputs, uint32_t count) {
 	auto& logitech = Send::Logitech::getLogitechInstance();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech.send_mouse_report(inputs[i])) return false;
@@ -46,7 +46,7 @@ DLLAPI bool WINAPI MouseDown(uint16_t button) {
 		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
 	}
 
-	return SendMouseInputBulk(&mi, 1);
+	return sendMouseInputBulk(&mi, 1);
 }
 
 DLLAPI bool WINAPI MouseUp(uint16_t button) {
@@ -71,7 +71,7 @@ DLLAPI bool WINAPI MouseUp(uint16_t button) {
 		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
 	}
 
-	return SendMouseInputBulk(&mi, 1);
+	return sendMouseInputBulk(&mi, 1);
 }
 
 DLLAPI bool WINAPI MouseClick(uint16_t button) {
@@ -99,10 +99,10 @@ DLLAPI bool WINAPI MouseClick(uint16_t button) {
 		if (inputs[0].dwFlags & MOUSEEVENTF_XDOWN) {
 			inputs[1].dwFlags = MOUSEEVENTF_XUP;
 			inputs[1].mouseData = xbtn;
-			return SendMouseInputBulk(inputs, 2);
+		return sendMouseInputBulk(inputs, 2);
 		}
 
-		return SendMouseInputBulk(&inputs[0], 1);
+		return sendMouseInputBulk(&inputs[0], 1);
 	}
 
 	// ---------------- 左/右/中键 ----------------
@@ -114,12 +114,12 @@ DLLAPI bool WINAPI MouseClick(uint16_t button) {
 		else if (button == MOUSEEVENTF_RIGHTDOWN) inputs[1].dwFlags = MOUSEEVENTF_RIGHTUP;
 		else if (button == MOUSEEVENTF_MIDDLEDOWN) inputs[1].dwFlags = MOUSEEVENTF_MIDDLEUP;
 
-		return SendMouseInputBulk(inputs, 2);
+		return sendMouseInputBulk(inputs, 2);
 	}
 
 	// ---------------- 其他情况（单独 UP 或其他宏） ----------------
 	inputs[0].dwFlags = button;
-	return SendMouseInputBulk(&inputs[0], 1);
+	return sendMouseInputBulk(&inputs[0], 1);
 }
 
 DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
@@ -157,7 +157,7 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 		prev_y = curr_y;
 	}
 
-	return SendMouseInputBulk(moves.data(), static_cast<uint32_t>(moves.size()));
+	return sendMouseInputBulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
 DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
@@ -200,7 +200,7 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 		prev_value = curr_value;
 	}
 
-	return SendMouseInputBulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
+	return sendMouseInputBulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
 }
 
 DLLAPI void WINAPI SetMouseMoveCoefficient(float coefficient) {
