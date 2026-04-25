@@ -1,4 +1,17 @@
-"""HIDController - Mouse and keyboard control via Logitech HID reports."""
+"""HIDController - Mouse and keyboard control via Logitech HID reports.
+
+包含两个模块：
+1. 主模块 - 通过 Logitech HID 报告控制键盘鼠标（输出）
+2. input_tracker - 通过 RAW INPUT API 检测键盘鼠标事件（输入）
+
+使用 input_tracker 示例:
+    >>> import hid_controller
+    >>> def on_mouse(device, dx, dy):
+    ...     print(f"Mouse: dx={dx}, dy={dy}")
+    >>> hid_controller.input_tracker.start(on_mouse)
+    >>> # ... 你的代码 ...
+    >>> hid_controller.input_tracker.stop()
+"""
 
 
 class _ConstantClassMeta(type):
@@ -211,3 +224,31 @@ __all__ = [
     "release_all_keys",
     "set_mouse_move_coefficient",
 ]
+
+# 延迟导入 input_tracker 模块（避免编译失败时影响整个包）
+def _get_input_tracker():
+    """
+    获取 input_tracker 模块（键盘鼠标事件检测）。
+    
+    基于 Windows RAW INPUT API 实时检测键盘鼠标事件。
+    
+    使用示例:
+        >>> import hid_controller
+        >>> tracker = hid_controller._get_input_tracker()
+        >>> tracker.start(on_mouse_callback)
+        >>> # ... 检测事件 ...
+        >>> tracker.stop()
+    
+    Returns:
+        module: input_tracker 模块
+    """
+    try:
+        from . import input_tracker as _tracker
+        return _tracker
+    except ImportError as e:
+        raise ImportError(
+            f"input_tracker 模块不可用。\n"
+            f"错误: {e}\n"
+            f"请运行: python setup.py build_ext --inplace\n"
+            f"或: pip install -e ."
+        )
