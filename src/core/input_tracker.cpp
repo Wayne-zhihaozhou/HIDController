@@ -1,10 +1,13 @@
-// InputTracker.cpp
-// Windows RAW INPUT API 键盘鼠标事件检测
-// 基于 WindowsProject2 的 input_tracker.cpp 融合到 HIDController 项目
+// InputTracker.cpp - Windows RAW INPUT API keyboard and mouse event detection
+// HIDController project
+//
+// This file provides the C++ implementation. It should be #include'd by
+// src/bindings/input_tracker_bindings.cpp which defines the PYBIND11_MODULE.
+//
+// Note: This file uses pybind11 types (py::tuple, py::list, py::object, py::gil_scoped_acquire).
+// The #include "input_tracker.cpp" pattern is used in input_tracker_bindings.cpp,
+// so the pybind11 headers must be included in the bindings file first.
 
-#include <pybind11/pybind11.h>
-#include <pybind11/functional.h>
-#include <pybind11/stl.h>
 #include <windows.h>
 #include <thread>
 #include <atomic>
@@ -12,8 +15,6 @@
 #include <mutex>
 #include <set>
 #include <functional>
-
-namespace py = pybind11;
 
 // ==================== 全局变量 ====================
 std::atomic<bool> g_running(false);
@@ -270,25 +271,4 @@ void stop_tracking() {
  */
 bool is_tracking() {
     return g_running.load();
-}
-
-// ==================== pybind11 模块定义 ====================
-
-PYBIND11_MODULE(input_tracker, m) {
-    m.doc() = "HIDController - Windows RAW INPUT keyboard and mouse event tracker";
-    
-    // 启动/停止跟踪
-    m.def("start", &start_tracking, 
-          py::arg("mouse_callback") = py::none(), 
-          py::arg("key_callback") = py::none(),
-          py::arg("mouse_button_callback") = py::none(), 
-          "Start tracking keyboard and mouse events via RAW INPUT");
-    
-    m.def("stop", &stop_tracking, "Stop tracking");
-    
-    m.def("is_tracking", &is_tracking, "Check if tracking is running");
-    
-    // 轮询接口
-    m.def("get_mouse_delta", &get_mouse_delta, "Get accumulated mouse delta since last call");
-    m.def("get_pressed_keys", &get_pressed_keys, "Get list of currently pressed virtual key codes");
 }

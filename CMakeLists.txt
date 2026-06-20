@@ -17,14 +17,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${DIST_DIR})
 # 定义导出符号宏
 add_definitions(-DDLL1_EXPORTS)
 
-# 查找所有源文件
+# 查找所有 C++ 核心源文件
 file(GLOB HID_CONTROLLER_SOURCES
-    "src/*.cpp"
+    "src/core/*.cpp"
 )
 
-# 排除 pch.cpp（它只用于预编译头）和 InputTracker.cpp（依赖pybind11，用于Python绑定）
+# 排除 pch.cpp（预编译头）和 input_tracker.cpp（RAW INPUT，不用于纯 DLL 构建）
 list(FILTER HID_CONTROLLER_SOURCES EXCLUDE REGEX ".*pch\\.cpp$")
-list(FILTER HID_CONTROLLER_SOURCES EXCLUDE REGEX ".*InputTracker\\.cpp$")
+list(FILTER HID_CONTROLLER_SOURCES EXCLUDE REGEX ".*input_tracker\\.cpp$")
 
 # 创建 DLL 目标
 add_library(HIDController SHARED
@@ -43,11 +43,11 @@ target_link_libraries(HIDController
     kernel32.lib
 )
 
-# 设置预编译头（暂时禁用，避免CMake兼容性问题）
-# if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
-#     target_precompile_header(HIDController PRIVATE include/pch.h)
-#     source_group("Header Files" FILES include/pch.h)
-# endif()
+# 设置预编译头
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
+    target_precompile_header(HIDController PRIVATE include/pch.h)
+    source_group("Header Files" FILES include/pch.h)
+endif()
 
 # 设置编译选项
 if(MSVC)

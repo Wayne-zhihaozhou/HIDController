@@ -5,20 +5,18 @@ from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
 # ==================== HIDController 主扩展模块（输出：控制键盘鼠标） ====================
-# 包含所有源文件：binding.cpp + 原有C++实现
 _extension_src_files = [
-    "binding.cpp",
-    "src/IbSendMouse.cpp",
-    "src/IbSendKeyboard.cpp",
-    "src/Logitech.cpp",
-    "src/LogitechDriver.cpp",
-    "src/pch.cpp",
+    "src/bindings/main_bindings.cpp",
+    "src/core/IbSendMouse.cpp",
+    "src/core/IbSendKeyboard.cpp",
+    "src/core/Logitech.cpp",
+    "src/core/LogitechDriver.cpp",
+    "src/core/pch.cpp",
 ]
 
 # ==================== input_tracker 扩展模块（输入：检测键盘鼠标事件） ====================
-# 基于 Windows RAW INPUT API 检测键盘鼠标事件
 input_tracker_src_files = [
-    "src/InputTracker.cpp",
+    "src/bindings/input_tracker_bindings.cpp",
 ]
 
 # 创建扩展模块
@@ -40,6 +38,8 @@ ext_modules = [
         input_tracker_src_files,
         include_dirs=[
             str(pybind11.get_include()),
+            "include",
+            "src/core",
         ],
         cxx_std=17,
     ),
