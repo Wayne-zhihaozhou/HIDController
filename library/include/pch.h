@@ -11,4 +11,4 @@
 #include <winternl.h>
 #include <filesystem>
 
-#include "HIDController.hpp"
+#include "hid_controller.h"
