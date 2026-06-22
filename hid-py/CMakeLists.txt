@@ -12,18 +12,9 @@ endif()
 # Find Python
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
-# Fetch pybind11
+# Fetch pybind11 (use system pybind11 first, fall back to FetchContent if available)
 set(PYBIND11_FINDPYTHON ON)
-find_package(pybind11 2.12 CONFIG QUIET)
-if(NOT pybind11_FOUND)
-    include(FetchContent)
-    FetchContent_Declare(
-        pybind11
-        GIT_REPOSITORY https://github.com/pybind/pybind11.git
-        GIT_TAG v2.13.6
-    )
-    FetchContent_MakeAvailable(pybind11)
-endif()
+find_package(pybind11 2.12 CONFIG REQUIRED)
 
 # Directories
 set(HIDCTL_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../hid-lib")
@@ -31,12 +22,34 @@ set(HIDCTL_INCLUDE_DIR "${HIDCTL_LIB_DIR}/include")
 set(HIDCTL_DLL_DIR "${HIDCTL_LIB_DIR}/build/Release")
 set(PKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/hid_controller")
 
+# Clean output: .pyd/.dll go to dist/, .lib/.exp go to _libs/
+set(DIST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
+set(DIST_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/_libs")
+file(MAKE_DIRECTORY "${DIST_DIR}")
+file(MAKE_DIRECTORY "${DIST_LIBS_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${DIST_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${DIST_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${DIST_LIBS_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DIST_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DIST_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${DIST_LIBS_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${DIST_LIBS_DIR}")
+
 # ==================== hid_send module ====================
 pybind11_add_module(hid_send
     "${HIDCTL_LIB_DIR}/src/bindings/hid_send_bindings.cpp"
 )
 
 target_include_directories(hid_send PRIVATE ${HIDCTL_INCLUDE_DIR})
+# Force output to dist/ (pybind11 overrides global output dirs, use LIBRARY_OUTPUT for MSVC .pyd)
+set_target_properties(hid_send PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${DIST_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${DIST_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${DIST_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${DIST_LIBS_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${DIST_LIBS_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${DIST_LIBS_DIR}"
+)
 
 # Link against hid_controller.lib if available (DLL already built)
 if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.lib")
@@ -60,6 +73,14 @@ pybind11_add_module(raw_input
 )
 
 target_include_directories(raw_input PRIVATE ${HIDCTL_INCLUDE_DIR} "${HIDCTL_LIB_DIR}/src/core")
+set_target_properties(raw_input PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${DIST_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG "${DIST_DIR}"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE "${DIST_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${DIST_LIBS_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${DIST_LIBS_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${DIST_LIBS_DIR}"
+)
 
 if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.lib")
     target_link_libraries(raw_input PRIVATE "${HIDCTL_DLL_DIR}/hid_controller.lib")
@@ -74,7 +95,7 @@ if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.dll")
     )
 endif()
 
-# Copy .pyd files into hid_controller/ package directory
+# Copy .pyd files into hid_controller/ package directory and clean up intermediates
 add_custom_target(copy_pydstamp ALL DEPENDS hid_send raw_input)
 add_custom_command(TARGET copy_pydstamp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -84,6 +105,14 @@ add_custom_command(TARGET copy_pydstamp POST_BUILD
         $<TARGET_FILE:raw_input>
         ${PKG_DIR}/raw_input.pyd
     COMMENT "Copying .pyd files into hid_controller/ package"
+)
+
+# Clean up intermediate output after build
+add_custom_target(clean_intermediates ALL DEPENDS copy_pydstamp)
+add_custom_command(TARGET clean_intermediates POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_BINARY_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${DIST_LIBS_DIR}"
+    COMMENT "Removing intermediate directories (_libs/ and build/)"
 )
 
 # Install rules
