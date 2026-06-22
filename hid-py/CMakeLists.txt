@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-project(HIDControllerPython LANGUAGES CXX)
+project(hid_controller_python LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,18 +38,18 @@ pybind11_add_module(hid_send
 
 target_include_directories(hid_send PRIVATE ${HIDCTL_INCLUDE_DIR})
 
-# Link against HIDController.lib if available (DLL already built)
-if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.lib")
-    target_link_libraries(hid_send PRIVATE "${HIDCTL_DLL_DIR}/HIDController.lib")
+# Link against hid_controller.lib if available (DLL already built)
+if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.lib")
+    target_link_libraries(hid_send PRIVATE "${HIDCTL_DLL_DIR}/hid_controller.lib")
 endif()
 
 # Copy DLL next to .pyd
-if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.dll")
+if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.dll")
     add_custom_command(TARGET hid_send POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${HIDCTL_DLL_DIR}/HIDController.dll"
+            "${HIDCTL_DLL_DIR}/hid_controller.dll"
             $<TARGET_FILE_DIR:hid_send>
-        COMMENT "Copying HIDController.dll next to hid_send.pyd"
+        COMMENT "Copying hid_controller.dll next to hid_send.pyd"
     )
 endif()
 
@@ -61,16 +61,16 @@ pybind11_add_module(raw_input
 
 target_include_directories(raw_input PRIVATE ${HIDCTL_INCLUDE_DIR} "${HIDCTL_LIB_DIR}/src/core")
 
-if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.lib")
-    target_link_libraries(raw_input PRIVATE "${HIDCTL_DLL_DIR}/HIDController.lib")
+if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.lib")
+    target_link_libraries(raw_input PRIVATE "${HIDCTL_DLL_DIR}/hid_controller.lib")
 endif()
 
-if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.dll")
+if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.dll")
     add_custom_command(TARGET raw_input POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${HIDCTL_DLL_DIR}/HIDController.dll"
+            "${HIDCTL_DLL_DIR}/hid_controller.dll"
             $<TARGET_FILE_DIR:raw_input>
-        COMMENT "Copying HIDController.dll next to raw_input.pyd"
+        COMMENT "Copying hid_controller.dll next to raw_input.pyd"
     )
 endif()
 

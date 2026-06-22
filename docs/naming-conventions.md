@@ -25,6 +25,7 @@ This document applies to all C++ and Python code in the HIDController project, i
 | 测试用例名 | `snake_case` | `is_valid`, `handles_timeout` |
 | 源文件 / 头文件 | `snake_case.cpp` / `.h` | `image_processor.cpp`, `network_session.h` |
 | 测试文件 | `snake_case_test.cpp` | `image_processor_test.cpp` |
+| 工程 / 配置文件（`.sln`/`.vcxproj`/`.def` 等） | `snake_case` | `hid_controller.sln`, `hid_controller.vcxproj`, `hid_controller.def` |
 
 ### 必须遵守的补充规则
 
@@ -96,8 +97,9 @@ C++ 和 Python 的**公开 API 名称必须完全一致**，降低用户学习�
 
 ### 目录结构
 
-| 语言 | 目录 |
+| 语言 / 类型 | 目录 / 位置 |
 |---|---|
+| 项目根目录（`.sln`/`.vcxproj`/`.def` 等） | 项目根目录，使用 `snake_case` 命名 |
 | C++ 公开头文件 | `include/hid_controller/` |
 | C++ 源文件 | `src/` |
 | C++ 测试文件 | `tests/`，命名 `*_test.cpp` |

@@ -11,7 +11,7 @@ typedef struct HWND__* HWND;
 #ifndef WINAPI
 #define WINAPI __stdcall
 #endif
-#ifdef HIDController_EXPORTS
+#ifdef hid_controller_EXPORTS
 #define DLLAPI  extern "C" __declspec(dllexport)
 #else
 #define DLLAPI  extern "C" __declspec(dllimport)

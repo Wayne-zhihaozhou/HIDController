@@ -10,7 +10,7 @@ hid-lib/*.pdb
 hid-py/build/
 hid-py/CMakeCache.txt
 hid-py/CMakeFiles/
-hid-py/HIDControllerPython.sln
+hid-py/hid_controller_python.sln
 hid-py/Release/
 hid-py/_deps/
 hid-py/_*.dir/

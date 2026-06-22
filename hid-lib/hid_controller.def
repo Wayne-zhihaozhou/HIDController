@@ -1,4 +1,4 @@
-LIBRARY HIDController
+LIBRARY hid_controller
 EXPORTS
     mouse_move_relative         @1
     mouse_move_absolute         @2
