@@ -98,8 +98,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\IbSendKeyboard.cpp" />
-    <ClCompile Include="src\core\IbSendMouse.cpp" />
+    <ClCompile Include="src\core\ib_send_keyboard.cpp" />
+    <ClCompile Include="src\core\ib_send_mouse.cpp" />
     <ClCompile Include="src\core\input_tracker_impl.cpp" />
     <ClCompile Include="src\core\logitech.cpp" />
     <ClCompile Include="src\core\logitech_driver.cpp" />

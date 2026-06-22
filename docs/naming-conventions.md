@@ -1,6 +1,6 @@
-# 命名规范
+# Naming Conventions
 
-本文档适用于 HIDController 项目的所有 C++ 和 Python 代码，包括公开 API、内部实现和测试代码。**所有代码必须严格遵守本规范**，本规范优先级高于任何外部参考文档。
+This document applies to all C++ and Python code in the HIDController project, including public APIs, internal implementations, and test code. **All code must strictly follow these conventions**, which take priority over any external reference documents.
 
 ---
 
