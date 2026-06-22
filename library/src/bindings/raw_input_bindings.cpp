@@ -1,4 +1,4 @@
-// input_tracker_bindings.cpp — pybind11 module definition
+// raw_input_bindings.cpp — pybind11 module definition
 #include <pybind11/pybind11.h>
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
@@ -7,7 +7,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(input_tracker, m) {
+PYBIND11_MODULE(raw_input, m) {
     m.doc() = "HIDController - Windows RAW INPUT keyboard and mouse event tracker";
 
     m.def("start",

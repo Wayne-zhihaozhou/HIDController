@@ -108,7 +108,7 @@ static uint16_t key_to_vk(const std::string& key) {
     return 0;
 }
 
-PYBIND11_MODULE(_extension, m) {
+PYBIND11_MODULE(hid_send, m) {
     m.doc() = "Python bindings for HIDController - Mouse and keyboard control via Logitech HID reports";
 
     // ==================== 鼠标控制函数 ====================

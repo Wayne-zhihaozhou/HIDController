@@ -31,62 +31,62 @@ set(HIDCTL_INCLUDE_DIR "${HIDCTL_LIB_DIR}/include")
 set(HIDCTL_DLL_DIR "${HIDCTL_LIB_DIR}/build/Release")
 set(PKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/hid_controller")
 
-# ==================== _extension module ====================
-pybind11_add_module(_extension
-    "${HIDCTL_LIB_DIR}/src/bindings/main_bindings.cpp"
+# ==================== hid_send module ====================
+pybind11_add_module(hid_send
+    "${HIDCTL_LIB_DIR}/src/bindings/hid_send_bindings.cpp"
 )
 
-target_include_directories(_extension PRIVATE ${HIDCTL_INCLUDE_DIR})
+target_include_directories(hid_send PRIVATE ${HIDCTL_INCLUDE_DIR})
 
 # Link against HIDController.lib if available (DLL already built)
 if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.lib")
-    target_link_libraries(_extension PRIVATE "${HIDCTL_DLL_DIR}/HIDController.lib")
+    target_link_libraries(hid_send PRIVATE "${HIDCTL_DLL_DIR}/HIDController.lib")
 endif()
 
 # Copy DLL next to .pyd
 if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.dll")
-    add_custom_command(TARGET _extension POST_BUILD
+    add_custom_command(TARGET hid_send POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${HIDCTL_DLL_DIR}/HIDController.dll"
-            $<TARGET_FILE_DIR:_extension>
-        COMMENT "Copying HIDController.dll next to _extension.pyd"
+            $<TARGET_FILE_DIR:hid_send>
+        COMMENT "Copying HIDController.dll next to hid_send.pyd"
     )
 endif()
 
-# ==================== input_tracker module ====================
-pybind11_add_module(input_tracker
-    "${HIDCTL_LIB_DIR}/src/bindings/input_tracker_bindings.cpp"
+# ==================== raw_input module ====================
+pybind11_add_module(raw_input
+    "${HIDCTL_LIB_DIR}/src/bindings/raw_input_bindings.cpp"
     "${HIDCTL_LIB_DIR}/src/core/input_tracker_impl.cpp"
 )
 
-target_include_directories(input_tracker PRIVATE ${HIDCTL_INCLUDE_DIR} "${HIDCTL_LIB_DIR}/src/core")
+target_include_directories(raw_input PRIVATE ${HIDCTL_INCLUDE_DIR} "${HIDCTL_LIB_DIR}/src/core")
 
 if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.lib")
-    target_link_libraries(input_tracker PRIVATE "${HIDCTL_DLL_DIR}/HIDController.lib")
+    target_link_libraries(raw_input PRIVATE "${HIDCTL_DLL_DIR}/HIDController.lib")
 endif()
 
 if(EXISTS "${HIDCTL_DLL_DIR}/HIDController.dll")
-    add_custom_command(TARGET input_tracker POST_BUILD
+    add_custom_command(TARGET raw_input POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${HIDCTL_DLL_DIR}/HIDController.dll"
-            $<TARGET_FILE_DIR:input_tracker>
-        COMMENT "Copying HIDController.dll next to input_tracker.pyd"
+            $<TARGET_FILE_DIR:raw_input>
+        COMMENT "Copying HIDController.dll next to raw_input.pyd"
     )
 endif()
 
 # Copy .pyd files into hid_controller/ package directory
-add_custom_target(copy_pydstamp ALL DEPENDS _extension input_tracker)
+add_custom_target(copy_pydstamp ALL DEPENDS hid_send raw_input)
 add_custom_command(TARGET copy_pydstamp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:_extension>
-        ${PKG_DIR}/_extension.pyd
+        $<TARGET_FILE:hid_send>
+        ${PKG_DIR}/hid_send.pyd
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_FILE:input_tracker>
-        ${PKG_DIR}/input_tracker.pyd
+        $<TARGET_FILE:raw_input>
+        ${PKG_DIR}/raw_input.pyd
     COMMENT "Copying .pyd files into hid_controller/ package"
 )
 
 # Install rules
-install(TARGETS _extension input_tracker
+install(TARGETS hid_send raw_input
     DESTINATION hid_controller
 )

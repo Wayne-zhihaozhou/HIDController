@@ -8,7 +8,7 @@ Logitech Gaming Software (LGS) is installed and the virtual driver is active.
 from __future__ import annotations
 
 # C extension modules
-from hid_controller._extension import (
+from hid_controller.hid_send import (
     move_mouse_relative,
     move_mouse_absolute,
     mouse_down,
@@ -28,7 +28,7 @@ from hid_controller._extension import (
     release_all_keys,
 )
 
-from hid_controller.input_tracker import start, stop, is_tracking, get_mouse_delta, get_pressed_keys
+from hid_controller.raw_input import start, stop, is_tracking, get_mouse_delta, get_pressed_keys
 
 __all__ = [
     # Mouse control

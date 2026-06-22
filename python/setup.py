@@ -50,8 +50,8 @@ class CMakeBuild(build_ext):
 
 setup(
     ext_modules=[
-        CMakeExtension("hid_controller._extension"),
-        CMakeExtension("hid_controller.input_tracker"),
+        CMakeExtension("hid_controller.hid_send"),
+        CMakeExtension("hid_controller.raw_input"),
     ],
     cmdclass={"build_ext": CMakeBuild},
 )
