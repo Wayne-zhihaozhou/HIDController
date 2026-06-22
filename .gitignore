@@ -2,20 +2,20 @@
 # Build outputs
 # ========================
 # C/C++ library build artifacts
-library/build/
-library/*.obj
-library/*.ilk
-library/*.pdb
+hid-lib/build/
+hid-lib/*.obj
+hid-lib/*.ilk
+hid-lib/*.pdb
 # Python CMake build directory
-python/build/
-python/CMakeCache.txt
-python/CMakeFiles/
-python/HIDControllerPython.sln
-python/Release/
-python/_deps/
-python/_*.dir/
-python/input_tracker.dir/
-python/x64/
+hid-py/build/
+hid-py/CMakeCache.txt
+hid-py/CMakeFiles/
+hid-py/HIDControllerPython.sln
+hid-py/Release/
+hid-py/_deps/
+hid-py/_*.dir/
+hid-py/input_tracker.dir/
+hid-py/x64/
 
 # ========================
 # IDE cache

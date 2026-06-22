@@ -23,7 +23,7 @@ class CMakeBuild(build_ext):
         if not cmake_path:
             raise RuntimeError("cmake not found")
 
-        build_dir = Path(self.build_lib) / "build" / "cmake"
+        build_dir = Path(self.build_lib) / "hid_controller" / "build" / "cmake"
         build_dir.mkdir(parents=True, exist_ok=True)
 
         config = "Release" if self.debug else "Debug"

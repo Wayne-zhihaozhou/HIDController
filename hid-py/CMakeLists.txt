@@ -26,7 +26,7 @@ if(NOT pybind11_FOUND)
 endif()
 
 # Directories
-set(HIDCTL_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../library")
+set(HIDCTL_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../hid-lib")
 set(HIDCTL_INCLUDE_DIR "${HIDCTL_LIB_DIR}/include")
 set(HIDCTL_DLL_DIR "${HIDCTL_LIB_DIR}/build/Release")
 set(PKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/hid_controller")
