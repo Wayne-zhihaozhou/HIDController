@@ -1,30 +1,30 @@
-﻿//IbSendMouse.cpp
+// ib_send_mouse.cpp - Logitech mouse control
 #include "pch.h"
-#include <Logitech.hpp>
+#include <logitech.h>
 
 // 全局系数缓存
-static float g_mouseMoveCoefficient = 1.0f;
-int originalParams[3];
-int originalSpeed;
+static float mouse_move_coefficient_ = 1.0f;
+int original_params_[3];
+int original_speed_;
 
-float GetMouseMoveCoefficient() {
-	return g_mouseMoveCoefficient;
+float get_mouse_move_coefficient() {
+	return mouse_move_coefficient_;
 }
 
-void BackupMouseSettings() {
-	SystemParametersInfo(SPI_GETMOUSE, 0, originalParams, 0);
-	SystemParametersInfo(SPI_GETMOUSESPEED, 0, &originalSpeed, 0);
+void backup_mouse_settings() {
+	SystemParametersInfo(SPI_GETMOUSE, 0, original_params_, 0);
+	SystemParametersInfo(SPI_GETMOUSESPEED, 0, &original_speed_, 0);
 }
 
-bool sendMouseInputBulk(const MOUSEINPUT* inputs, uint32_t count) {
-	auto& logitech = Send::Logitech::getLogitechInstance();
+bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
+	auto& logitech = send::Logitech::get_logitech_instance();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech.send_mouse_report(inputs[i])) return false;
 	}
 	return true;
 }
 
-DLLAPI bool WINAPI MouseDown(uint16_t button) {
+DLLAPI bool WINAPI mouse_down(uint16_t button) {
 	MOUSEINPUT mi{};
 	mi.dx = 0;
 	mi.dy = 0;
@@ -46,10 +46,10 @@ DLLAPI bool WINAPI MouseDown(uint16_t button) {
 		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
 	}
 
-	return sendMouseInputBulk(&mi, 1);
+	return send_mouse_input_bulk(&mi, 1);
 }
 
-DLLAPI bool WINAPI MouseUp(uint16_t button) {
+DLLAPI bool WINAPI mouse_up(uint16_t button) {
 	MOUSEINPUT mi{};
 	mi.dx = 0;
 	mi.dy = 0;
@@ -71,10 +71,10 @@ DLLAPI bool WINAPI MouseUp(uint16_t button) {
 		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
 	}
 
-	return sendMouseInputBulk(&mi, 1);
+	return send_mouse_input_bulk(&mi, 1);
 }
 
-DLLAPI bool WINAPI MouseClick(uint16_t button) {
+DLLAPI bool WINAPI mouse_click(uint16_t button) {
 	MOUSEINPUT inputs[2]{};
 
 	// 初始化 MOUSEINPUT
@@ -99,10 +99,10 @@ DLLAPI bool WINAPI MouseClick(uint16_t button) {
 		if (inputs[0].dwFlags & MOUSEEVENTF_XDOWN) {
 			inputs[1].dwFlags = MOUSEEVENTF_XUP;
 			inputs[1].mouseData = xbtn;
-		return sendMouseInputBulk(inputs, 2);
+			return send_mouse_input_bulk(inputs, 2);
 		}
 
-		return sendMouseInputBulk(&inputs[0], 1);
+		return send_mouse_input_bulk(&inputs[0], 1);
 	}
 
 	// ---------------- 左/右/中键 ----------------
@@ -114,25 +114,25 @@ DLLAPI bool WINAPI MouseClick(uint16_t button) {
 		else if (button == MOUSEEVENTF_RIGHTDOWN) inputs[1].dwFlags = MOUSEEVENTF_RIGHTUP;
 		else if (button == MOUSEEVENTF_MIDDLEDOWN) inputs[1].dwFlags = MOUSEEVENTF_MIDDLEUP;
 
-		return sendMouseInputBulk(inputs, 2);
+		return send_mouse_input_bulk(inputs, 2);
 	}
 
 	// ---------------- 其他情况（单独 UP 或其他宏） ----------------
 	inputs[0].dwFlags = button;
-	return sendMouseInputBulk(&inputs[0], 1);
+	return send_mouse_input_bulk(&inputs[0], 1);
 }
 
-DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
-	const int32_t MAX_DELTA = 128;
+DLLAPI bool WINAPI mouse_move_relative(int32_t dx, int32_t dy) {
+	constexpr int32_t kMaxDelta = 128;
 
 	//纠正系数
-	float coeff = GetMouseMoveCoefficient();
+	float coeff = get_mouse_move_coefficient();
 	dx = static_cast<int32_t>(dx * coeff);
 	dy = static_cast<int32_t>(dy * coeff);
 
 	int32_t steps = max(
-		(std::abs(dx) + MAX_DELTA - 1) / MAX_DELTA,
-		(std::abs(dy) + MAX_DELTA - 1) / MAX_DELTA
+		(std::abs(dx) + kMaxDelta - 1) / kMaxDelta,
+		(std::abs(dy) + kMaxDelta - 1) / kMaxDelta
 	);
 	if (steps == 0) steps = 1;
 
@@ -157,10 +157,10 @@ DLLAPI bool WINAPI MouseMoveRelative(int32_t dx, int32_t dy) {
 		prev_y = curr_y;
 	}
 
-	return sendMouseInputBulk(moves.data(), static_cast<uint32_t>(moves.size()));
+	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
 }
 
-DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
+DLLAPI bool WINAPI mouse_move_absolute(uint32_t target_x, uint32_t target_y) {
 	//高频连续调用MouseMoveAbsolute函数,GetCursorPos(&current_pos)中的数据来不及更新,因此计算的偏移会有偏差
 	POINT current_pos;
 	if (!GetCursorPos(&current_pos)) {
@@ -170,13 +170,13 @@ DLLAPI bool WINAPI MouseMoveAbsolute(uint32_t target_x, uint32_t target_y) {
 	int32_t dx = static_cast<int32_t>(target_x) - current_pos.x;
 	int32_t dy = static_cast<int32_t>(target_y) - current_pos.y;
 
-	return MouseMoveRelative(dx, dy);
+	return mouse_move_relative(dx, dy);
 }
 
-DLLAPI bool WINAPI MouseWheel(int32_t movement) {
-	const int32_t MAX_DELTA = 120;  // 每个 HID 报告最大滚动量，标准滚轮为 120
+DLLAPI bool WINAPI mouse_wheel(int32_t movement) {
+	constexpr int32_t kMaxDelta = 120;  // 每个 HID 报告最大滚动量，标准滚轮为 120
 
-	int32_t steps = (std::abs(movement) + MAX_DELTA - 1) / MAX_DELTA;
+	int32_t steps = (std::abs(movement) + kMaxDelta - 1) / kMaxDelta;
 	if (steps == 0) steps = 1;
 
 	std::vector<MOUSEINPUT> wheels;
@@ -200,60 +200,60 @@ DLLAPI bool WINAPI MouseWheel(int32_t movement) {
 		prev_value = curr_value;
 	}
 
-	return sendMouseInputBulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
+	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
 }
 
-DLLAPI void WINAPI SetMouseMoveCoefficient(float coefficient) {
-	g_mouseMoveCoefficient = coefficient;
+DLLAPI void WINAPI set_mouse_move_coefficient(float coefficient) {
+	mouse_move_coefficient_ = coefficient;
 }
 
-DLLAPI void WINAPI AutoCalibrate() {
-	const int32_t testDx = 300;
-	const int32_t testDy = 0;
+DLLAPI void WINAPI auto_calibrate() {
+	const int32_t k_test_dx = 300;
+	const int32_t k_test_dy = 0;
 
 	// 1. 保存用户当前鼠标位置
-	POINT userPos;
-	GetCursorPos(&userPos);
+	POINT user_pos;
+	GetCursorPos(&user_pos);
 
 	// 2. 移动鼠标到初始校准位置
 	SetCursorPos(0, 0);
-	POINT startPos;
-	GetCursorPos(&startPos);
+	POINT start_pos;
+	GetCursorPos(&start_pos);
 
 	// 3. 重置自动系数
-	SetMouseMoveCoefficient(1.0f);
+	set_mouse_move_coefficient(1.0f);
 
 	// 4. 原始移动
-	MouseMoveRelative(testDx, testDy);
+	mouse_move_relative(k_test_dx, k_test_dy);
 	Sleep(1);
 
 	// 获取实际鼠标位置
-	POINT endPos;
-	GetCursorPos(&endPos);
+	POINT end_pos;
+	GetCursorPos(&end_pos);
 
 	// 检查鼠标是否移到屏幕边界
-	if (endPos.x >= GetSystemMetrics(SM_CXSCREEN) - 1) {
+	if (end_pos.x >= GetSystemMetrics(SM_CXSCREEN) - 1) {
 		printf("鼠标灵敏度过高,自动校准失败,请手动设置系数\n");
-		SetCursorPos(userPos.x, userPos.y);
+		SetCursorPos(user_pos.x, user_pos.y);
 	}
 
 	// 5. 计算实际偏移
-	int32_t movedX = endPos.x - startPos.x;
+	int32_t moved_x = end_pos.x - start_pos.x;
 
 	// 6. 计算系数
-	float coeffX = (movedX != 0) ? static_cast<float>(testDx) / movedX : 1.0f;
+	float coeff_x = (moved_x != 0) ? static_cast<float>(k_test_dx) / moved_x : 1.0f;
 
 	// 7. 还原用户鼠标位置
-	SetCursorPos(userPos.x, userPos.y);
+	SetCursorPos(user_pos.x, user_pos.y);
 
 	// 8. 保存系数
-	SetMouseMoveCoefficient(coeffX);
-	printf("自动校准成功,系数为%f\n", coeffX);
+	set_mouse_move_coefficient(coeff_x);
+	printf("自动校准成功,系数为%f\n", coeff_x);
 }
 
-DLLAPI void WINAPI DisableMouseAcceleration() {
+DLLAPI void WINAPI disable_mouse_acceleration() {
 	// 保存原始设置
-	BackupMouseSettings();
+	backup_mouse_settings();
 	// 禁用鼠标加速(系统设置)
 	int mouseParams[3] = { 0, 0, 0 };
 	SystemParametersInfo(SPI_SETMOUSE, 0, mouseParams, SPIF_SENDCHANGE);
@@ -262,8 +262,8 @@ DLLAPI void WINAPI DisableMouseAcceleration() {
 	printf("禁用鼠标加速成功\n");
 }
 
-DLLAPI void WINAPI EnableMouseAcceleration() {
-	SystemParametersInfo(SPI_SETMOUSE, 0, originalParams, SPIF_SENDCHANGE);
-	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &originalSpeed, SPIF_SENDCHANGE);
+DLLAPI void WINAPI enable_mouse_acceleration() {
+	SystemParametersInfo(SPI_SETMOUSE, 0, original_params_, SPIF_SENDCHANGE);
+	SystemParametersInfo(SPI_SETMOUSESPEED, 0, &original_speed_, SPIF_SENDCHANGE);
 	printf("恢复鼠标设置成功\n");
 }

@@ -1,17 +1,17 @@
-﻿// IbSendKeyboard.cpp
+// ib_send_keyboard.cpp
 #include "pch.h"
-#include <Logitech.hpp>
+#include <logitech.h>
 #include <vector>
 
-bool sendKeyboardInputBulk(const KEYBDINPUT* inputs, uint32_t count) {
-	auto& logitech = Send::Logitech::getLogitechInstance();
+bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
+	auto& logitech = send::Logitech::get_logitech_instance();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech.send_keyboard_report(inputs[i])) return false;
 	}
 	return true;
 }
 
-DLLAPI bool WINAPI KeyDown(uint16_t vk) {
+DLLAPI bool WINAPI key_down(uint16_t vk) {
 	KEYBDINPUT ki{};
 	ki.wVk = vk;
 	ki.dwFlags = 0;  // 按下
@@ -19,10 +19,10 @@ DLLAPI bool WINAPI KeyDown(uint16_t vk) {
 	ki.time = 0;
 	ki.dwExtraInfo = 0;
 
-	return sendKeyboardInputBulk(&ki, 1);
+	return send_keyboard_input_bulk(&ki, 1);
 }
 
-DLLAPI bool WINAPI KeyUp(uint16_t vk) {
+DLLAPI bool WINAPI key_up(uint16_t vk) {
 	KEYBDINPUT ki{};
 	ki.wVk = vk;
 	ki.dwFlags = KEYEVENTF_KEYUP; // 抬起
@@ -30,10 +30,10 @@ DLLAPI bool WINAPI KeyUp(uint16_t vk) {
 	ki.time = 0;
 	ki.dwExtraInfo = 0;
 
-	return sendKeyboardInputBulk(&ki, 1);
+	return send_keyboard_input_bulk(&ki, 1);
 }
 
-DLLAPI bool WINAPI KeyPress(uint16_t vk) {
+DLLAPI bool WINAPI key_press(uint16_t vk) {
 	// 构建一次性报告数组，先按下再松开
 	KEYBDINPUT inputs[2]{};
 
@@ -52,10 +52,10 @@ DLLAPI bool WINAPI KeyPress(uint16_t vk) {
 	inputs[1].dwExtraInfo = 0;
 
 	// 一次性发送所有报告
-	return sendKeyboardInputBulk(inputs, 2);
+	return send_keyboard_input_bulk(inputs, 2);
 }
 
-DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
+DLLAPI bool WINAPI key_combo(const std::vector<uint16_t>& keys) {
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -75,10 +75,10 @@ DLLAPI bool WINAPI KeyCombo(const std::vector<uint16_t>& keys) {
 		inputs.push_back(ki);
 	}
 
-	return sendKeyboardInputBulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
+	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
 }
 
-DLLAPI bool WINAPI KeySeq(const std::vector<uint16_t>& keys) {
+DLLAPI bool WINAPI key_seq(const std::vector<uint16_t>& keys) {
 	std::vector<KEYBDINPUT> inputs;
 	inputs.reserve(keys.size() * 2);
 
@@ -96,11 +96,11 @@ DLLAPI bool WINAPI KeySeq(const std::vector<uint16_t>& keys) {
 		inputs.push_back(kiUp);
 	}
 
-	return sendKeyboardInputBulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
+	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
 }
 
 DLLAPI void WINAPI release_all_keys() {
-	auto& logitech = Send::Logitech::getLogitechInstance();
+	auto& logitech = send::Logitech::get_logitech_instance();
 	logitech.release_all_keys();
 	logitech.release_all_mouse();
 }

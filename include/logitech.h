@@ -1,17 +1,17 @@
-﻿//Logitech.hpp
+// logitech.h
 #pragma once
-#include "LogitechDriver.hpp"
+#include "logitech_driver.h"
 
-namespace Send {
+namespace send {
 
 	class Logitech {
 	private:
-		LogitechDriver driver{};
-		LogitechDriver::MouseReport mouse_report{};
-		LogitechDriver::KeyboardReport keyboard_report{};// 键盘报告,记录按键快照状态.
-		std::mutex mouse_mutex;
-		std::mutex keyboard_mutex;
-		
+		LogitechDriver driver_{};
+		LogitechDriver::MouseReport mouse_report_{};
+		LogitechDriver::KeyboardReport keyboard_report_{};
+		std::mutex mouse_mutex_{};
+		std::mutex keyboard_mutex_{};
+
 		// 禁止拷贝
 		Logitech(const Logitech&) = delete;
 		Logitech& operator=(const Logitech&) = delete;
@@ -25,7 +25,7 @@ namespace Send {
 		~Logitech();
 
 	public:
-		static Logitech& getLogitechInstance();
+		static Logitech& get_logitech_instance();
 		bool send_keyboard_report(const KEYBDINPUT& ki);
 		bool send_mouse_report(const MOUSEINPUT& mi);
 		void release_all_mouse();
@@ -33,4 +33,4 @@ namespace Send {
 
 	};
 
-} // namespace Send
+} // namespace send
