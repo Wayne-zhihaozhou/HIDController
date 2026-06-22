@@ -61,7 +61,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -81,7 +81,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\include;$(SolutionDir)..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>MaxSpeed</Optimization>
       <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -96,22 +96,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\IbSendKeyboard.cpp" />
-    <ClCompile Include="..\src\IbSendMouse.cpp" />
-    <ClCompile Include="..\src\InputTracker.cpp" />
-    <ClCompile Include="..\src\Logitech.cpp" />
-    <ClCompile Include="..\src\LogitechDriver.cpp" />
-    <ClCompile Include="..\src\pch.cpp">
+    <ClCompile Include="..\..\src\core\ib_send_keyboard.cpp" />
+    <ClCompile Include="..\..\src\core\ib_send_mouse.cpp" />
+    <ClCompile Include="..\..\src\core\input_tracker.cpp" />
+    <ClCompile Include="..\..\src\core\logitech.cpp" />
+    <ClCompile Include="..\..\src\core\logitech_driver.cpp" />
+    <ClCompile Include="..\..\src\core\pch.cpp" />
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\HIDController.hpp" />
-    <ClInclude Include="..\include\KeyboardMap.hpp" />
-    <ClInclude Include="..\include\Logitech.hpp" />
-    <ClInclude Include="..\include\LogitechDriver.hpp" />
-    <ClInclude Include="..\include\pch.h" />
+    <ClInclude Include="..\..\include\hid_controller.h" />
+    <ClInclude Include="..\..\include\keyboard_map.h" />
+    <ClInclude Include="..\..\include\logitech.h" />
+    <ClInclude Include="..\..\include\logitech_driver.h" />
+    <ClInclude Include="..\..\include\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HIDController.def" />

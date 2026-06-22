@@ -226,33 +226,45 @@ tracker = hid_controller._get_input_tracker()
 
 ```
 HIDController/
-├── binding.cpp          # pybind11 绑定（主模块：输出控制）
-├── setup.py             # Python 扩展构建配置
-├── pyproject.toml       # 现代化 Python 包配置（含 cibuildwheel 配置）
+├── CMakeLists.txt       # CMake 构建配置（Python 扩展）
 ├── README.md            # 项目文档
 ├── LICENSE              # MIT 许可证
 ├── .gitignore
-├── test_all_api_auto.py         # 完整 API 自动测试
+├── .clang-format
+├── .flake8
+├── pyproject.toml       # Python 包配置（含 cibuildwheel 配置）
+├── setup.py             # Python 扩展构建配置
+├── test_detection.py    # 功能检测测试
 ├── hid_controller/      # Python 包
 │   ├── __init__.py      # 包入口
 │   └── input_tracker.py # 输入检测模块包装
 ├── include/             # C++ 头文件
-│   ├── HIDController.hpp
-│   ├── KeyboardMap.hpp
-│   ├── Logitech.hpp
-│   ├── LogitechDriver.hpp
+│   ├── hid_controller.h
+│   ├── keyboard_map.h
+│   ├── logitech.h
+│   ├── logitech_driver.h
 │   └── pch.h
 ├── src/                 # C++ 源文件
-│   ├── IbSendMouse.cpp
-│   ├── IbSendKeyboard.cpp
-│   ├── Logitech.cpp
-│   ├── LogitechDriver.cpp
-│   ├── pch.cpp
-│   └── InputTracker.cpp # 输入检测模块（RAW INPUT）
-└── examples/            # 示例代码
-    ├── mouse_example.py
-    ├── keyboard_example.py
-    └── input_tracker_example.py  # 输入检测示例
+│   ├── bindings/        # pybind11 绑定
+│   │   ├── main_bindings.cpp
+│   │   └── input_tracker_bindings.cpp
+│   └── core/            # 核心实现
+│       ├── ib_send_keyboard.cpp
+│       ├── ib_send_mouse.cpp
+│       ├── input_tracker.cpp
+│       ├── logitech.cpp
+│       ├── logitech_driver.cpp
+│       └── pch.cpp
+├── examples/            # 示例代码
+│   ├── mouse_example.py
+│   ├── keyboard_example.py
+│   └── input_tracker_example.py
+└── projects/            # 独立子项目
+    └── dll/             # 独立 C++ DLL 库
+        ├── HIDController.sln
+        ├── HIDController.vcxproj
+        ├── HIDController.def
+        └── README.md
 ```
 
 ## 构建 wheel 包
