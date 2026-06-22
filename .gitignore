@@ -1,41 +1,59 @@
-# Python virtual environment
+# ========================
+# Build outputs
+# ========================
+# C/C++ library build artifacts
+library/build/
+library/*.obj
+library/*.ilk
+library/*.pdb
+# Python CMake build directory
+python/build/
+python/CMakeCache.txt
+python/CMakeFiles/
+python/HIDControllerPython.sln
+python/Release/
+python/_deps/
+python/_*.dir/
+python/input_tracker.dir/
+python/x64/
+
+# ========================
+# IDE cache
+# ========================
+.vs/
+.vscode/
+.qt-creator/
+*.swp
+*.swo
+*~
+
+# ========================
+# Python
+# ========================
+# Virtual environments
 .venv/
 venv/
 env/
-
-# Python
+# Python bytecode
 __pycache__/
+*.pyc
+*.pyo
 *.py[cod]
 *$py.class
+# Compiled extensions
 *.so
-*.egg
+*.dylib
+*.pyd
+# Build dists
 *.egg-info/
 dist/
 build/
 pyproject-build/
 *.whl
 
-# Python extensions (compiled)
-*.pyd
-
-# C/C++ build artifacts
-bin/
-Debug/
-Release/
-x64/
-x86/
-_obj/
-build-vs2026/
-build-dist/
-
-# IDE
-.vscode/
-.vs/
-*.swp
-*.swo
-*~
-
+# ========================
 # OS files
+# ========================
 .DS_Store
 Thumbs.db
 desktop.ini

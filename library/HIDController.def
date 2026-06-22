@@ -1,18 +1,18 @@
 LIBRARY HIDController
 EXPORTS
-    MouseMoveRelative         @1
-    MouseMoveAbsolute         @2
-    MouseDown                 @3
-    MouseUp                   @4
-    MouseClick                @5
-    MouseWheel                @6
-    SetMouseMoveCoefficient   @7
-    AutoCalibrate             @8
-    DisableMouseAcceleration  @9
-    EnableMouseAcceleration   @10
-    KeyDown                   @11
-    KeyUp                     @12
-    KeyPress                  @13
-    KeyCombo                  @14
-    KeySeq                    @15
+    mouse_move_relative         @1
+    mouse_move_absolute         @2
+    mouse_down                 @3
+    mouse_up                   @4
+    mouse_click                @5
+    mouse_wheel                @6
+    set_mouse_move_coefficient   @7
+    auto_calibrate             @8
+    disable_mouse_acceleration  @9
+    enable_mouse_acceleration   @10
+    key_down                   @11
+    key_up                   @12
+    key_press                  @13
+    key_combo                  @14
+    key_seq                    @15
     release_all_keys          @16

@@ -73,7 +73,7 @@ bool kill_process_by_name(const std::wstring& process_name) {
 	return killed;
 }
 
-std::wstring find_device(std::function<bool(std::wstring_view)> predicate) {
+std::wstring scan_devices(std::function<bool(std::wstring_view)> predicate) {
 	std::wstring result{};
 	HANDLE dir_handle;
 	OBJECT_ATTRIBUTES obj_attr;
@@ -104,7 +104,7 @@ static bool ends_with(const std::wstring& str, const std::wstring& suffix) {
 }
 
 std::wstring LogitechDriver::find_device() {
-	return find_device([](std::wstring_view sv) {
+	return scan_devices([](std::wstring_view sv) {
 		std::wstring ws(sv);
 		return ((ws.find(L"ROOT#SYSTEM#") == 0) || (ws.find(L"Root#SYSTEM#") == 0)) &&
 			(ends_with(ws, L"#{1abc05c0-c378-41b9-9cef-df1aba82b015}") ||
