@@ -50,6 +50,8 @@ dist/
 build/
 pyproject-build/
 *.whl
+# CMake build artifacts
+hid-py/_libs/
 
 # ========================
 # OS files
