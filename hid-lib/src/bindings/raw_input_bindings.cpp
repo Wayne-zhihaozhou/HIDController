@@ -79,7 +79,7 @@ static void wheel_callback_wrapper(uintptr_t device_handle, int32_t wheel_delta,
 
 // ==================== Module functions ====================
 
-static PyObject* raw_start(PyObject* self, PyObject* args) {
+static PyObject* raw_start_input_tracking(PyObject* self, PyObject* args) {
     PyObject* mouse_cb = Py_None;
     PyObject* key_cb = Py_None;
     PyObject* mouse_button_cb = Py_None;
@@ -120,7 +120,7 @@ static PyObject* raw_start(PyObject* self, PyObject* args) {
     Py_RETURN_NONE;
 }
 
-static PyObject* raw_stop(PyObject* self, PyObject* args) {
+static PyObject* raw_stop_input_tracking(PyObject* self, PyObject* args) {
     // Release Python callbacks after stopping
     stop_tracking_impl();
     Py_XSETREF(g_state.mouse_cb, nullptr);
@@ -144,15 +144,24 @@ static PyObject* raw_get_mouse_delta(PyObject* self, PyObject* args) {
 
 static PyObject* raw_get_pressed_keys(PyObject* self, PyObject* args) {
     (void)args;
-    uint16_t keys[64];
-    uint32_t count = 0;
-    get_pressed_keys_impl(keys, &count, 64);
+    std::vector<uint16_t> keys(256);
+    uint32_t count = 256;
+    get_pressed_keys_impl(keys.data(), &count, 256);
 
     PyObject* list = PyList_New((Py_ssize_t)count);
     for (uint32_t i = 0; i < count; i++) {
         PyList_SET_ITEM(list, (Py_ssize_t)i, PyLong_FromUnsignedLong((unsigned long)keys[i]));
     }
     return list;
+}
+
+static PyObject* raw_register_raw_input(PyObject* self, PyObject* args) {
+    uintptr_t hwnd = 0;
+    if (!PyArg_ParseTuple(args, "K", &hwnd))
+        return NULL;
+
+    bool result = hid_controller_register_raw_input(reinterpret_cast<HWND>(hwnd));
+    return PyBool_FromLong((long)result);
 }
 
 static PyObject* raw_get_device_name(PyObject* self, PyObject* args) {
@@ -167,11 +176,11 @@ static PyObject* raw_get_device_name(PyObject* self, PyObject* args) {
 // ==================== Method table ====================
 
 static PyMethodDef RawInputMethods[] = {
-    {"start",       (PyCFunction)raw_start,       METH_VARARGS,
+    {"start_input_tracking", (PyCFunction)raw_start_input_tracking, METH_VARARGS,
      "Start tracking keyboard and mouse events via RAW INPUT.\n"
      "Args: mouse_callback, key_callback, mouse_button_callback, wheel_callback (all optional callables)\n"
      "wheel_callback(device_handle, wheel_delta, horizontal) — horizontal=1 for hwheel, 0 for vertical"},
-    {"stop",        (PyCFunction)raw_stop,        METH_NOARGS,
+    {"stop_input_tracking", (PyCFunction)raw_stop_input_tracking, METH_NOARGS,
      "Stop tracking"},
     {"is_tracking", (PyCFunction)raw_is_tracking, METH_NOARGS,
      "Check if tracking is running"},
@@ -179,6 +188,8 @@ static PyMethodDef RawInputMethods[] = {
      "Get accumulated mouse delta since last call"},
     {"get_pressed_keys", (PyCFunction)raw_get_pressed_keys, METH_NOARGS,
      "Get list of currently pressed virtual key codes"},
+    {"register_raw_input", (PyCFunction)raw_register_raw_input, METH_VARARGS,
+     "Register a window to receive raw input events"},
     {"get_device_name", (PyCFunction)raw_get_device_name, METH_VARARGS,
      "Get the device name for a raw input device handle"},
     {NULL, NULL, 0, NULL}

@@ -163,6 +163,11 @@ static PyObject* hid_set_mouse_move_coefficient(PyObject* self, PyObject* args) 
     Py_RETURN_NONE;
 }
 
+static PyObject* hid_get_mouse_move_coefficient(PyObject* self, PyObject* args) {
+    float coeff = get_mouse_move_coefficient();
+    return PyFloat_FromDouble((double)coeff);
+}
+
 static PyObject* hid_auto_calibrate(PyObject* self, PyObject* args) {
     auto_calibrate();
     Py_RETURN_NONE;
@@ -276,6 +281,8 @@ static PyMethodDef HidSendMethods[] = {
      "Mouse wheel scroll. Args: movement (int) - typically 120 for one notch"},
     {"set_mouse_move_coefficient", (PyCFunction)hid_set_mouse_move_coefficient, METH_VARARGS,
      "Set mouse move speed coefficient. Args: coefficient (float)"},
+    {"get_mouse_move_coefficient", (PyCFunction)hid_get_mouse_move_coefficient, METH_NOARGS,
+     "Get current mouse move speed coefficient (float)."},
     {"auto_calibrate",         (PyCFunction)hid_auto_calibrate,         METH_NOARGS,
      "Automatically calibrate mouse speed coefficient."},
     {"disable_mouse_acceleration", (PyCFunction)hid_disable_mouse_acceleration, METH_NOARGS,

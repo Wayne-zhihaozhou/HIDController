@@ -7,7 +7,7 @@ static float mouse_move_coefficient_ = 1.0f;
 int original_params_[3];
 int original_speed_;
 
-float get_mouse_move_coefficient() {
+DLLAPI float WINAPI get_mouse_move_coefficient() {
 	return mouse_move_coefficient_;
 }
 

@@ -26,6 +26,7 @@ DLLAPI bool WINAPI mouse_up(uint16_t button);
 DLLAPI bool WINAPI mouse_click(uint16_t button);
 DLLAPI bool WINAPI mouse_wheel(int32_t movement);
 DLLAPI void WINAPI set_mouse_move_coefficient(float coefficient);
+DLLAPI float WINAPI get_mouse_move_coefficient();
 DLLAPI void WINAPI auto_calibrate();
 DLLAPI void WINAPI disable_mouse_acceleration();
 DLLAPI void WINAPI enable_mouse_acceleration();

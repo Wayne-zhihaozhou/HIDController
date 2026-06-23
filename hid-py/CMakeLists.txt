@@ -37,6 +37,7 @@ Python_add_library(hid_send MODULE WITH_SOABI
 )
 
 target_include_directories(hid_send PRIVATE ${HIDCTL_INCLUDE_DIR})
+target_compile_definitions(hid_send PRIVATE HID_CONTROLLER_EXPORTS)
 
 # Override Python_add_library's output dirs to point to dist/
 set_target_properties(hid_send PROPERTIES

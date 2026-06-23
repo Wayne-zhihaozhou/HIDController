@@ -28,7 +28,14 @@ from hid_controller.hid_send import (
     release_all_keys,
 )
 
-from hid_controller.raw_input import start, stop, is_tracking, get_mouse_delta, get_pressed_keys
+from hid_controller.raw_input import (
+    start_input_tracking,
+    stop_input_tracking,
+    register_raw_input,
+    is_tracking,
+    get_mouse_delta,
+    get_pressed_keys,
+)
 
 __all__ = [
     # Mouse control
@@ -51,16 +58,17 @@ __all__ = [
     "key_seq",
     "release_all_keys",
     # Input tracking
-    "start_tracking",
-    "stop_tracking",
+    "start_input_tracking",
+    "stop_input_tracking",
+    "register_raw_input",
     "is_tracking",
     "get_mouse_delta",
     "get_pressed_keys",
 ]
 
 # Aliases for convenience
-start_tracking = start
-stop_tracking = stop
+start_tracking = start_input_tracking
+stop_tracking = stop_input_tracking
 
 
 def get_version() -> str:
