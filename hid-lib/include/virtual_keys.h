@@ -5,31 +5,17 @@
 #include <cstdint>
 
 enum class KeyCode : uint16_t {
-	// ---- Non-keyboard entries (USB 0x00 = reserved/no event) ----
-	LBUTTON   = 0x00,
-	RBUTTON   = 0x00,
-	MBUTTON   = 0x00,
-
 	// ---- Standard keys ----
 	CANCEL    = 0x9B,
 	BACK      = 0x2A,
 	TAB       = 0x2B,
-	CLEAR     = 0x00,
 	ENTER     = 0x28,
 	SHIFT     = 0xE1,	// LSHIFT (general shift)
 	CTRL      = 0xE0,	// LCTRL (general ctrl)
 	ALT       = 0xE2,	// LALT (general alt)
 	PAUSE     = 0x48,
 	CAPS_LOCK = 0x39,
-	IME_KANA  = 0x00,
-	JUNJA     = 0x00,
-	FINAL     = 0x00,
-	HANJA     = 0x00,
 	ESCAPE    = 0x29,
-	CONVERT   = 0x00,
-	NONCONVERT = 0x00,
-	ACCEPT    = 0x00,
-	MODECHANGE = 0x00,
 
 	// ---- Navigation ----
 	SPACE     = 0x2C,
@@ -41,13 +27,9 @@ enum class KeyCode : uint16_t {
 	UP        = 0x52,
 	RIGHT     = 0x4F,
 	DOWN      = 0x51,
-	SELECT    = 0x00,
-	PRINT     = 0x00,
-	EXECUTE   = 0x00,
 	SNAPSHOT  = 0x46,
 	INSERT    = 0x49,
 	DEL       = 0x4C,
-	HELP      = 0x00,
 
 	// ---- 0-9 top row ----
 	NUM0      = 0x27,
@@ -93,7 +75,6 @@ enum class KeyCode : uint16_t {
 	LWIN      = 0xE3,
 	RWIN      = 0xE7,
 	APPS      = 0x65,
-	SLEEP     = 0x00,
 
 	// ---- Numpad ----
 	NUMPAD0   = 0x62,
@@ -108,7 +89,6 @@ enum class KeyCode : uint16_t {
 	NUMPAD9   = 0x61,
 	MULTIPLY  = 0x55,
 	ADD       = 0x57,
-	SEPARATOR = 0x00,
 	SUBTRACT  = 0x56,
 	DECIMAL   = 0x63,
 	DIVIDE    = 0x54,
@@ -151,28 +131,6 @@ enum class KeyCode : uint16_t {
 	LALT      = 0xE2,
 	RALT      = 0xE6,
 
-	// ---- Browser ----
-	BROWSER_BACK      = 0x00,
-	BROWSER_FORWARD   = 0x00,
-	BROWSER_REFRESH   = 0x00,
-	BROWSER_STOP      = 0x00,
-	BROWSER_SEARCH    = 0x00,
-	BROWSER_FAVORITES = 0x00,
-	BROWSER_HOME      = 0x00,
-
-	// ---- Media ----
-	VOLUME_MUTE       = 0x00,
-	VOLUME_DOWN       = 0x00,
-	VOLUME_UP         = 0x00,
-	MEDIA_NEXT_TRACK  = 0x00,
-	MEDIA_PREV_TRACK  = 0x00,
-	MEDIA_STOP        = 0x00,
-	MEDIA_PLAY_PAUSE  = 0x00,
-	LAUNCH_MAIL       = 0x00,
-	LAUNCH_MEDIA_SELECT = 0x00,
-	LAUNCH_APP1       = 0x00,
-	LAUNCH_APP2       = 0x00,
-
 	// ---- OEM ----
 	OEM_1       = 0x33,
 	OEM_PLUS    = 0x2E,
@@ -185,18 +143,5 @@ enum class KeyCode : uint16_t {
 	OEM_5       = 0x31,
 	OEM_6       = 0x30,
 	OEM_7       = 0x34,
-	OEM_8       = 0x00,
 	OEM_102     = 0x64,
-	PROCESSKEY  = 0x00,
-	PACKET      = 0x00,
-
-	// ---- Extended ----
-	ATTN        = 0x00,
-	CRSEL       = 0x00,
-	EXSEL       = 0x00,
-	EREOF       = 0x00,
-	PLAY        = 0x00,
-	ZOOM        = 0x00,
-	PA1         = 0x00,
-	OEM_CLEAR   = 0x00,
 };

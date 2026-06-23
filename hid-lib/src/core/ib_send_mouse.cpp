@@ -24,59 +24,52 @@ bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	return true;
 }
 
+struct MouseMapping {
+	DWORD down;
+	DWORD up;
+	DWORD data;
+};
+
+static constexpr MouseMapping kMappings[] = {
+	{MOUSEEVENTF_LEFTDOWN,   MOUSEEVENTF_LEFTUP,   0},      // LEFT   = 1
+	{MOUSEEVENTF_RIGHTDOWN,  MOUSEEVENTF_RIGHTUP,  0},      // RIGHT  = 2
+	{MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP, 0},      // MIDDLE = 3
+	{MOUSEEVENTF_XDOWN,      MOUSEEVENTF_XUP,      0x0001}, // X1     = 4
+	{MOUSEEVENTF_XDOWN,      MOUSEEVENTF_XUP,      0x0002}, // X2     = 5
+};
+
+static const MouseMapping* lookup(MouseButton button) {
+	auto idx = static_cast<uint16_t>(button);
+	if (idx < 1 || idx > 5) return nullptr;
+	return &kMappings[idx - 1];
+}
+
 DLLAPI bool WINAPI mouse_down(MouseButton button) {
+	auto m = lookup(button);
+	if (!m) return false;
 	MOUSEINPUT mi{};
-	mi.dwFlags = 0;
-	mi.mouseData = 0;
-
-	switch (button) {
-		case MouseButton::LEFT:   mi.dwFlags = MOUSEEVENTF_LEFTDOWN; break;
-		case MouseButton::RIGHT:  mi.dwFlags = MOUSEEVENTF_RIGHTDOWN; break;
-		case MouseButton::MIDDLE: mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN; break;
-		case MouseButton::X1: mi.dwFlags = MOUSEEVENTF_XDOWN; mi.mouseData = 0x0001; break;
-		case MouseButton::X2: mi.dwFlags = MOUSEEVENTF_XDOWN; mi.mouseData = 0x0002; break;
-		default: return false;
-	}
-
+	mi.dwFlags = m->down;
+	mi.mouseData = m->data;
 	return send_mouse_input_bulk(&mi, 1);
 }
 
 DLLAPI bool WINAPI mouse_up(MouseButton button) {
+	auto m = lookup(button);
+	if (!m) return false;
 	MOUSEINPUT mi{};
-	mi.dwFlags = 0;
-	mi.mouseData = 0;
-
-	switch (button) {
-		case MouseButton::LEFT:   mi.dwFlags = MOUSEEVENTF_LEFTUP; break;
-		case MouseButton::RIGHT:  mi.dwFlags = MOUSEEVENTF_RIGHTUP; break;
-		case MouseButton::MIDDLE: mi.dwFlags = MOUSEEVENTF_MIDDLEUP; break;
-		case MouseButton::X1: mi.dwFlags = MOUSEEVENTF_XUP; mi.mouseData = 0x0001; break;
-		case MouseButton::X2: mi.dwFlags = MOUSEEVENTF_XUP; mi.mouseData = 0x0002; break;
-		default: return false;
-	}
-
+	mi.dwFlags = m->up;
+	mi.mouseData = m->data;
 	return send_mouse_input_bulk(&mi, 1);
 }
 
 DLLAPI bool WINAPI mouse_click(MouseButton button) {
+	auto m = lookup(button);
+	if (!m) return false;
 	MOUSEINPUT inputs[2]{};
-	uint16_t down_flag = 0, up_flag = 0;
-	uint16_t mouse_data = 0;
-
-	switch (button) {
-		case MouseButton::LEFT:   down_flag = MOUSEEVENTF_LEFTDOWN; up_flag = MOUSEEVENTF_LEFTUP; break;
-		case MouseButton::RIGHT:  down_flag = MOUSEEVENTF_RIGHTDOWN; up_flag = MOUSEEVENTF_RIGHTUP; break;
-		case MouseButton::MIDDLE: down_flag = MOUSEEVENTF_MIDDLEDOWN; up_flag = MOUSEEVENTF_MIDDLEUP; break;
-		case MouseButton::X1: down_flag = MOUSEEVENTF_XDOWN; up_flag = MOUSEEVENTF_XUP; mouse_data = 0x0001; break;
-		case MouseButton::X2: down_flag = MOUSEEVENTF_XDOWN; up_flag = MOUSEEVENTF_XUP; mouse_data = 0x0002; break;
-		default: return false;
-	}
-
-	inputs[0].dwFlags = down_flag;
-	inputs[0].mouseData = mouse_data;
-	inputs[1].dwFlags = up_flag;
-	inputs[1].mouseData = mouse_data;
-
+	inputs[0].dwFlags = m->down;
+	inputs[0].mouseData = m->data;
+	inputs[1].dwFlags = m->up;
+	inputs[1].mouseData = m->data;
 	return send_mouse_input_bulk(inputs, 2);
 }
 
@@ -147,12 +140,8 @@ DLLAPI bool WINAPI mouse_wheel(int32_t movement) {
 		float curr_value = step_value * i;
 
 		MOUSEINPUT mi{};
-		mi.dx = 0;
-		mi.dy = 0;
 		mi.dwFlags = MOUSEEVENTF_WHEEL;
 		mi.mouseData = static_cast<DWORD>(curr_value - prev_value + 0.5f);
-		mi.time = 0;
-		mi.dwExtraInfo = 0;
 
 		wheels.push_back(mi);
 		prev_value = curr_value;

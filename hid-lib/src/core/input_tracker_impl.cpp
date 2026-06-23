@@ -115,21 +115,21 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 						if (mouse_button_callback_) mouse_button_callback_(device_handle, 5, false);
 					}
 
+					auto to_signed = [](WORD w) -> int32_t {
+						return (w > 32767) ? (static_cast<int32_t>(w) - 65536) : static_cast<int32_t>(w);
+					};
+
 					// Vertical wheel
 					if (mouse.usButtonFlags & RI_MOUSE_WHEEL) {
 						if (mouse_wheel_callback_) {
-							WORD raw_wheel = static_cast<WORD>(mouse.usButtonData);
-							int32_t wheel_delta = (raw_wheel > 32767) ? (static_cast<int32_t>(raw_wheel) - 65536) : static_cast<int32_t>(raw_wheel);
-							mouse_wheel_callback_(device_handle, wheel_delta, false);
+							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), false);
 						}
 					}
 
 					// Horizontal wheel (Windows 8+)
 					if (mouse.usButtonFlags & RI_MOUSE_HWHEEL) {
 						if (mouse_wheel_callback_) {
-							WORD raw_hwheel = static_cast<WORD>(mouse.usButtonData);
-							int32_t hwheel_delta = (raw_hwheel > 32767) ? (static_cast<int32_t>(raw_hwheel) - 65536) : static_cast<int32_t>(raw_hwheel);
-							mouse_wheel_callback_(device_handle, hwheel_delta, true);
+							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), true);
 						}
 					}
 				}

@@ -16,7 +16,7 @@ namespace send {
 		Logitech(const Logitech&) = delete;
 		Logitech& operator=(const Logitech&) = delete;
 
-		// 支持移动语义
+		// 禁止移动语义
 		Logitech(Logitech&&) = delete;
 		Logitech& operator=(Logitech&&) = delete;
 

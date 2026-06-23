@@ -102,7 +102,7 @@ __all__ = [
     # Input tracking
     "start_input_tracking",
     "stop_input_tracking",
-    "hid_controller_register_raw_input",
+    "register_raw_input",
     "is_tracking",
     "get_mouse_delta",
     "get_pressed_keys",

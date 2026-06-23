@@ -9,6 +9,5 @@
 #include <mutex>
 #include <functional>
 #include <winternl.h>
-#include <filesystem>
 
 #include "hid_controller.h"
