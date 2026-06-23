@@ -80,27 +80,28 @@ static void wheel_callback_wrapper(uintptr_t device_handle, int32_t wheel_delta,
 // ==================== Module functions ====================
 
 static PyObject* raw_start_input_tracking(PyObject* self, PyObject* args) {
-    PyObject* mouse_cb = Py_None;
-    PyObject* key_cb = Py_None;
-    PyObject* mouse_button_cb = Py_None;
-    PyObject* wheel_cb = Py_None;
+    PyObject* mouse_cb = nullptr;
+    PyObject* key_cb = nullptr;
+    PyObject* mouse_button_cb = nullptr;
+    PyObject* wheel_cb = nullptr;
 
-    if (!PyArg_ParseTuple(args, "|OOOO", &mouse_cb, &key_cb, &mouse_button_cb, &wheel_cb))
+    // All 4 callbacks are required — matches C++ API exactly
+    if (!PyArg_ParseTuple(args, "OOOO", &mouse_cb, &key_cb, &mouse_button_cb, &wheel_cb))
         return NULL;
 
-    if (mouse_cb != Py_None && !PyCallable_Check(mouse_cb)) {
+    if (!PyCallable_Check(mouse_cb)) {
         PyErr_SetString(PyExc_TypeError, "mouse_callback must be callable");
         return NULL;
     }
-    if (key_cb != Py_None && !PyCallable_Check(key_cb)) {
+    if (!PyCallable_Check(key_cb)) {
         PyErr_SetString(PyExc_TypeError, "key_callback must be callable");
         return NULL;
     }
-    if (mouse_button_cb != Py_None && !PyCallable_Check(mouse_button_cb)) {
+    if (!PyCallable_Check(mouse_button_cb)) {
         PyErr_SetString(PyExc_TypeError, "mouse_button_callback must be callable");
         return NULL;
     }
-    if (wheel_cb != Py_None && !PyCallable_Check(wheel_cb)) {
+    if (!PyCallable_Check(wheel_cb)) {
         PyErr_SetString(PyExc_TypeError, "wheel_callback must be callable");
         return NULL;
     }
@@ -117,7 +118,8 @@ static PyObject* raw_start_input_tracking(PyObject* self, PyObject* args) {
         mouse_button_callback_wrapper,
         wheel_callback_wrapper);
 
-    Py_RETURN_NONE;
+    // start_tracking_impl is void; C++ wrapper always returns true
+    return PyBool_FromLong(true);
 }
 
 static PyObject* raw_stop_input_tracking(PyObject* self, PyObject* args) {
@@ -169,8 +171,23 @@ static PyObject* raw_get_device_name(PyObject* self, PyObject* args) {
     if (!PyArg_ParseTuple(args, "K", &device_handle))
         return NULL;
 
-    std::wstring name = get_device_name_impl(device_handle);
-    return PyUnicode_FromWideChar(name.c_str(), static_cast<Py_ssize_t>(name.size()));
+    // Use the public C API (not the internal _impl)
+    wchar_t name[512];
+    uint32_t name_length = 512;
+    bool result = get_device_name(device_handle, name, &name_length);
+    if (!result) {
+        // Buffer too small — retry with dynamic buffer
+        if (name_length > 0 && name_length < 1024) {
+            std::vector<wchar_t> buf(name_length + 1, L'\0');
+            name_length = static_cast<uint32_t>(buf.size());
+            if (get_device_name(device_handle, buf.data(), &name_length)) {
+                return PyUnicode_FromWideChar(buf.data(), static_cast<Py_ssize_t>(name_length));
+            }
+        }
+        PyErr_SetString(PyExc_RuntimeError, "get_device_name failed");
+        return NULL;
+    }
+    return PyUnicode_FromWideChar(name, static_cast<Py_ssize_t>(name_length));
 }
 
 // ==================== Method table ====================
@@ -178,7 +195,7 @@ static PyObject* raw_get_device_name(PyObject* self, PyObject* args) {
 static PyMethodDef RawInputMethods[] = {
     {"start_input_tracking", (PyCFunction)raw_start_input_tracking, METH_VARARGS,
      "Start tracking keyboard and mouse events via RAW INPUT.\n"
-     "Args: mouse_callback, key_callback, mouse_button_callback, wheel_callback (all optional callables)\n"
+     "Args: mouse_callback, key_callback, mouse_button_callback, wheel_callback (all required callables)\n"
      "wheel_callback(device_handle, wheel_delta, horizontal) — horizontal=1 for hwheel, 0 for vertical"},
     {"stop_input_tracking", (PyCFunction)raw_stop_input_tracking, METH_NOARGS,
      "Stop tracking"},

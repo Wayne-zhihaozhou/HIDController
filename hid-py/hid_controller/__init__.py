@@ -27,6 +27,7 @@ def __getattr__(name):
         "mouse_click",
         "mouse_wheel",
         "set_mouse_move_coefficient",
+        "get_mouse_move_coefficient",
         "auto_calibrate",
         "disable_mouse_acceleration",
         "enable_mouse_acceleration",
@@ -48,6 +49,7 @@ def __getattr__(name):
         "is_tracking",
         "get_mouse_delta",
         "get_pressed_keys",
+        "get_device_name",
     ):
         if _raw_input is None:
             import hid_controller.raw_input as _mod
@@ -84,6 +86,7 @@ __all__ = [
     "mouse_click",
     "mouse_wheel",
     "set_mouse_move_coefficient",
+    "get_mouse_move_coefficient",
     "auto_calibrate",
     "disable_mouse_acceleration",
     "enable_mouse_acceleration",
@@ -101,6 +104,7 @@ __all__ = [
     "is_tracking",
     "get_mouse_delta",
     "get_pressed_keys",
+    "get_device_name",
 ]
 
 def get_version() -> str:

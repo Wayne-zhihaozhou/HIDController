@@ -60,3 +60,26 @@ bool WINAPI hid_controller_register_raw_input(HWND hwnd)
 
     return RegisterRawInputDevices(rid, 2, sizeof(rid[0])) != FALSE;
 }
+
+bool WINAPI mouse_press(uint16_t button)
+{
+    return mouse_click(button);
+}
+
+bool WINAPI get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length)
+{
+    std::wstring wname = get_device_name_impl(device_handle);
+    if (wname.empty() && *name_length > 0) {
+        name[0] = L'\0';
+        *name_length = 0;
+        return false;
+    }
+    uint32_t needed = static_cast<uint32_t>(wname.size());
+    if (*name_length <= needed) {
+        *name_length = needed + 1;
+        return false;
+    }
+    wcsncpy_s(name, *name_length, wname.c_str(), needed);
+    *name_length = needed;
+    return true;
+}
