@@ -110,7 +110,9 @@
     <ClInclude Include="include\keyboard_map.h" />
     <ClInclude Include="include\logitech.h" />
     <ClInclude Include="include\logitech_driver.h" />
+    <ClInclude Include="include\mouse_button.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="include\virtual_keys.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hid_controller.def" />

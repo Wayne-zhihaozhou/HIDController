@@ -7,95 +7,91 @@
 #include <vector>
 #include "../include/hid_controller.h"
 
-// ==================== Helper: string -> mouse button flag ====================
+// ==================== Helper: PyObject -> MouseButton ====================
 
-static uint16_t button_str_to_flag(const char* s) {
-    if (strcmp(s, "xbutton1") == 0)   return MOUSEEVENTF_XDOWN | XBUTTON1;
-    if (strcmp(s, "xbutton2") == 0)   return MOUSEEVENTF_XDOWN | XBUTTON2;
-    if (strcmp(s, "xbutton1up") == 0) return MOUSEEVENTF_XUP | XBUTTON1;
-    if (strcmp(s, "xbutton2up") == 0) return MOUSEEVENTF_XUP | XBUTTON2;
-    if (strcmp(s, "left") == 0)       return 0x02;
-    if (strcmp(s, "leftup") == 0)     return 0x04;
-    if (strcmp(s, "right") == 0)      return 0x08;
-    if (strcmp(s, "rightup") == 0)    return 0x10;
-    if (strcmp(s, "middle") == 0)     return 0x20;
-    if (strcmp(s, "middleup") == 0)   return 0x40;
-    if (strcmp(s, "x1") == 0)         return 0x0080;
-    if (strcmp(s, "x2") == 0)         return 0x0100;
-    return 0;
-}
-
-// ==================== Helper: PyObject -> uint16_t (mouse button) ====================
-
-static uint16_t py_to_button(PyObject* btn) {
-    if (!PyUnicode_Check(btn)) {
-        long val = PyLong_AsLong(btn);
-        return (uint16_t)val;
+static MouseButton py_to_mouse_button(PyObject* obj) {
+    if (PyUnicode_Check(obj)) {
+        const char* s = PyUnicode_AsUTF8(obj);
+        if (!s) return MouseButton::LEFT;
+        if (strcmp(s, "left") == 0)       return MouseButton::LEFT;
+        if (strcmp(s, "right") == 0)      return MouseButton::RIGHT;
+        if (strcmp(s, "middle") == 0)     return MouseButton::MIDDLE;
+        if (strcmp(s, "xbutton1") == 0)   return MouseButton::X1;
+        if (strcmp(s, "xbutton2") == 0)   return MouseButton::X2;
+        if (strcmp(s, "x1") == 0)         return MouseButton::X1;
+        if (strcmp(s, "x2") == 0)         return MouseButton::X2;
+        return MouseButton::LEFT;
     }
-    const char* s = PyUnicode_AsUTF8(btn);
-    if (!s) return 0;
-    return button_str_to_flag(s);
+    long val = PyLong_AsLong(obj);
+    switch (val) {
+        case 0x02: case 0x04: return MouseButton::LEFT;
+        case 0x08: case 0x10: return MouseButton::RIGHT;
+        case 0x20: case 0x40: return MouseButton::MIDDLE;
+        case 0x81:            return MouseButton::X1;
+        case 0x82:            return MouseButton::X2;
+        default:              return MouseButton::LEFT;
+    }
 }
 
-// ==================== Helper: PyObject -> uint16_t (virtual key) ====================
+// ==================== Helper: PyObject -> KeyCode ====================
 
-static uint16_t key_name_to_vk(const char* s) {
-    if (strcmp(s, "space") == 0)     return VK_SPACE;
-    if (strcmp(s, "shift") == 0)     return VK_SHIFT;
-    if (strcmp(s, "lshift") == 0)    return VK_LSHIFT;
-    if (strcmp(s, "rshift") == 0)    return VK_RSHIFT;
-    if (strcmp(s, "ctrl") == 0)      return VK_CONTROL;
-    if (strcmp(s, "lctrl") == 0)     return VK_LCONTROL;
-    if (strcmp(s, "rctrl") == 0)     return VK_RCONTROL;
-    if (strcmp(s, "alt") == 0)       return VK_MENU;
-    if (strcmp(s, "lalt") == 0)      return VK_LMENU;
-    if (strcmp(s, "ralt") == 0)      return VK_RMENU;
-    if (strcmp(s, "win") == 0)       return VK_LWIN;
-    if (strcmp(s, "enter") == 0)     return VK_RETURN;
-    if (strcmp(s, "escape") == 0)    return VK_ESCAPE;
-    if (strcmp(s, "tab") == 0)       return VK_TAB;
-    if (strcmp(s, "back") == 0)      return VK_BACK;
-    if (strcmp(s, "delete") == 0)    return VK_DELETE;
-    if (strcmp(s, "insert") == 0)    return VK_INSERT;
-    if (strcmp(s, "home") == 0)      return VK_HOME;
-    if (strcmp(s, "end") == 0)       return VK_END;
-    if (strcmp(s, "pageup") == 0)    return VK_PRIOR;
-    if (strcmp(s, "pagedown") == 0)  return VK_NEXT;
-    if (strcmp(s, "up") == 0)        return VK_UP;
-    if (strcmp(s, "down") == 0)      return VK_DOWN;
-    if (strcmp(s, "left") == 0)      return VK_LEFT;
-    if (strcmp(s, "right") == 0)     return VK_RIGHT;
-    if (strcmp(s, "capslock") == 0)  return VK_CAPITAL;
-    if (strcmp(s, "numlock") == 0)   return VK_NUMLOCK;
-    if (strcmp(s, "scrolllock") == 0) return VK_SCROLL;
-    if (strcmp(s, "f1") == 0)        return VK_F1;
-    if (strcmp(s, "f2") == 0)        return VK_F2;
-    if (strcmp(s, "f3") == 0)        return VK_F3;
-    if (strcmp(s, "f4") == 0)        return VK_F4;
-    if (strcmp(s, "f5") == 0)        return VK_F5;
-    if (strcmp(s, "f6") == 0)        return VK_F6;
-    if (strcmp(s, "f7") == 0)        return VK_F7;
-    if (strcmp(s, "f8") == 0)        return VK_F8;
-    if (strcmp(s, "f9") == 0)        return VK_F9;
-    if (strcmp(s, "f10") == 0)       return VK_F10;
-    if (strcmp(s, "f11") == 0)       return VK_F11;
-    if (strcmp(s, "f12") == 0)       return VK_F12;
-    return 0;
+static KeyCode key_name_to_vk(const char* s) {
+    if (strcmp(s, "space") == 0)     return KeyCode::SPACE;
+    if (strcmp(s, "shift") == 0)     return KeyCode::SHIFT;
+    if (strcmp(s, "lshift") == 0)    return KeyCode::LSHIFT;
+    if (strcmp(s, "rshift") == 0)    return KeyCode::RSHIFT;
+    if (strcmp(s, "ctrl") == 0)      return KeyCode::CTRL;
+    if (strcmp(s, "lctrl") == 0)     return KeyCode::LCTRL;
+    if (strcmp(s, "rctrl") == 0)     return KeyCode::RCTRL;
+    if (strcmp(s, "alt") == 0)       return KeyCode::ALT;
+    if (strcmp(s, "lalt") == 0)      return KeyCode::LALT;
+    if (strcmp(s, "ralt") == 0)      return KeyCode::RALT;
+    if (strcmp(s, "win") == 0)       return KeyCode::LWIN;
+    if (strcmp(s, "enter") == 0)     return KeyCode::ENTER;
+    if (strcmp(s, "escape") == 0)    return KeyCode::ESCAPE;
+    if (strcmp(s, "tab") == 0)       return KeyCode::TAB;
+    if (strcmp(s, "back") == 0)      return KeyCode::BACK;
+    if (strcmp(s, "delete") == 0)    return KeyCode::DEL;
+    if (strcmp(s, "insert") == 0)    return KeyCode::INSERT;
+    if (strcmp(s, "home") == 0)      return KeyCode::HOME;
+    if (strcmp(s, "end") == 0)       return KeyCode::END;
+    if (strcmp(s, "pageup") == 0)    return KeyCode::PRIOR;
+    if (strcmp(s, "pagedown") == 0)  return KeyCode::NEXT;
+    if (strcmp(s, "up") == 0)        return KeyCode::UP;
+    if (strcmp(s, "down") == 0)      return KeyCode::DOWN;
+    if (strcmp(s, "left") == 0)      return KeyCode::LEFT;
+    if (strcmp(s, "right") == 0)     return KeyCode::RIGHT;
+    if (strcmp(s, "capslock") == 0)  return KeyCode::CAPS_LOCK;
+    if (strcmp(s, "numlock") == 0)   return KeyCode::NUM_LOCK;
+    if (strcmp(s, "scrolllock") == 0) return KeyCode::SCROLL_LOCK;
+    if (strcmp(s, "f1") == 0)        return KeyCode::F1;
+    if (strcmp(s, "f2") == 0)        return KeyCode::F2;
+    if (strcmp(s, "f3") == 0)        return KeyCode::F3;
+    if (strcmp(s, "f4") == 0)        return KeyCode::F4;
+    if (strcmp(s, "f5") == 0)        return KeyCode::F5;
+    if (strcmp(s, "f6") == 0)        return KeyCode::F6;
+    if (strcmp(s, "f7") == 0)        return KeyCode::F7;
+    if (strcmp(s, "f8") == 0)        return KeyCode::F8;
+    if (strcmp(s, "f9") == 0)        return KeyCode::F9;
+    if (strcmp(s, "f10") == 0)       return KeyCode::F10;
+    if (strcmp(s, "f11") == 0)       return KeyCode::F11;
+    if (strcmp(s, "f12") == 0)       return KeyCode::F12;
+    return static_cast<KeyCode>(0);
 }
 
-static uint16_t py_to_vk(PyObject* vk_obj) {
+static KeyCode py_to_vk(PyObject* vk_obj) {
     if (PyUnicode_Check(vk_obj)) {
         Py_ssize_t len;
         const char* s = PyUnicode_AsUTF8AndSize(vk_obj, &len);
-        if (!s) return 0;
-        uint16_t code = key_name_to_vk(s);
-        if (code) return code;
+        if (!s) return KeyCode::ENTER;
+        KeyCode code = key_name_to_vk(s);
+        if (static_cast<uint16_t>(code) != 0) return code;
         // Single character fallback
-        if (len == 1) return (uint16_t)s[0];
-        return 0;
+        if (len == 1) return static_cast<KeyCode>((uint16_t)s[0]);
+        return KeyCode::ENTER;
     }
     long val = PyLong_AsLong(vk_obj);
-    return (uint16_t)val;
+    return static_cast<KeyCode>((uint16_t)val);
 }
 
 // ==================== Mouse functions ====================
@@ -120,13 +116,13 @@ static PyObject* hid_mouse_button_op(PyObject* self, PyObject* args, int op) {
     if (!PyArg_ParseTuple(args, "O", &btn_obj))
         return NULL;
 
-    uint16_t flag = py_to_button(btn_obj);
+    MouseButton btn = py_to_mouse_button(btn_obj);
     bool result;
 
     switch (op) {
-        case 0: result = mouse_down(flag); break;
-        case 1: result = mouse_up(flag);   break;
-        default: result = mouse_click(flag); break;
+        case 0: result = mouse_down(btn); break;
+        case 1: result = mouse_up(btn);   break;
+        default: result = mouse_click(btn); break;
     }
 
     return PyBool_FromLong((long)result);
@@ -187,7 +183,7 @@ static PyObject* hid_key_op(PyObject* self, PyObject* args, int op) {
     if (!PyArg_ParseTuple(args, "O", &vk_obj))
         return NULL;
 
-    uint16_t vk = py_to_vk(vk_obj);
+    KeyCode vk = py_to_vk(vk_obj);
     bool result;
 
     switch (op) {
@@ -229,7 +225,7 @@ static PyObject* hid_key_sequence_op(PyObject* self, PyObject* args, bool sequen
         return NULL;
     }
 
-    std::vector<uint16_t> codes;
+    std::vector<KeyCode> codes;
     codes.reserve((size_t)n);
     for (Py_ssize_t i = 0; i < n; i++) {
         PyObject* item = PyList_GetItem(keys_list, i);

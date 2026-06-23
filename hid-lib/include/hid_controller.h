@@ -4,6 +4,9 @@
 #include <vector>
 #include <utility>
 
+#include "mouse_button.h"
+#include "virtual_keys.h"
+
 // 基础Windows类型定义（不依赖windows.h）
 // 注意：使用时需要包含windows.h，这里使用前向声明
 struct HWND__;
@@ -24,9 +27,9 @@ typedef struct HWND__* HWND;
 
 DLLAPI bool WINAPI mouse_move_relative(int32_t dx, int32_t dy);
 DLLAPI bool WINAPI mouse_move_absolute(uint32_t x, uint32_t y);
-DLLAPI bool WINAPI mouse_down(uint16_t button);
-DLLAPI bool WINAPI mouse_up(uint16_t button);
-DLLAPI bool WINAPI mouse_click(uint16_t button);
+DLLAPI bool WINAPI mouse_down(MouseButton button);
+DLLAPI bool WINAPI mouse_up(MouseButton button);
+DLLAPI bool WINAPI mouse_click(MouseButton button);
 DLLAPI bool WINAPI mouse_wheel(int32_t movement);
 DLLAPI void WINAPI set_mouse_move_coefficient(float coefficient);
 DLLAPI float WINAPI get_mouse_move_coefficient();
@@ -36,11 +39,11 @@ DLLAPI void WINAPI enable_mouse_acceleration();
 
 // -------------------- 键盘控制 --------------------
 
-DLLAPI bool WINAPI key_down(uint16_t vk);
-DLLAPI bool WINAPI key_up(uint16_t vk);
-DLLAPI bool WINAPI key_press(uint16_t vk);
-DLLAPI bool WINAPI key_combo(const std::vector<uint16_t>& keys);
-DLLAPI bool WINAPI key_seq(const std::vector<uint16_t>& keys);
+DLLAPI bool WINAPI key_down(KeyCode vk);
+DLLAPI bool WINAPI key_up(KeyCode vk);
+DLLAPI bool WINAPI key_press(KeyCode vk);
+DLLAPI bool WINAPI key_combo(const std::vector<KeyCode>& keys);
+DLLAPI bool WINAPI key_seq(const std::vector<KeyCode>& keys);
 DLLAPI void WINAPI release_all_keys();
 
 // -------------------- Raw Input 设备检测功能 --------------------

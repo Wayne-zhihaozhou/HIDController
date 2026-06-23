@@ -24,102 +24,60 @@ bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	return true;
 }
 
-DLLAPI bool WINAPI mouse_down(uint16_t button) {
+DLLAPI bool WINAPI mouse_down(MouseButton button) {
 	MOUSEINPUT mi{};
-	mi.dx = 0;
-	mi.dy = 0;
 	mi.dwFlags = 0;
 	mi.mouseData = 0;
-	mi.time = 0;
-	mi.dwExtraInfo = 0;
 
-	// 左/右/中键
-	if (button & MOUSEEVENTF_LEFTDOWN)   mi.dwFlags |= MOUSEEVENTF_LEFTDOWN;
-	if (button & MOUSEEVENTF_RIGHTDOWN)  mi.dwFlags |= MOUSEEVENTF_RIGHTDOWN;
-	if (button & MOUSEEVENTF_MIDDLEDOWN) mi.dwFlags |= MOUSEEVENTF_MIDDLEDOWN;
-
-	// XButton
-	if (button & MOUSEEVENTF_XDOWN) {
-		mi.dwFlags |= MOUSEEVENTF_XDOWN;
-		mi.mouseData = 0;
-		if (button & XBUTTON1) mi.mouseData |= XBUTTON1;
-		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
+	switch (button) {
+		case MouseButton::LEFT:   mi.dwFlags = MOUSEEVENTF_LEFTDOWN; break;
+		case MouseButton::RIGHT:  mi.dwFlags = MOUSEEVENTF_RIGHTDOWN; break;
+		case MouseButton::MIDDLE: mi.dwFlags = MOUSEEVENTF_MIDDLEDOWN; break;
+		case MouseButton::X1: mi.dwFlags = MOUSEEVENTF_XDOWN; mi.mouseData = 0x0001; break;
+		case MouseButton::X2: mi.dwFlags = MOUSEEVENTF_XDOWN; mi.mouseData = 0x0002; break;
+		default: return false;
 	}
 
 	return send_mouse_input_bulk(&mi, 1);
 }
 
-DLLAPI bool WINAPI mouse_up(uint16_t button) {
+DLLAPI bool WINAPI mouse_up(MouseButton button) {
 	MOUSEINPUT mi{};
-	mi.dx = 0;
-	mi.dy = 0;
 	mi.dwFlags = 0;
 	mi.mouseData = 0;
-	mi.time = 0;
-	mi.dwExtraInfo = 0;
 
-	// 左/右/中键
-	if (button & MOUSEEVENTF_LEFTUP)   mi.dwFlags |= MOUSEEVENTF_LEFTUP;
-	if (button & MOUSEEVENTF_RIGHTUP)  mi.dwFlags |= MOUSEEVENTF_RIGHTUP;
-	if (button & MOUSEEVENTF_MIDDLEUP) mi.dwFlags |= MOUSEEVENTF_MIDDLEUP;
-
-	// XButton
-	if (button & MOUSEEVENTF_XUP) {
-		mi.dwFlags |= MOUSEEVENTF_XUP;
-		mi.mouseData = 0;
-		if (button & XBUTTON1) mi.mouseData |= XBUTTON1;
-		if (button & XBUTTON2) mi.mouseData |= XBUTTON2;
+	switch (button) {
+		case MouseButton::LEFT:   mi.dwFlags = MOUSEEVENTF_LEFTUP; break;
+		case MouseButton::RIGHT:  mi.dwFlags = MOUSEEVENTF_RIGHTUP; break;
+		case MouseButton::MIDDLE: mi.dwFlags = MOUSEEVENTF_MIDDLEUP; break;
+		case MouseButton::X1: mi.dwFlags = MOUSEEVENTF_XUP; mi.mouseData = 0x0001; break;
+		case MouseButton::X2: mi.dwFlags = MOUSEEVENTF_XUP; mi.mouseData = 0x0002; break;
+		default: return false;
 	}
 
 	return send_mouse_input_bulk(&mi, 1);
 }
 
-DLLAPI bool WINAPI mouse_click(uint16_t button) {
+DLLAPI bool WINAPI mouse_click(MouseButton button) {
 	MOUSEINPUT inputs[2]{};
+	uint16_t down_flag = 0, up_flag = 0;
+	uint16_t mouse_data = 0;
 
-	// 初始化 MOUSEINPUT
-	for (int i = 0; i < 2; ++i) {
-		inputs[i].dx = 0;
-		inputs[i].dy = 0;
-		inputs[i].mouseData = 0;
-		inputs[i].dwFlags = 0;
-		inputs[i].dwExtraInfo = 0;
-		inputs[i].time = 0;
+	switch (button) {
+		case MouseButton::LEFT:   down_flag = MOUSEEVENTF_LEFTDOWN; up_flag = MOUSEEVENTF_LEFTUP; break;
+		case MouseButton::RIGHT:  down_flag = MOUSEEVENTF_RIGHTDOWN; up_flag = MOUSEEVENTF_RIGHTUP; break;
+		case MouseButton::MIDDLE: down_flag = MOUSEEVENTF_MIDDLEDOWN; up_flag = MOUSEEVENTF_MIDDLEUP; break;
+		case MouseButton::X1: down_flag = MOUSEEVENTF_XDOWN; up_flag = MOUSEEVENTF_XUP; mouse_data = 0x0001; break;
+		case MouseButton::X2: down_flag = MOUSEEVENTF_XDOWN; up_flag = MOUSEEVENTF_XUP; mouse_data = 0x0002; break;
+		default: return false;
 	}
 
-	// ---------------- XButton1/2 ----------------
-	if (button & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP)) {
-		inputs[0].dwFlags = button & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP);
+	inputs[0].dwFlags = down_flag;
+	inputs[0].mouseData = mouse_data;
+	inputs[1].dwFlags = up_flag;
+	inputs[1].mouseData = mouse_data;
 
-		// 获取 XButton1 或 XButton2
-		uint16_t xbtn = button & (XBUTTON1 | XBUTTON2);
-		inputs[0].mouseData = xbtn;
-
-		// 如果是 DOWN，自动生成 UP
-		if (inputs[0].dwFlags & MOUSEEVENTF_XDOWN) {
-			inputs[1].dwFlags = MOUSEEVENTF_XUP;
-			inputs[1].mouseData = xbtn;
-			return send_mouse_input_bulk(inputs, 2);
-		}
-
-		return send_mouse_input_bulk(&inputs[0], 1);
-	}
-
-	// ---------------- 左/右/中键 ----------------
-	if (button & (MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_MIDDLEDOWN)) {
-		inputs[0].dwFlags = button;  // DOWN
-
-		// 自动生成 UP
-		if (button == MOUSEEVENTF_LEFTDOWN) inputs[1].dwFlags = MOUSEEVENTF_LEFTUP;
-		else if (button == MOUSEEVENTF_RIGHTDOWN) inputs[1].dwFlags = MOUSEEVENTF_RIGHTUP;
-		else if (button == MOUSEEVENTF_MIDDLEDOWN) inputs[1].dwFlags = MOUSEEVENTF_MIDDLEUP;
-
-		return send_mouse_input_bulk(inputs, 2);
-	}
-
-	// ---------------- 其他情况（单独 UP 或其他宏） ----------------
-	inputs[0].dwFlags = button;
-	return send_mouse_input_bulk(&inputs[0], 1);
+	return send_mouse_input_bulk(inputs, 2);
 }
 
 DLLAPI bool WINAPI mouse_move_relative(int32_t dx, int32_t dy) {
