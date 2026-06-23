@@ -2,7 +2,6 @@
 #pragma once
 #pragma comment(lib, "ntdll.lib")
 
-constexpr NTSTATUS STATUS_SUCCESS = 0x00000000;
 constexpr NTSTATUS STATUS_MORE_ENTRIES = 0x00000105;
 constexpr ACCESS_MASK kDirectoryQuery = 0x0001;
 
@@ -92,7 +91,14 @@ namespace send {
 		bool report_mouse(const MouseReport& report) const;
 		bool report_keyboard(const KeyboardReport& report) const;
 
-
+	private:
+		template<typename Report>
+		bool report_ioctl(DWORD ioctl_code, const Report& report) const {
+			DWORD bytes_returned;
+			return DeviceIoControl(device_, ioctl_code,
+				const_cast<Report*>(&report), sizeof(Report),
+				nullptr, 0, &bytes_returned, nullptr);
+		}
 	};
 	static_assert(sizeof(LogitechDriver::MouseReport) == 5, "MouseReport must be 5 bytes");
 }

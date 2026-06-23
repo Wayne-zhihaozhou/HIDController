@@ -95,14 +95,14 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					// Vertical wheel
 					if (mouse.usButtonFlags & RI_MOUSE_WHEEL) {
 						if (mouse_wheel_callback_) {
-							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), 0);
+							mouse_wheel_callback_(device_handle, to_signed(mouse.usButtonData), 0);
 						}
 					}
 
 					// Horizontal wheel (Windows 8+)
 					if (mouse.usButtonFlags & RI_MOUSE_HWHEEL) {
 						if (mouse_wheel_callback_) {
-							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), 1);
+							mouse_wheel_callback_(device_handle, to_signed(mouse.usButtonData), 1);
 						}
 					}
 				}

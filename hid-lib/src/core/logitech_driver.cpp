@@ -60,15 +60,11 @@ void LogitechDriver::destroy() {
 }
 
 bool LogitechDriver::report_mouse(const MouseReport& report) const {
-	constexpr DWORD kIoctlBusenumPlayMouseMove = 0x2A2010;
-	DWORD bytes_returned;
-	return DeviceIoControl(device_, kIoctlBusenumPlayMouseMove, const_cast<MouseReport*>(&report), sizeof(MouseReport), nullptr, 0, &bytes_returned, nullptr);
+	return report_ioctl(0x2A2010, report);
 }
 
 bool LogitechDriver::report_keyboard(const KeyboardReport& report) const {
-	constexpr DWORD kIoctlBusenumPlayKeyboard = 0x2A200C;
-	DWORD bytes_returned;
-	return DeviceIoControl(device_, kIoctlBusenumPlayKeyboard, const_cast<KeyboardReport*>(&report), sizeof(KeyboardReport), nullptr, 0, &bytes_returned, nullptr);
+	return report_ioctl(0x2A200C, report);
 }
 
 }

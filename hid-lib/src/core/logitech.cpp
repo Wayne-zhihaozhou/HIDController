@@ -127,7 +127,6 @@ void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi)
 				}
 
 				if (!inserted) {
-					printf("按键数量超过6个限制!\n");
 					OutputDebugStringA("按键数量超过6个限制!\n");
 				}
 			}
