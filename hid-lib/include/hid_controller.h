@@ -14,8 +14,10 @@ typedef struct HWND__* HWND;
 #endif
 #ifdef hid_controller_EXPORTS
 #define DLLAPI  extern "C" __declspec(dllexport)
+#define DLLAPI_CPP __declspec(dllexport)
 #else
 #define DLLAPI  extern "C" __declspec(dllimport)
+#define DLLAPI_CPP __declspec(dllimport)
 #endif
 
 // -------------------- 鼠标控制 --------------------
@@ -52,7 +54,8 @@ typedef void (*mouse_wheel_callback)(uintptr_t device_handle, int32_t wheel_delt
 DLLAPI bool WINAPI start_input_tracking(mouse_move_callback mouse_callback, keyboard_callback key_callback, mouse_button_callback mouse_button_callback, mouse_wheel_callback wheel_callback);
 DLLAPI void WINAPI stop_input_tracking();
 DLLAPI bool WINAPI is_tracking();
-DLLAPI std::pair<long, long> WINAPI get_mouse_delta();
-DLLAPI std::vector<uint16_t> WINAPI get_pressed_keys();
 DLLAPI bool WINAPI hid_controller_register_raw_input(HWND hwnd);
 DLLAPI bool WINAPI get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length);
+// Raw input query — uses C++ linkage for std::pair/std::vector return types
+DLLAPI_CPP std::pair<long, long> get_mouse_delta();
+DLLAPI_CPP std::vector<uint16_t> get_pressed_keys();

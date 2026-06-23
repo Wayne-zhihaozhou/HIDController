@@ -46,7 +46,7 @@ std::wstring get_device_name_impl(uintptr_t device_handle) {
         return L"";
 
     // First get the required buffer size
-    DWORD buffer_size = 0;
+    UINT buffer_size = 0;
     if (!GetRawInputDeviceInfoW(device, RIDI_DEVICENAME, nullptr, &buffer_size))
         return L"";
 
@@ -55,7 +55,8 @@ std::wstring get_device_name_impl(uintptr_t device_handle) {
         return L"";
 
     std::wstring name(buffer_size, L'\0');
-    if (GetRawInputDeviceInfoW(device, RIDI_DEVICENAME, &name.front(), &buffer_size) == 0)
+    UINT size = buffer_size;
+    if (GetRawInputDeviceInfoW(device, RIDI_DEVICENAME, &name.front(), &size) == 0)
         return L"";
 
     // Strip trailing nulls

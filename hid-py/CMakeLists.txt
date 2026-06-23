@@ -16,20 +16,20 @@ find_package(Python COMPONENTS Interpreter Development REQUIRED)
 set(HIDCTL_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../hid-lib")
 set(HIDCTL_INCLUDE_DIR "${HIDCTL_LIB_DIR}/include")
 set(HIDCTL_DLL_DIR "${HIDCTL_LIB_DIR}/build/Release")
-set(PKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/hid_controller")
+set(PKG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
 
-# Output: .pyd goes to dist/; .lib/.exp go to _libs/
+# Output: .pyd goes to dist/; .lib/.exp go to temp/
 set(DIST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist")
-set(DIST_LIBS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/_libs")
+set(TEMP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/temp")
 file(MAKE_DIRECTORY "${DIST_DIR}")
-file(MAKE_DIRECTORY "${DIST_LIBS_DIR}")
+file(MAKE_DIRECTORY "${TEMP_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${DIST_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${DIST_DIR}")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${DIST_LIBS_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${TEMP_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${DIST_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${DIST_DIR}")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${DIST_LIBS_DIR}")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${DIST_LIBS_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${TEMP_DIR}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${TEMP_DIR}")
 
 # ==================== hid_send module ====================
 Python_add_library(hid_send MODULE WITH_SOABI
@@ -44,9 +44,9 @@ set_target_properties(hid_send PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${DIST_DIR}"
     LIBRARY_OUTPUT_DIRECTORY_DEBUG "${DIST_DIR}"
     LIBRARY_OUTPUT_DIRECTORY_RELEASE "${DIST_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${DIST_LIBS_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${DIST_LIBS_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${DIST_LIBS_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${TEMP_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${TEMP_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${TEMP_DIR}"
 )
 
 # Link against hid_controller.lib if available
@@ -76,9 +76,9 @@ set_target_properties(raw_input PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${DIST_DIR}"
     LIBRARY_OUTPUT_DIRECTORY_DEBUG "${DIST_DIR}"
     LIBRARY_OUTPUT_DIRECTORY_RELEASE "${DIST_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY "${DIST_LIBS_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${DIST_LIBS_DIR}"
-    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${DIST_LIBS_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY "${TEMP_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${TEMP_DIR}"
+    ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${TEMP_DIR}"
 )
 
 if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.lib")
@@ -94,7 +94,7 @@ if(EXISTS "${HIDCTL_DLL_DIR}/hid_controller.dll")
     )
 endif()
 
-# Copy .pyd files into hid_controller/ package directory
+# Copy .pyd files into dist/ directory
 add_custom_target(copy_pydstamp ALL DEPENDS hid_send raw_input)
 add_custom_command(TARGET copy_pydstamp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -103,11 +103,11 @@ add_custom_command(TARGET copy_pydstamp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:raw_input>
         ${PKG_DIR}/raw_input.pyd
-    COMMENT "Copying .pyd files into hid_controller/ package"
+    COMMENT "Copying .pyd files into dist/ package"
 )
 
 
 # Install rules
 install(TARGETS hid_send raw_input
-    DESTINATION hid_controller
+    DESTINATION dist
 )

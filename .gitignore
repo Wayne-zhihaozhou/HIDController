@@ -59,3 +59,4 @@ hid-py/_libs/
 .DS_Store
 Thumbs.db
 desktop.ini
+.claude/skills/build.md

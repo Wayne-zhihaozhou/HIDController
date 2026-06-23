@@ -30,7 +30,7 @@ static void mouse_callback_wrapper(uintptr_t device_handle, int32_t dx, int32_t 
 
     // Acquire GIL and call Python
     PyGILState_STATE gstate = PyGILState_Ensure();
-    PyObject* args = Py_BuildValue("(Ki)", device_handle, dx);
+    PyObject* args = Py_BuildValue("(Kll)", device_handle, (long)dx, (long)dy);
     if (args && g_state.mouse_cb != Py_None) {
         PyObject* result = PyObject_CallObject(g_state.mouse_cb, args);
         Py_XDECREF(result);
