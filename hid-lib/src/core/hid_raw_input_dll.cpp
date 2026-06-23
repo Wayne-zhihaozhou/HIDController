@@ -14,7 +14,7 @@ bool WINAPI start_input_tracking(
         [mc](uintptr_t h, long dx, long dy) { mc(h, (int32_t)dx, (int32_t)dy); },
         kc,
         mbc,
-        [wbc](uintptr_t h, int32_t wd, bool horizontal) { wbc(h, wd, horizontal ? 1 : 0); }
+        [wbc](uintptr_t h, int32_t wd, int32_t horizontal) { wbc(h, wd, horizontal); }
     );
     return true;
 }

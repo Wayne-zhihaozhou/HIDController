@@ -12,7 +12,7 @@
 using mouse_move_fn = std::function<void(uintptr_t, long, long)>;
 using keyboard_fn = std::function<void(uintptr_t, uint16_t, bool)>;
 using mouse_button_fn = std::function<void(uintptr_t, uint32_t, bool)>;
-using mouse_wheel_fn = std::function<void(uintptr_t, int32_t, bool horizontal)>;
+using mouse_wheel_fn = std::function<void(uintptr_t, int32_t, int32_t horizontal)>;
 
 void start_tracking_impl(mouse_move_fn, keyboard_fn, mouse_button_fn, mouse_wheel_fn);
 void stop_tracking_impl();

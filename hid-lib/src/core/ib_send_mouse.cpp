@@ -1,6 +1,6 @@
 // ib_send_mouse.cpp - Logitech mouse control
 #include "pch.h"
-#include <logitech.h>
+#include "logitech.h"
 
 // 全局系数缓存
 static float mouse_move_coefficient_ = 1.0f;

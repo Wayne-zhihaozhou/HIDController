@@ -1,9 +1,6 @@
 // raw_input_bindings.cpp — Python C API bindings for HIDController raw_input
 // HIDController project — Windows RAW INPUT keyboard and mouse event tracker
 #include <Python.h>
-#include <windows.h>
-#include <stdint.h>
-#include <vector>
 #include "input_tracker_internal.h"
 #include "../include/hid_controller.h"
 

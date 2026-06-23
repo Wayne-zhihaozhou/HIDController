@@ -1,6 +1,7 @@
 // input_tracker_impl.cpp — Pure C++ input tracking implementation (no pybind11)
 // HIDController project — Windows RAW INPUT API keyboard and mouse event detection
 #include "input_tracker_internal.h"
+#include "../include/hid_controller.h"
 
 // ==================== Global state ====================
 static std::atomic<bool> running_{false};
@@ -17,26 +18,6 @@ static std::atomic<long> accumulated_dy_{0};
 
 static std::mutex key_mutex_;
 static std::set<uint16_t> pressed_keys_;
-
-// ==================== RAW Input Registration ====================
-
-static void register_raw_input(HWND hwnd) {
-	RAWINPUTDEVICE rid[2];
-
-	rid[0].usUsagePage = 0x01;
-	rid[0].usUsage = 0x02;
-	rid[0].dwFlags = RIDEV_INPUTSINK;
-	rid[0].hwndTarget = hwnd;
-
-	rid[1].usUsagePage = 0x01;
-	rid[1].usUsage = 0x06;
-	rid[1].dwFlags = RIDEV_INPUTSINK;
-	rid[1].hwndTarget = hwnd;
-
-	if (!RegisterRawInputDevices(rid, 2, sizeof(rid[0]))) {
-		OutputDebugStringA("Failed to register Raw Input devices.\n");
-	}
-}
 
 // ==================== Device Name Query ====================
 
@@ -90,30 +71,22 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 						mouse_callback_(device_handle, dx, dy);
 					}
 
-					#define CHECK_BTN(flag, num) \
+					#define CHECK_BTN(flag, num, pressed) \
 						if (mouse.usButtonFlags & flag) { \
-							if (mouse_button_callback_) mouse_button_callback_(device_handle, num, mouse.usButtonFlags & flag); \
+							if (mouse_button_callback_) mouse_button_callback_(device_handle, num, (pressed)); \
 						}
-					CHECK_BTN(RI_MOUSE_LEFT_BUTTON_DOWN, 1)
-					CHECK_BTN(RI_MOUSE_LEFT_BUTTON_UP, 1)
-					CHECK_BTN(RI_MOUSE_RIGHT_BUTTON_DOWN, 2)
-					CHECK_BTN(RI_MOUSE_RIGHT_BUTTON_UP, 2)
-					CHECK_BTN(RI_MOUSE_MIDDLE_BUTTON_DOWN, 3)
-					CHECK_BTN(RI_MOUSE_MIDDLE_BUTTON_UP, 3)
+					CHECK_BTN(RI_MOUSE_LEFT_BUTTON_DOWN, 1, true)
+					CHECK_BTN(RI_MOUSE_LEFT_BUTTON_UP, 1, false)
+					CHECK_BTN(RI_MOUSE_RIGHT_BUTTON_DOWN, 2, true)
+					CHECK_BTN(RI_MOUSE_RIGHT_BUTTON_UP, 2, false)
+					CHECK_BTN(RI_MOUSE_MIDDLE_BUTTON_DOWN, 3, true)
+					CHECK_BTN(RI_MOUSE_MIDDLE_BUTTON_UP, 3, false)
 
 					// XButton1/XButton2
-					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN) {
-						if (mouse_button_callback_) mouse_button_callback_(device_handle, 4, true);
-					}
-					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP) {
-						if (mouse_button_callback_) mouse_button_callback_(device_handle, 4, false);
-					}
-					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN) {
-						if (mouse_button_callback_) mouse_button_callback_(device_handle, 5, true);
-					}
-					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP) {
-						if (mouse_button_callback_) mouse_button_callback_(device_handle, 5, false);
-					}
+					CHECK_BTN(RI_MOUSE_BUTTON_4_DOWN, 4, true)
+					CHECK_BTN(RI_MOUSE_BUTTON_4_UP, 4, false)
+					CHECK_BTN(RI_MOUSE_BUTTON_5_DOWN, 5, true)
+					CHECK_BTN(RI_MOUSE_BUTTON_5_UP, 5, false)
 
 					auto to_signed = [](WORD w) -> int32_t {
 						return (w > 32767) ? (static_cast<int32_t>(w) - 65536) : static_cast<int32_t>(w);
@@ -122,14 +95,14 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					// Vertical wheel
 					if (mouse.usButtonFlags & RI_MOUSE_WHEEL) {
 						if (mouse_wheel_callback_) {
-							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), false);
+							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), 0);
 						}
 					}
 
 					// Horizontal wheel (Windows 8+)
 					if (mouse.usButtonFlags & RI_MOUSE_HWHEEL) {
 						if (mouse_wheel_callback_) {
-							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), true);
+							mouse_wheel_callback_(device_handle, to_signed(static_cast<WORD>(mouse.usButtonData)), 1);
 						}
 					}
 				}

@@ -36,12 +36,11 @@ namespace send {
 		HANDLE device_;
 
 		struct MouseButton {
-			bool LButton_ : 1;
-			bool RButton_ : 1;
-			bool MButton_ : 1;
-			bool XButton1_ : 1;
-			bool XButton2_ : 1;
-			bool unknown_ : 3;
+				bool LButton_ : 1;
+				bool RButton_ : 1;
+				bool MButton_ : 1;
+				bool XButton1_ : 1;
+				bool XButton2_ : 1;
 		};
 
 		struct KeyboardModifiers {

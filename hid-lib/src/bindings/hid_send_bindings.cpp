@@ -1,10 +1,7 @@
 // hid_send_bindings.cpp — Python C API bindings for HIDController hid_send
 // HIDController project — Send HID reports via Logitech virtual driver
 #include <Python.h>
-#include <windows.h>
-#include <stdint.h>
 #include <string>
-#include <vector>
 #include "../include/hid_controller.h"
 
 // ==================== Helper: PyObject -> MouseButton ====================

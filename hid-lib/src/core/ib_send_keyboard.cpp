@@ -1,7 +1,6 @@
 // ib_send_keyboard.cpp
 #include "pch.h"
-#include <logitech.h>
-#include <vector>
+#include "logitech.h"
 
 DLLAPI bool WINAPI key_down(KeyCode vk) {
 	auto& logitech = send::Logitech::get_logitech_instance();
