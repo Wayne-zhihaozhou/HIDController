@@ -6,7 +6,6 @@
 extern "C" {
 	constexpr NTSTATUS STATUS_SUCCESS = 0x00000000;
 	constexpr NTSTATUS STATUS_MORE_ENTRIES = 0x00000105;
-	constexpr NTSTATUS STATUS_BUFFER_TOO_SMALL = 0xC0000023;
 	constexpr ACCESS_MASK kDirectoryQuery = 0x0001;
 
 		NTSTATUS WINAPI NtOpenDirectoryObject(
@@ -65,9 +64,6 @@ namespace send {
 			int8_t y_;
 			int8_t wheel_;
 			int8_t unknown_t_;
-
-		private:
-			void assert_size() { static_assert(sizeof(MouseReport) == 5); }
 		};
 
 		struct KeyboardReport {
@@ -114,4 +110,5 @@ namespace send {
 
 
 	};
+	static_assert(sizeof(LogitechDriver::MouseReport) == 5, "MouseReport must be 5 bytes");
 }

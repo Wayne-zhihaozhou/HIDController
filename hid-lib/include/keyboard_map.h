@@ -7,7 +7,6 @@ namespace send::usb {
 	constexpr uint8_t keyboard_vk_to_usage(uint8_t vkCode) {
 		// TODO: fully test
 
-#pragma region
 		switch (vkCode) {
 		case 0x00: return 0x0000;
 		case 0x01: return 0x0000;  //VK_LBUTTON
@@ -209,7 +208,6 @@ namespace send::usb {
 				? 0x3A + vkCode - VK_F1
 				: 0x68 + vkCode - VK_F13;
 		}
-#pragma endregion
 	}
 
 }

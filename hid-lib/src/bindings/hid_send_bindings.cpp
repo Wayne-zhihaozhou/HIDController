@@ -140,10 +140,6 @@ static PyObject* hid_mouse_up(PyObject* self, PyObject* args) {
     return hid_mouse_button_op(self, args, 1);
 }
 
-static PyObject* hid_mouse_press(PyObject* self, PyObject* args) {
-    return hid_mouse_button_op(self, args, 2);
-}
-
 static PyObject* hid_mouse_click(PyObject* self, PyObject* args) {
     return hid_mouse_button_op(self, args, 2);
 }
@@ -265,16 +261,14 @@ static PyObject* hid_release_all_keys(PyObject* self, PyObject* args) {
 // ==================== Method table ====================
 
 static PyMethodDef HidSendMethods[] = {
-    {"move_mouse_relative",    (PyCFunction)hid_move_mouse_relative,    METH_VARARGS,
+    {"mouse_move_relative",    (PyCFunction)hid_move_mouse_relative,    METH_VARARGS,
      "Move mouse relatively. Args: dx (int), dy (int)"},
-    {"move_mouse_absolute",    (PyCFunction)hid_move_mouse_absolute,    METH_VARARGS,
+    {"mouse_move_absolute",    (PyCFunction)hid_move_mouse_absolute,    METH_VARARGS,
      "Move mouse absolutely. Args: x (int), y (int)"},
     {"mouse_down",             (PyCFunction)hid_mouse_down,             METH_VARARGS,
      "Mouse button down. Args: button (int or str) - e.g., 'left', 'right', 'middle', 'xbutton1', 'xbutton2'"},
     {"mouse_up",               (PyCFunction)hid_mouse_up,               METH_VARARGS,
      "Mouse button up. Args: button (int or str)"},
-    {"mouse_press",            (PyCFunction)hid_mouse_press,            METH_VARARGS,
-     "Mouse press (down + up). Args: button (int or str) - e.g., 'left', 'right', 'middle'"},
     {"mouse_click",            (PyCFunction)hid_mouse_click,            METH_VARARGS,
      "Mouse click (down + up). Args: button (int or str)"},
     {"mouse_wheel",            (PyCFunction)hid_mouse_wheel,            METH_VARARGS,

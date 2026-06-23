@@ -19,11 +19,10 @@ _raw_input = None
 def __getattr__(name):
     global _hid_send, _raw_input
     if name in (
-        "move_mouse_relative",
-        "move_mouse_absolute",
+        "mouse_move_relative",
+        "mouse_move_absolute",
         "mouse_down",
         "mouse_up",
-        "mouse_press",
         "mouse_click",
         "mouse_wheel",
         "set_mouse_move_coefficient",
@@ -78,11 +77,10 @@ __all__ = [
     "Mouse",
     "Key",
     # Mouse control
-    "move_mouse_relative",
-    "move_mouse_absolute",
+    "mouse_move_relative",
+    "mouse_move_absolute",
     "mouse_down",
     "mouse_up",
-    "mouse_press",
     "mouse_click",
     "mouse_wheel",
     "set_mouse_move_coefficient",
@@ -100,7 +98,7 @@ __all__ = [
     # Input tracking
     "start_input_tracking",
     "stop_input_tracking",
-    "register_raw_input",
+    "hid_controller_register_raw_input",
     "is_tracking",
     "get_mouse_delta",
     "get_pressed_keys",

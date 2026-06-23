@@ -40,7 +40,7 @@ std::vector<uint16_t> WINAPI get_pressed_keys()
     return get_pressed_keys_impl();
 }
 
-bool WINAPI hid_controller_register_raw_input(HWND hwnd)
+bool WINAPI register_raw_input(HWND hwnd)
 {
     RAWINPUTDEVICE rid[2];
 
@@ -55,11 +55,6 @@ bool WINAPI hid_controller_register_raw_input(HWND hwnd)
     rid[1].hwndTarget = hwnd;
 
     return RegisterRawInputDevices(rid, 2, sizeof(rid[0])) != FALSE;
-}
-
-bool WINAPI mouse_press(uint16_t button)
-{
-    return mouse_click(button);
 }
 
 bool WINAPI get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length)

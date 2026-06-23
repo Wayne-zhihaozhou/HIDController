@@ -4,10 +4,6 @@
 #include <windows.h>
 #include <stdint.h>
 #include <vector>
-#include <mutex>
-#include <functional>
-#include <atomic>
-#include <thread>
 #include "input_tracker_internal.h"
 #include "../include/hid_controller.h"
 
@@ -160,7 +156,7 @@ static PyObject* raw_register_raw_input(PyObject* self, PyObject* args) {
     if (!PyArg_ParseTuple(args, "K", &hwnd))
         return NULL;
 
-    bool result = hid_controller_register_raw_input(reinterpret_cast<HWND>(hwnd));
+    bool result = register_raw_input(reinterpret_cast<HWND>(hwnd));
     return PyBool_FromLong((long)result);
 }
 

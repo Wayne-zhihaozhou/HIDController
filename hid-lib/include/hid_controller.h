@@ -27,7 +27,6 @@ DLLAPI bool WINAPI mouse_move_absolute(uint32_t x, uint32_t y);
 DLLAPI bool WINAPI mouse_down(uint16_t button);
 DLLAPI bool WINAPI mouse_up(uint16_t button);
 DLLAPI bool WINAPI mouse_click(uint16_t button);
-DLLAPI bool WINAPI mouse_press(uint16_t button);
 DLLAPI bool WINAPI mouse_wheel(int32_t movement);
 DLLAPI void WINAPI set_mouse_move_coefficient(float coefficient);
 DLLAPI float WINAPI get_mouse_move_coefficient();
@@ -54,7 +53,7 @@ typedef void (*mouse_wheel_callback)(uintptr_t device_handle, int32_t wheel_delt
 DLLAPI bool WINAPI start_input_tracking(mouse_move_callback mouse_callback, keyboard_callback key_callback, mouse_button_callback mouse_button_callback, mouse_wheel_callback wheel_callback);
 DLLAPI void WINAPI stop_input_tracking();
 DLLAPI bool WINAPI is_tracking();
-DLLAPI bool WINAPI hid_controller_register_raw_input(HWND hwnd);
+DLLAPI bool WINAPI register_raw_input(HWND hwnd);
 DLLAPI bool WINAPI get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length);
 // Raw input query — uses C++ linkage for std::pair/std::vector return types
 DLLAPI_CPP std::pair<long, long> get_mouse_delta();

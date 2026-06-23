@@ -16,7 +16,7 @@ from enum import IntFlag
 class Mouse(IntFlag):
     """Mouse button flags.
 
-    Use with hid_send.mouse_down(), mouse_up(), mouse_click(), mouse_press().
+    Use with hid_send.mouse_down(), mouse_up(), mouse_click().
 
     Attributes
     ----------

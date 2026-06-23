@@ -1,77 +1,7 @@
 #include "pch.h"
 #include "logitech_driver.h"
-#include <tlhelp32.h>
 
 namespace send {
-
-std::wstring find_executable_in_path(const std::wstring& exe_name = L"LCore.exe") {
-	wchar_t* path_env = nullptr;
-	size_t len = 0;
-	_wdupenv_s(&path_env, &len, L"PATH");
-	if (!path_env) return L"";
-	std::wstring path_str(path_env);
-	free(path_env);
-	std::wstringstream ss(path_str);
-	std::wstring folder;
-	while (std::getline(ss, folder, L';')) {
-		std::filesystem::path full_path = folder;
-		full_path /= exe_name;
-		if (std::filesystem::exists(full_path)) return full_path.wstring();
-	}
-	return L"";
-}
-
-bool start_process(const std::wstring& process_path) {
-	STARTUPINFOW si{};
-	PROCESS_INFORMATION pi{};
-	si.cb = sizeof(si);
-	if (!CreateProcessW(process_path.c_str(), nullptr, nullptr, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) return false;
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-	return true;
-}
-
-bool is_process_running(const std::wstring& process_name) {
-	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	if (snapshot == INVALID_HANDLE_VALUE) return false;
-	PROCESSENTRY32W entry{ sizeof(PROCESSENTRY32W) };
-	bool found = false;
-	if (Process32FirstW(snapshot, &entry)) {
-		do {
-			std::wstring name = entry.szExeFile;
-			std::wstring target = process_name;
-			std::transform(name.begin(), name.end(), name.begin(), ::towlower);
-			std::transform(target.begin(), target.end(), target.begin(), ::towlower);
-			if (name == target) { found = true; break; }
-		} while (Process32NextW(snapshot, &entry));
-	}
-	CloseHandle(snapshot);
-	return found;
-}
-
-bool kill_process_by_name(const std::wstring& process_name) {
-	HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	if (snapshot == INVALID_HANDLE_VALUE) return false;
-	PROCESSENTRY32W entry{ sizeof(PROCESSENTRY32W) };
-	bool killed = false;
-	if (Process32FirstW(snapshot, &entry)) {
-		do {
-			std::wstring name = entry.szExeFile;
-			std::wstring target = process_name;
-			std::transform(name.begin(), name.end(), name.begin(), ::towlower);
-			std::transform(target.begin(), target.end(), target.begin(), ::towlower);
-			if (name == target) {
-				HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, entry.th32ProcessID);
-				if (hProcess) {
-					if (TerminateProcess(hProcess, 0)) killed = true;
-					CloseHandle(hProcess);
-				}
-			}
-		} while (Process32NextW(snapshot, &entry));
-	}
-	CloseHandle(snapshot);
-	return killed;
-}
 
 std::wstring scan_devices(std::function<bool(std::wstring_view)> predicate) {
 	std::wstring result{};
