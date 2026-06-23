@@ -26,7 +26,7 @@ namespace send {
 
 	public:
 		static Logitech& get_logitech_instance();
-		bool send_keyboard_report(const KEYBDINPUT& ki);
+		bool send_keyboard_report(KeyCode vk, bool down);
 		bool send_mouse_report(const MOUSEINPUT& mi);
 		void release_all_mouse();
 		void release_all_keys();

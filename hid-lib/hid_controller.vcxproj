@@ -107,7 +107,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\hid_controller.h" />
-    <ClInclude Include="include\keyboard_map.h" />
     <ClInclude Include="include\logitech.h" />
     <ClInclude Include="include\logitech_driver.h" />
     <ClInclude Include="include\mouse_button.h" />

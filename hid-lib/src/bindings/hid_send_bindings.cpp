@@ -79,6 +79,31 @@ static KeyCode key_name_to_vk(const char* s) {
     return static_cast<KeyCode>(0);
 }
 
+// ASCII → USB HID Keyboard Usage ID (single character fallback)
+static uint16_t ascii_to_usb(char c) {
+    if (c >= 'A' && c <= 'Z') return 0x04 + (c - 'A');
+    if (c >= 'a' && c <= 'z') return 0x04 + (c - 'a');
+    if (c >= '1' && c <= '9') return 0x1E + (c - '1');
+    if (c == '0') return 0x27;
+    switch (c) {
+        case ' ':  return 0x2C;
+        case '-':  return 0x2D;
+        case '=':  return 0x2E;
+        case '[':  return 0x2F;
+        case ']':  return 0x30;
+        case '\\': return 0x31;
+        case ';':  return 0x33;
+        case '\'': return 0x34;
+        case '`':  return 0x35;
+        case ',':  return 0x36;
+        case '.':  return 0x37;
+        case '/':  return 0x38;
+        case '\n': return 0x28;
+        case '\t': return 0x2B;
+        default:   return 0x00;
+    }
+}
+
 static KeyCode py_to_vk(PyObject* vk_obj) {
     if (PyUnicode_Check(vk_obj)) {
         Py_ssize_t len;
@@ -86,8 +111,8 @@ static KeyCode py_to_vk(PyObject* vk_obj) {
         if (!s) return KeyCode::ENTER;
         KeyCode code = key_name_to_vk(s);
         if (static_cast<uint16_t>(code) != 0) return code;
-        // Single character fallback
-        if (len == 1) return static_cast<KeyCode>((uint16_t)s[0]);
+        // Single character fallback: ASCII → USB HID Usage ID
+        if (len == 1) return static_cast<KeyCode>(ascii_to_usb(s[0]));
         return KeyCode::ENTER;
     }
     long val = PyLong_AsLong(vk_obj);
@@ -273,7 +298,6 @@ static PyObject* hid_get_key_code_map(PyObject* self, PyObject* args) {
 
     KEY_CODE_ENTRY(LBUTTON);   KEY_CODE_ENTRY(RBUTTON);
     KEY_CODE_ENTRY(CANCEL);    KEY_CODE_ENTRY(MBUTTON);
-    KEY_CODE_ENTRY(X1);        KEY_CODE_ENTRY(X2);
     KEY_CODE_ENTRY(BACK);      KEY_CODE_ENTRY(TAB);
     KEY_CODE_ENTRY(CLEAR);     KEY_CODE_ENTRY(ENTER);
     KEY_CODE_ENTRY(SHIFT);     KEY_CODE_ENTRY(CTRL);

@@ -3,100 +3,47 @@
 #include <logitech.h>
 #include <vector>
 
-bool send_keyboard_input_bulk(const KEYBDINPUT* inputs, uint32_t count) {
-	auto& logitech = send::Logitech::get_logitech_instance();
-	for (uint32_t i = 0; i < count; ++i) {
-		if (!logitech.send_keyboard_report(inputs[i])) return false;
-	}
-	return true;
-}
-
 DLLAPI bool WINAPI key_down(KeyCode vk) {
-	KEYBDINPUT ki{};
-	ki.wVk = static_cast<WORD>(vk);
-	ki.dwFlags = 0;  // 按下
-	ki.wScan = 0;
-	ki.time = 0;
-	ki.dwExtraInfo = 0;
-
-	return send_keyboard_input_bulk(&ki, 1);
+	auto& logitech = send::Logitech::get_logitech_instance();
+	return logitech.send_keyboard_report(vk, true);
 }
 
 DLLAPI bool WINAPI key_up(KeyCode vk) {
-	KEYBDINPUT ki{};
-	ki.wVk = static_cast<WORD>(vk);
-	ki.dwFlags = KEYEVENTF_KEYUP; // 抬起
-	ki.wScan = 0;
-	ki.time = 0;
-	ki.dwExtraInfo = 0;
-
-	return send_keyboard_input_bulk(&ki, 1);
+	auto& logitech = send::Logitech::get_logitech_instance();
+	return logitech.send_keyboard_report(vk, false);
 }
 
 DLLAPI bool WINAPI key_press(KeyCode vk) {
-	// 构建一次性报告数组，先按下再松开
-	KEYBDINPUT inputs[2]{};
-
-	// 按下
-	inputs[0].wVk = static_cast<WORD>(vk);
-	inputs[0].dwFlags = 0;  // 按下
-	inputs[0].wScan = 0;
-	inputs[0].time = 0;
-	inputs[0].dwExtraInfo = 0;
-
-	// 抬起
-	inputs[1].wVk = static_cast<WORD>(vk);
-	inputs[1].dwFlags = KEYEVENTF_KEYUP;  // 抬起
-	inputs[1].wScan = 0;
-	inputs[1].time = 0;
-	inputs[1].dwExtraInfo = 0;
-
-	// 一次性发送所有报告
-	return send_keyboard_input_bulk(inputs, 2);
+	auto& logitech = send::Logitech::get_logitech_instance();
+	if (!logitech.send_keyboard_report(vk, true)) return false;
+	return logitech.send_keyboard_report(vk, false);
 }
 
 DLLAPI bool WINAPI key_combo(const std::vector<KeyCode>& keys) {
-	std::vector<KEYBDINPUT> inputs;
-	inputs.reserve(keys.size() * 2);
+	auto& logitech = send::Logitech::get_logitech_instance();
 
-	// 先按下所有键（从前到后）
+	// Press all keys (front to back)
 	for (auto vk : keys) {
-		KEYBDINPUT ki{};
-		ki.wVk = static_cast<WORD>(vk);
-		ki.dwFlags = 0;  // 按下
-		inputs.push_back(ki);
+		if (!logitech.send_keyboard_report(vk, true)) return false;
 	}
 
-	// 再"反向"抬起所有键（从后到前，保证修饰键最后释放）
+	// Release all keys in reverse (back to front, so modifiers release last)
 	for (auto it = keys.rbegin(); it != keys.rend(); ++it) {
-		KEYBDINPUT ki{};
-		ki.wVk = static_cast<WORD>(*it);
-		ki.dwFlags = KEYEVENTF_KEYUP; // 抬起
-		inputs.push_back(ki);
+		if (!logitech.send_keyboard_report(*it, false)) return false;
 	}
 
-	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
+	return true;
 }
 
 DLLAPI bool WINAPI key_seq(const std::vector<KeyCode>& keys) {
-	std::vector<KEYBDINPUT> inputs;
-	inputs.reserve(keys.size() * 2);
+	auto& logitech = send::Logitech::get_logitech_instance();
 
 	for (auto vk : keys) {
-		// 按下
-		KEYBDINPUT kiDown{};
-		kiDown.wVk = static_cast<WORD>(vk);
-		kiDown.dwFlags = 0;
-		inputs.push_back(kiDown);
-
-		// 松开
-		KEYBDINPUT kiUp{};
-		kiUp.wVk = static_cast<WORD>(vk);
-		kiUp.dwFlags = KEYEVENTF_KEYUP;
-		inputs.push_back(kiUp);
+		if (!logitech.send_keyboard_report(vk, true)) return false;
+		if (!logitech.send_keyboard_report(vk, false)) return false;
 	}
 
-	return send_keyboard_input_bulk(inputs.data(), static_cast<uint32_t>(inputs.size()));
+	return true;
 }
 
 DLLAPI void WINAPI release_all_keys() {

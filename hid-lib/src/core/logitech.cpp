@@ -1,7 +1,6 @@
 // logitech.cpp
 #include "pch.h"
 #include "logitech.h"
-#include "keyboard_map.h"
 
 namespace send {
 
@@ -81,30 +80,27 @@ void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi)
 	}
 
 	// 发送键盘输入事件（支持修饰键状态更新）
-	bool Logitech::send_keyboard_report(const KEYBDINPUT& ki) {
+	bool Logitech::send_keyboard_report(KeyCode vk, bool keydown) {
 		std::lock_guard lock(keyboard_mutex_);
 
-		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
+		auto usage = static_cast<uint8_t>(vk);
 
-		switch (static_cast<KeyCode>(ki.wVk)) {
-		case KeyCode::CTRL:  keyboard_report_.modifiers_.RCtrl_ = keydown; break;
-		case KeyCode::LCTRL: keyboard_report_.modifiers_.LCtrl_ = keydown; break;
-		case KeyCode::RCTRL: keyboard_report_.modifiers_.RCtrl_ = keydown; break;
-		case KeyCode::SHIFT:    keyboard_report_.modifiers_.RShift_ = keydown; break;
-		case KeyCode::LSHIFT:   keyboard_report_.modifiers_.LShift_ = keydown; break;
-		case KeyCode::RSHIFT:   keyboard_report_.modifiers_.RShift_ = keydown; break;
-		case KeyCode::ALT:  keyboard_report_.modifiers_.RAlt_ = keydown; break;
-		case KeyCode::LALT:    keyboard_report_.modifiers_.LAlt_ = keydown; break;
-		case KeyCode::RALT:    keyboard_report_.modifiers_.RAlt_ = keydown; break;
-		case KeyCode::LWIN:     keyboard_report_.modifiers_.LGui_ = keydown; break;
-		case KeyCode::RWIN:     keyboard_report_.modifiers_.RGui_ = keydown; break;
-
-		default:
-			// 普通按键处理
-			uint8_t usage = usb::keyboard_vk_to_usage(static_cast<KeyCode>(ki.wVk));
-
+		// Modifier keys: USB usage IDs 0xE0-0xE7 → driver bitfield
+		if (usage >= 0xE0 && usage <= 0xE7) {
+			switch (usage) {
+			case 0xE0: keyboard_report_.modifiers_.LCtrl_ = keydown; break;
+			case 0xE4: keyboard_report_.modifiers_.RCtrl_ = keydown; break;
+			case 0xE1: keyboard_report_.modifiers_.LShift_ = keydown; break;
+			case 0xE5: keyboard_report_.modifiers_.RShift_ = keydown; break;
+			case 0xE2: keyboard_report_.modifiers_.LAlt_ = keydown; break;
+			case 0xE6: keyboard_report_.modifiers_.RAlt_ = keydown; break;
+			case 0xE3: keyboard_report_.modifiers_.LGui_ = keydown; break;
+			case 0xE7: keyboard_report_.modifiers_.RGui_ = keydown; break;
+			}
+		}
+		else {
+			// Normal key: usage ID is the enum value itself
 			if (keydown) {
-				// 按下：检查是否已经存在，避免重复
 				bool already_pressed = false;
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report_.keys_[i] == usage) {
@@ -114,11 +110,9 @@ void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi)
 				}
 
 				if (already_pressed) {
-					// 已经按下，不再处理
-					break;
+					return driver_.report_keyboard(keyboard_report_);
 				}
 
-				// 填入空位
 				bool inserted = false;
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report_.keys_[i] == 0) {
@@ -134,7 +128,6 @@ void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi)
 				}
 			}
 			else {
-				// 抬起：清除对应按键
 				for (int i = 0; i < 6; i++) {
 					if (keyboard_report_.keys_[i] == usage) {
 						keyboard_report_.keys_[i] = 0;
@@ -142,10 +135,8 @@ void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi)
 					}
 				}
 			}
-			break;
 		}
 
-		// 提交键盘报告
 		return driver_.report_keyboard(keyboard_report_);
 	}
 
