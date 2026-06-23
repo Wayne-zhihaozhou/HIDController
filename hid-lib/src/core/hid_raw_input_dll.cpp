@@ -29,19 +29,15 @@ bool WINAPI is_tracking()
     return is_tracking_impl();
 }
 
-void WINAPI get_mouse_delta(int32_t* dx, int32_t* dy)
+std::pair<long, long> WINAPI get_mouse_delta()
 {
-    long ldx = 0;
-    long ldy = 0;
-    get_mouse_delta_impl(&ldx, &ldy);
-    *dx = (int32_t)ldx;
-    *dy = (int32_t)ldy;
+    auto [ldx, ldy] = get_mouse_delta_impl();
+    return {ldx, ldy};
 }
 
-void WINAPI get_pressed_keys(uint16_t* keys, uint32_t* count)
+std::vector<uint16_t> WINAPI get_pressed_keys()
 {
-    uint32_t max_count = *count;
-    get_pressed_keys_impl(keys, count, max_count);
+    return get_pressed_keys_impl();
 }
 
 bool WINAPI hid_controller_register_raw_input(HWND hwnd)

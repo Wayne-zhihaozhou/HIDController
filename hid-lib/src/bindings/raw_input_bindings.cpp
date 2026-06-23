@@ -9,6 +9,7 @@
 #include <atomic>
 #include <thread>
 #include "input_tracker_internal.h"
+#include "../include/hid_controller.h"
 
 // ==================== Module state ====================
 
@@ -55,7 +56,7 @@ static void mouse_button_callback_wrapper(uintptr_t device_handle, uint32_t butt
     if (!g_state.mouse_button_cb || g_state.mouse_button_cb == Py_None) return;
 
     PyGILState_STATE gstate = PyGILState_Ensure();
-    PyObject* args = Py_BuildValue("(KiO)", device_handle, button, is_down ? Py_True : Py_False);
+    PyObject* args = Py_BuildValue("(KKO)", device_handle, (unsigned long long)button, is_down ? Py_True : Py_False);
     if (args && g_state.mouse_button_cb != Py_None) {
         PyObject* result = PyObject_CallObject(g_state.mouse_button_cb, args);
         Py_XDECREF(result);
@@ -68,7 +69,7 @@ static void wheel_callback_wrapper(uintptr_t device_handle, int32_t wheel_delta,
     if (!g_state.wheel_cb || g_state.wheel_cb == Py_None) return;
 
     PyGILState_STATE gstate = PyGILState_Ensure();
-    PyObject* args = Py_BuildValue("(Kii)", device_handle, wheel_delta, horizontal ? Py_True : Py_False);
+    PyObject* args = Py_BuildValue("(KiO)", device_handle, wheel_delta, horizontal ? Py_True : Py_False);
     if (args && g_state.wheel_cb != Py_None) {
         PyObject* result = PyObject_CallObject(g_state.wheel_cb, args);
         Py_XDECREF(result);
@@ -139,19 +140,16 @@ static PyObject* raw_is_tracking(PyObject* self, PyObject* args) {
 
 static PyObject* raw_get_mouse_delta(PyObject* self, PyObject* args) {
     (void)args;
-    long dx = 0, dy = 0;
-    get_mouse_delta_impl(&dx, &dy);
+    auto [dx, dy] = get_mouse_delta();
     return Py_BuildValue("(l,l)", dx, dy);
 }
 
 static PyObject* raw_get_pressed_keys(PyObject* self, PyObject* args) {
     (void)args;
-    std::vector<uint16_t> keys(256);
-    uint32_t count = 256;
-    get_pressed_keys_impl(keys.data(), &count, 256);
+    std::vector<uint16_t> keys = get_pressed_keys();
 
-    PyObject* list = PyList_New((Py_ssize_t)count);
-    for (uint32_t i = 0; i < count; i++) {
+    PyObject* list = PyList_New((Py_ssize_t)keys.size());
+    for (size_t i = 0; i < keys.size(); i++) {
         PyList_SET_ITEM(list, (Py_ssize_t)i, PyLong_FromUnsignedLong((unsigned long)keys[i]));
     }
     return list;

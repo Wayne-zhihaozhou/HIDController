@@ -2,6 +2,7 @@
 #pragma once
 #include <stdint.h>
 #include <vector>
+#include <utility>
 
 // 基础Windows类型定义（不依赖windows.h）
 // 注意：使用时需要包含windows.h，这里使用前向声明
@@ -51,7 +52,7 @@ typedef void (*mouse_wheel_callback)(uintptr_t device_handle, int32_t wheel_delt
 DLLAPI bool WINAPI start_input_tracking(mouse_move_callback mouse_callback, keyboard_callback key_callback, mouse_button_callback mouse_button_callback, mouse_wheel_callback wheel_callback);
 DLLAPI void WINAPI stop_input_tracking();
 DLLAPI bool WINAPI is_tracking();
-DLLAPI void WINAPI get_mouse_delta(int32_t* dx, int32_t* dy);
-DLLAPI void WINAPI get_pressed_keys(uint16_t* keys, uint32_t* count);
+DLLAPI std::pair<long, long> WINAPI get_mouse_delta();
+DLLAPI std::vector<uint16_t> WINAPI get_pressed_keys();
 DLLAPI bool WINAPI hid_controller_register_raw_input(HWND hwnd);
 DLLAPI bool WINAPI get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length);

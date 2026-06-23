@@ -212,17 +212,14 @@ bool is_tracking_impl() {
 	return running_.load();
 }
 
-void get_mouse_delta_impl(long* dx, long* dy) {
-	*dx = accumulated_dx_.exchange(0);
-	*dy = accumulated_dy_.exchange(0);
+std::pair<long, long> get_mouse_delta_impl() {
+	long dx = accumulated_dx_.exchange(0);
+	long dy = accumulated_dy_.exchange(0);
+	return {dx, dy};
 }
 
-void get_pressed_keys_impl(uint16_t* keys, uint32_t* count, uint32_t max_count) {
+std::vector<uint16_t> get_pressed_keys_impl() {
 	std::lock_guard<std::mutex> lock(key_mutex_);
-	uint32_t i = 0;
-	for (uint16_t key : pressed_keys_) {
-		if (i >= max_count) break;
-		keys[i++] = key;
-	}
-	*count = i;
+	std::vector<uint16_t> keys(pressed_keys_.begin(), pressed_keys_.end());
+	return keys;
 }
