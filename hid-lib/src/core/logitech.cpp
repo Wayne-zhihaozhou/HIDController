@@ -12,7 +12,6 @@ namespace send {
 	// 析构函数：RAII释放驱动
 	Logitech::~Logitech() {
 		release_all_keys();
-		release_all_mouse();
 		driver_.destroy();
 	}
 
