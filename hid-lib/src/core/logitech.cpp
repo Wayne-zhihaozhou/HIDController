@@ -86,22 +86,22 @@ void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi)
 
 		bool keydown = !(ki.dwFlags & KEYEVENTF_KEYUP);
 
-		switch (ki.wVk) {
-		case VK_CONTROL:  keyboard_report_.modifiers_.RCtrl_ = keydown; break;
-		case VK_LCONTROL: keyboard_report_.modifiers_.LCtrl_ = keydown; break;
-		case VK_RCONTROL: keyboard_report_.modifiers_.RCtrl_ = keydown; break;
-		case VK_SHIFT:    keyboard_report_.modifiers_.RShift_ = keydown; break;
-		case VK_LSHIFT:   keyboard_report_.modifiers_.LShift_ = keydown; break;
-		case VK_RSHIFT:   keyboard_report_.modifiers_.RShift_ = keydown; break;
-		case VK_MENU:     keyboard_report_.modifiers_.RAlt_ = keydown; break;
-		case VK_LMENU:    keyboard_report_.modifiers_.LAlt_ = keydown; break;
-		case VK_RMENU:    keyboard_report_.modifiers_.RAlt_ = keydown; break;
-		case VK_LWIN:     keyboard_report_.modifiers_.LGui_ = keydown; break;
-		case VK_RWIN:     keyboard_report_.modifiers_.RGui_ = keydown; break;
+		switch (static_cast<KeyCode>(ki.wVk)) {
+		case KeyCode::CTRL:  keyboard_report_.modifiers_.RCtrl_ = keydown; break;
+		case KeyCode::LCTRL: keyboard_report_.modifiers_.LCtrl_ = keydown; break;
+		case KeyCode::RCTRL: keyboard_report_.modifiers_.RCtrl_ = keydown; break;
+		case KeyCode::SHIFT:    keyboard_report_.modifiers_.RShift_ = keydown; break;
+		case KeyCode::LSHIFT:   keyboard_report_.modifiers_.LShift_ = keydown; break;
+		case KeyCode::RSHIFT:   keyboard_report_.modifiers_.RShift_ = keydown; break;
+		case KeyCode::ALT:  keyboard_report_.modifiers_.RAlt_ = keydown; break;
+		case KeyCode::LALT:    keyboard_report_.modifiers_.LAlt_ = keydown; break;
+		case KeyCode::RALT:    keyboard_report_.modifiers_.RAlt_ = keydown; break;
+		case KeyCode::LWIN:     keyboard_report_.modifiers_.LGui_ = keydown; break;
+		case KeyCode::RWIN:     keyboard_report_.modifiers_.RGui_ = keydown; break;
 
 		default:
 			// 普通按键处理
-			uint8_t usage = usb::keyboard_vk_to_usage((uint8_t)ki.wVk);
+			uint8_t usage = usb::keyboard_vk_to_usage(static_cast<KeyCode>(ki.wVk));
 
 			if (keydown) {
 				// 按下：检查是否已经存在，避免重复

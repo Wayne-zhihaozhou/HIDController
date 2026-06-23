@@ -6,12 +6,10 @@ Logitech Gaming Software (LGS) is installed and the virtual driver is active.
 """
 
 from __future__ import annotations
+from enum import IntEnum
 
 # Enum types for mouse buttons and virtual key codes
-from hid_controller.mouse import Mouse
-from hid_controller.key import Key
-
-# C extension modules (defer import until first use so enums are available for testing)
+# Generated from C++ header via the compiled extension — single source of truth.
 _hid_send = None
 _raw_input = None
 
@@ -19,6 +17,8 @@ _raw_input = None
 def __getattr__(name):
     global _hid_send, _raw_input
     if name in (
+        "MouseButton",
+        "KeyCode",
         "mouse_move_relative",
         "mouse_move_absolute",
         "mouse_down",
@@ -40,6 +40,10 @@ def __getattr__(name):
         if _hid_send is None:
             import hid_controller.hid_send as _mod
             _hid_send = _mod
+        if name == "MouseButton":
+            return IntEnum("MouseButton", _hid_send.get_mouse_button_map())
+        if name == "KeyCode":
+            return IntEnum("KeyCode", _hid_send.get_key_code_map())
         return getattr(_hid_send, name)
     if name in (
         "start_input_tracking",
@@ -69,13 +73,13 @@ def __getattr__(name):
 
 def __dir__():
     # Include aliases in dir() output
-    names = ["Mouse", "Key"] + list(__all__) + ["start_tracking", "stop_tracking"]
+    names = ["MouseButton", "KeyCode"] + list(__all__) + ["start_tracking", "stop_tracking"]
     return sorted(set(names))
 
 __all__ = [
     # Mouse / Key enums
-    "Mouse",
-    "Key",
+    "MouseButton",
+    "KeyCode",
     # Mouse control
     "mouse_move_relative",
     "mouse_move_absolute",
