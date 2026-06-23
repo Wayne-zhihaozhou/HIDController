@@ -44,8 +44,9 @@ DLLAPI void WINAPI release_all_keys();
 typedef void (*mouse_move_callback)(uintptr_t device_handle, int32_t dx, int32_t dy);
 typedef void (*mouse_button_callback)(uintptr_t device_handle, uint32_t button, bool is_down);
 typedef void (*keyboard_callback)(uintptr_t device_handle, uint16_t vkey, bool is_down);
+typedef void (*mouse_wheel_callback)(uintptr_t device_handle, int32_t wheel_delta, int32_t horizontal);
 
-DLLAPI bool WINAPI start_input_tracking(mouse_move_callback mouse_callback, keyboard_callback key_callback, mouse_button_callback mouse_button_callback);
+DLLAPI bool WINAPI start_input_tracking(mouse_move_callback mouse_callback, keyboard_callback key_callback, mouse_button_callback mouse_button_callback, mouse_wheel_callback wheel_callback);
 DLLAPI void WINAPI stop_input_tracking();
 DLLAPI bool WINAPI is_tracking();
 DLLAPI void WINAPI get_mouse_delta(int32_t* dx, int32_t* dy);

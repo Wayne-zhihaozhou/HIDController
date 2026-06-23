@@ -10,6 +10,7 @@ static HWND hwnd_ = nullptr;
 static mouse_move_fn mouse_callback_;
 static keyboard_fn key_callback_;
 static mouse_button_fn mouse_button_callback_;
+static mouse_wheel_fn mouse_wheel_callback_;
 
 static std::atomic<long> accumulated_dx_{0};
 static std::atomic<long> accumulated_dy_{0};
@@ -35,6 +36,32 @@ static void register_raw_input(HWND hwnd) {
 	if (!RegisterRawInputDevices(rid, 2, sizeof(rid[0]))) {
 		OutputDebugStringA("Failed to register Raw Input devices.\n");
 	}
+}
+
+// ==================== Device Name Query ====================
+
+std::wstring get_device_name_impl(uintptr_t device_handle) {
+    HANDLE device = reinterpret_cast<HANDLE>(device_handle);
+    if (device == INVALID_HANDLE_VALUE || device == nullptr)
+        return L"";
+
+    // First get the required buffer size
+    DWORD buffer_size = 0;
+    if (!GetRawInputDeviceInfoW(device, RIDI_DEVICENAME, nullptr, &buffer_size))
+        return L"";
+
+    // buffer_size includes null terminator
+    if (buffer_size == 0 || buffer_size > 1024)
+        return L"";
+
+    std::wstring name(buffer_size, L'\0');
+    if (GetRawInputDeviceInfoW(device, RIDI_DEVICENAME, &name.front(), &buffer_size) == 0)
+        return L"";
+
+    // Strip trailing nulls
+    while (!name.empty() && name.back() == L'\0')
+        name.pop_back();
+    return name;
 }
 
 // ==================== Window Procedure ====================
@@ -72,6 +99,38 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					CHECK_BTN(RI_MOUSE_RIGHT_BUTTON_UP, 2)
 					CHECK_BTN(RI_MOUSE_MIDDLE_BUTTON_DOWN, 3)
 					CHECK_BTN(RI_MOUSE_MIDDLE_BUTTON_UP, 3)
+
+					// XButton1/XButton2
+					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_4_DOWN) {
+						if (mouse_button_callback_) mouse_button_callback_(device_handle, 4, true);
+					}
+					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_4_UP) {
+						if (mouse_button_callback_) mouse_button_callback_(device_handle, 4, false);
+					}
+					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_5_DOWN) {
+						if (mouse_button_callback_) mouse_button_callback_(device_handle, 5, true);
+					}
+					if (mouse.usButtonFlags & RI_MOUSE_BUTTON_5_UP) {
+						if (mouse_button_callback_) mouse_button_callback_(device_handle, 5, false);
+					}
+
+					// Vertical wheel
+					if (mouse.usButtonFlags & RI_MOUSE_WHEEL) {
+						if (mouse_wheel_callback_) {
+							WORD raw_wheel = static_cast<WORD>(mouse.usButtonData);
+							int32_t wheel_delta = (raw_wheel > 32767) ? (static_cast<int32_t>(raw_wheel) - 65536) : static_cast<int32_t>(raw_wheel);
+							mouse_wheel_callback_(device_handle, wheel_delta, false);
+						}
+					}
+
+					// Horizontal wheel (Windows 8+)
+					if (mouse.usButtonFlags & RI_MOUSE_HWHEEL) {
+						if (mouse_wheel_callback_) {
+							WORD raw_hwheel = static_cast<WORD>(mouse.usButtonData);
+							int32_t hwheel_delta = (raw_hwheel > 32767) ? (static_cast<int32_t>(raw_hwheel) - 65536) : static_cast<int32_t>(raw_hwheel);
+							mouse_wheel_callback_(device_handle, hwheel_delta, true);
+						}
+					}
 				}
 				else if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 					uint16_t vkey = raw->data.keyboard.VKey;
@@ -122,11 +181,12 @@ static void message_loop() {
 
 // ==================== Public API ====================
 
-void start_tracking_impl(mouse_move_fn mc, keyboard_fn kc, mouse_button_fn mbc) {
+void start_tracking_impl(mouse_move_fn mc, keyboard_fn kc, mouse_button_fn mbc, mouse_wheel_fn mwc) {
 	if (running_) return;
 	mouse_callback_ = mc;
 	key_callback_ = kc;
 	mouse_button_callback_ = mbc;
+	mouse_wheel_callback_ = mwc;
 	running_ = true;
 	worker_thread_ = std::thread(message_loop);
 }
@@ -140,6 +200,7 @@ void stop_tracking_impl() {
 	mouse_callback_ = nullptr;
 	key_callback_ = nullptr;
 	mouse_button_callback_ = nullptr;
+	mouse_wheel_callback_ = nullptr;
 	accumulated_dx_ = 0;
 	accumulated_dy_ = 0;
 
