@@ -4,19 +4,19 @@
 
 // 全局系数缓存
 static float mouse_move_coefficient_ = 1.0f;
-int original_params_[3];
-int original_speed_;
+static int original_params_[3];
+static int original_speed_;
 
 DLLAPI float WINAPI get_mouse_move_coefficient() {
 	return mouse_move_coefficient_;
 }
 
-void backup_mouse_settings() {
+static void backup_mouse_settings() {
 	SystemParametersInfo(SPI_GETMOUSE, 0, original_params_, 0);
 	SystemParametersInfo(SPI_GETMOUSESPEED, 0, &original_speed_, 0);
 }
 
-bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
+static bool send_mouse_input_bulk(const MOUSEINPUT* inputs, uint32_t count) {
 	auto& logitech = send::Logitech::get_logitech_instance();
 	for (uint32_t i = 0; i < count; ++i) {
 		if (!logitech.send_mouse_report(inputs[i])) return false;
@@ -42,6 +42,36 @@ static const MouseMapping* lookup(MouseButton button) {
 	auto idx = static_cast<uint16_t>(button);
 	if (idx < 1 || idx > 5) return nullptr;
 	return &kMappings[idx - 1];
+}
+
+// 将大数值拆分为多个 HID 兼容的步进报告
+template<typename F>
+static bool step_reports(int32_t total_dx, int32_t total_dy, int32_t max_step, F&& fill) {
+    int32_t steps = (std::max)(
+        (std::abs(total_dx) + max_step - 1) / max_step,
+        (std::abs(total_dy) + max_step - 1) / max_step);
+    if (steps < 1) steps = 1;
+
+    float step_dx = static_cast<float>(total_dx) / steps;
+    float step_dy = static_cast<float>(total_dy) / steps;
+    float prev_x = 0, prev_y = 0;
+
+    std::vector<MOUSEINPUT> reports;
+    reports.reserve(steps);
+    for (int32_t i = 1; i <= steps; ++i) {
+        float curr_x = step_dx * i;
+        float curr_y = step_dy * i;
+
+        MOUSEINPUT mi{};
+        fill(mi,
+            static_cast<int32_t>(curr_x - prev_x + 0.5f),
+            static_cast<int32_t>(curr_y - prev_y + 0.5f));
+        reports.push_back(mi);
+
+        prev_x = curr_x;
+        prev_y = curr_y;
+    }
+    return send_mouse_input_bulk(reports.data(), static_cast<uint32_t>(reports.size()));
 }
 
 DLLAPI bool WINAPI mouse_down(MouseButton button) {
@@ -74,41 +104,14 @@ DLLAPI bool WINAPI mouse_click(MouseButton button) {
 }
 
 DLLAPI bool WINAPI mouse_move_relative(int32_t dx, int32_t dy) {
-	constexpr int32_t kMaxDelta = 128;
-
 	//纠正系数
 	float coeff = get_mouse_move_coefficient();
 	dx = static_cast<int32_t>(dx * coeff);
 	dy = static_cast<int32_t>(dy * coeff);
 
-	int32_t steps = max(
-		(std::abs(dx) + kMaxDelta - 1) / kMaxDelta,
-		(std::abs(dy) + kMaxDelta - 1) / kMaxDelta
-	);
-	if (steps == 0) steps = 1;
-
-	std::vector<MOUSEINPUT> moves;
-	moves.reserve(steps);
-
-	float step_x = static_cast<float>(dx) / steps;
-	float step_y = static_cast<float>(dy) / steps;
-	float prev_x = 0, prev_y = 0;
-
-	for (int32_t i = 1; i <= steps; ++i) {
-		float curr_x = step_x * i;
-		float curr_y = step_y * i;
-
-		MOUSEINPUT mi{};
-		mi.dx = static_cast<int32_t>(curr_x - prev_x + 0.5f);
-		mi.dy = static_cast<int32_t>(curr_y - prev_y + 0.5f);
-		mi.dwFlags = MOUSEEVENTF_MOVE;
-
-		moves.push_back(mi);
-		prev_x = curr_x;
-		prev_y = curr_y;
-	}
-
-	return send_mouse_input_bulk(moves.data(), static_cast<uint32_t>(moves.size()));
+	return step_reports(dx, dy, 128, [](MOUSEINPUT& mi, int32_t sx, int32_t sy) {
+		mi.dx = sx; mi.dy = sy; mi.dwFlags = MOUSEEVENTF_MOVE;
+	});
 }
 
 DLLAPI bool WINAPI mouse_move_absolute(uint32_t target_x, uint32_t target_y) {
@@ -125,29 +128,9 @@ DLLAPI bool WINAPI mouse_move_absolute(uint32_t target_x, uint32_t target_y) {
 }
 
 DLLAPI bool WINAPI mouse_wheel(int32_t movement) {
-	constexpr int32_t kMaxDelta = 120;  // 每个 HID 报告最大滚动量，标准滚轮为 120
-
-	int32_t steps = (std::abs(movement) + kMaxDelta - 1) / kMaxDelta;
-	if (steps == 0) steps = 1;
-
-	std::vector<MOUSEINPUT> wheels;
-	wheels.reserve(steps);
-
-	float step_value = static_cast<float>(movement) / steps;
-	float prev_value = 0;
-
-	for (int32_t i = 1; i <= steps; ++i) {
-		float curr_value = step_value * i;
-
-		MOUSEINPUT mi{};
-		mi.dwFlags = MOUSEEVENTF_WHEEL;
-		mi.mouseData = static_cast<DWORD>(curr_value - prev_value + 0.5f);
-
-		wheels.push_back(mi);
-		prev_value = curr_value;
-	}
-
-	return send_mouse_input_bulk(wheels.data(), static_cast<uint32_t>(wheels.size()));
+	return step_reports(movement, 0, 120, [](MOUSEINPUT& mi, int32_t delta, int32_t) {
+		mi.mouseData = static_cast<DWORD>(delta); mi.dwFlags = MOUSEEVENTF_WHEEL;
+	});
 }
 
 DLLAPI void WINAPI set_mouse_move_coefficient(float coefficient) {
@@ -182,6 +165,7 @@ DLLAPI void WINAPI auto_calibrate() {
 	if (end_pos.x >= GetSystemMetrics(SM_CXSCREEN) - 1) {
 		printf("鼠标灵敏度过高,自动校准失败,请手动设置系数\n");
 		SetCursorPos(user_pos.x, user_pos.y);
+		return;
 	}
 
 	// 5. 计算实际偏移

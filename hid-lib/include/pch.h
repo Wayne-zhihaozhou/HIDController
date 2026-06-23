@@ -5,7 +5,6 @@
 // 系统和标准库头文件
 #include <windows.h>
 #include <string>
-#include <sstream>
 #include <mutex>
 #include <functional>
 #include <winternl.h>

@@ -21,57 +21,33 @@ static RawInputState g_state = {};
 
 // ==================== C callback wrappers ====================
 
-static void mouse_callback_wrapper(uintptr_t device_handle, int32_t dx, int32_t dy) {
-    if (!g_state.mouse_cb || g_state.mouse_cb == Py_None) return;
+#define PYTHON_CB_INVOKE(cb_field, fmt, ...) \
+    do { \
+        if (!g_state.cb_field || g_state.cb_field == Py_None) return; \
+        PyGILState_STATE _gstate = PyGILState_Ensure(); \
+        PyObject* _args = Py_BuildValue(fmt, __VA_ARGS__); \
+        if (_args) { \
+            PyObject* _result = PyObject_CallObject(g_state.cb_field, _args); \
+            Py_XDECREF(_result); \
+        } \
+        Py_XDECREF(_args); \
+        PyGILState_Release(_gstate); \
+    } while(0)
 
-    // Acquire GIL and call Python
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    PyObject* args = Py_BuildValue("(Kll)", device_handle, (long)dx, (long)dy);
-    if (args && g_state.mouse_cb != Py_None) {
-        PyObject* result = PyObject_CallObject(g_state.mouse_cb, args);
-        Py_XDECREF(result);
-    }
-    Py_XDECREF(args);
-    PyGILState_Release(gstate);
+static void mouse_callback_wrapper(uintptr_t device_handle, int32_t dx, int32_t dy) {
+    PYTHON_CB_INVOKE(mouse_cb, "(Kll)", device_handle, (long)dx, (long)dy);
 }
 
 static void key_callback_wrapper(uintptr_t device_handle, uint16_t vkey, bool is_down) {
-    if (!g_state.key_cb || g_state.key_cb == Py_None) return;
-
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    PyObject* args = Py_BuildValue("(Kib)", device_handle, vkey, is_down);
-    if (args && g_state.key_cb != Py_None) {
-        PyObject* result = PyObject_CallObject(g_state.key_cb, args);
-        Py_XDECREF(result);
-    }
-    Py_XDECREF(args);
-    PyGILState_Release(gstate);
+    PYTHON_CB_INVOKE(key_cb, "(Kib)", device_handle, vkey, is_down);
 }
 
 static void mouse_button_callback_wrapper(uintptr_t device_handle, uint32_t button, bool is_down) {
-    if (!g_state.mouse_button_cb || g_state.mouse_button_cb == Py_None) return;
-
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    PyObject* args = Py_BuildValue("(KKO)", device_handle, (unsigned long long)button, is_down ? Py_True : Py_False);
-    if (args && g_state.mouse_button_cb != Py_None) {
-        PyObject* result = PyObject_CallObject(g_state.mouse_button_cb, args);
-        Py_XDECREF(result);
-    }
-    Py_XDECREF(args);
-    PyGILState_Release(gstate);
+    PYTHON_CB_INVOKE(mouse_button_cb, "(KKO)", device_handle, (unsigned long long)button, is_down ? Py_True : Py_False);
 }
 
 static void wheel_callback_wrapper(uintptr_t device_handle, int32_t wheel_delta, int32_t horizontal) {
-    if (!g_state.wheel_cb || g_state.wheel_cb == Py_None) return;
-
-    PyGILState_STATE gstate = PyGILState_Ensure();
-    PyObject* args = Py_BuildValue("(KiO)", device_handle, wheel_delta, horizontal ? Py_True : Py_False);
-    if (args && g_state.wheel_cb != Py_None) {
-        PyObject* result = PyObject_CallObject(g_state.wheel_cb, args);
-        Py_XDECREF(result);
-    }
-    Py_XDECREF(args);
-    PyGILState_Release(gstate);
+    PYTHON_CB_INVOKE(wheel_cb, "(KiO)", device_handle, wheel_delta, horizontal ? Py_True : Py_False);
 }
 
 // ==================== Module functions ====================

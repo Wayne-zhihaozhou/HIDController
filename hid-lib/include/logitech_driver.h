@@ -89,20 +89,6 @@ namespace send {
 		LogitechDriver(const LogitechDriver&) = delete;
 		LogitechDriver& operator=(const LogitechDriver&) = delete;
 
-		// 支持移动语义
-		LogitechDriver(LogitechDriver&& other) noexcept {
-			device_ = other.device_;
-			other.device_ = INVALID_HANDLE_VALUE;
-		}
-		LogitechDriver& operator=(LogitechDriver&& other) noexcept {
-			if (this != &other) {
-				destroy();
-				device_ = other.device_;
-				other.device_ = INVALID_HANDLE_VALUE;
-			}
-			return *this;
-		}
-
 		bool create();
 		void destroy();
 		bool report_mouse(const MouseReport& report) const;

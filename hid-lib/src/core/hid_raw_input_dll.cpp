@@ -12,8 +12,8 @@ bool WINAPI start_input_tracking(
 {
     start_tracking_impl(
         [mc](uintptr_t h, long dx, long dy) { mc(h, (int32_t)dx, (int32_t)dy); },
-        [kc](uintptr_t h, uint16_t vk, bool d) { kc(h, vk, d); },
-        [mbc](uintptr_t h, uint32_t b, bool d) { mbc(h, b, d); },
+        kc,
+        mbc,
         [wbc](uintptr_t h, int32_t wd, bool horizontal) { wbc(h, wd, horizontal ? 1 : 0); }
     );
     return true;
@@ -29,13 +29,13 @@ bool WINAPI is_tracking()
     return is_tracking_impl();
 }
 
-std::pair<long, long> WINAPI get_mouse_delta()
+DLLAPI_CPP std::pair<long, long> get_mouse_delta()
 {
     auto [ldx, ldy] = get_mouse_delta_impl();
     return {ldx, ldy};
 }
 
-std::vector<uint16_t> WINAPI get_pressed_keys()
+DLLAPI_CPP std::vector<uint16_t> get_pressed_keys()
 {
     return get_pressed_keys_impl();
 }
