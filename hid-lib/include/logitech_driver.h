@@ -35,31 +35,27 @@ namespace send {
 	public:
 		HANDLE device_;
 
-		struct MouseButton {
-			bool LButton_ : 1;
-			bool RButton_ : 1;
-			bool MButton_ : 1;
-			bool XButton1_ : 1;
-			bool XButton2_ : 1;
-			bool unknown_ : 3;
+		enum class MouseButtonFlag : uint8_t {
+			Left   = 0x01,
+			Right  = 0x02,
+			Middle = 0x04,
+			X1     = 0x08,
+			X2     = 0x10,
 		};
 
-		struct KeyboardModifiers {
-			bool LCtrl_ : 1;
-			bool LShift_ : 1;
-			bool LAlt_ : 1;
-			bool LGui_ : 1;
-			bool RCtrl_ : 1;
-			bool RShift_ : 1;
-			bool RAlt_ : 1;
-			bool RGui_ : 1;
+		enum class KeyboardModifierFlag : uint8_t {
+			LCtrl  = 0x01,
+			LShift = 0x02,
+			LAlt   = 0x04,
+			LGui   = 0x08,
+			RCtrl  = 0x10,
+			RShift = 0x20,
+			RAlt   = 0x40,
+			RGui   = 0x80,
 		};
 
 		struct MouseReport {
-			union {
-				MouseButton button_;
-				uint8_t button_byte_;
-			};
+			uint8_t button_byte_;
 			int8_t x_;
 			int8_t y_;
 			int8_t wheel_;
@@ -67,10 +63,7 @@ namespace send {
 		};
 
 		struct KeyboardReport {
-			union {
-				KeyboardModifiers modifiers_;
-				uint8_t modifiers_byte_;
-			};
+			uint8_t modifiers_byte_;
 			uint8_t reserved_;
 			uint8_t keys_[6];
 		};

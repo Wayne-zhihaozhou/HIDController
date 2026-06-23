@@ -4,169 +4,155 @@
 
 namespace send {
 
-	// 构造函数：RAII初始化驱动
-	Logitech::Logitech() {
-		driver_.create();
-	}
+static void set_bit(uint8_t& byte, uint8_t bit, bool value) {
+    if (value) byte |= bit;
+    else       byte &= ~bit;
+}
 
-	// 析构函数：RAII释放驱动
-	Logitech::~Logitech() {
-		release_all_keys();
-		release_all_mouse();
-		driver_.destroy();
-	}
+// USB HID modifier bit for usage 0xE0-0xE7 indexed at offset 0-7
+static uint8_t modifier_bit_for_usage(uint8_t usage) {
+    constexpr uint8_t kModBits[] = {
+        0x01, 0x10, 0x02, 0x20,  // LCtrl, RCtrl, LShift, RShift
+        0x04, 0x40, 0x08, 0x80,  // LAlt,  RAlt,  LGui,   RGui
+    };
+    return kModBits[usage - 0xE0];
+}
 
-	// 获取单例
-	Logitech& Logitech::get_logitech_instance() {
-		static Logitech instance; // 延迟初始化，线程安全
-		return instance;
-	}
+// Mouse button flags (same order as MouseButton enum values 1..5)
+static constexpr uint8_t kButtonBits[] = {
+    static_cast<uint8_t>(LogitechDriver::MouseButtonFlag::Left),
+    static_cast<uint8_t>(LogitechDriver::MouseButtonFlag::Right),
+    static_cast<uint8_t>(LogitechDriver::MouseButtonFlag::Middle),
+    static_cast<uint8_t>(LogitechDriver::MouseButtonFlag::X1),
+    static_cast<uint8_t>(LogitechDriver::MouseButtonFlag::X2),
+};
 
-// 辅助函数
-void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi) {
-		// 左键
-		if (mi.dwFlags & MOUSEEVENTF_LEFTDOWN) btn.LButton_ = true;
-		if (mi.dwFlags & MOUSEEVENTF_LEFTUP)   btn.LButton_ = false;
+// 构造函数：RAII初始化驱动
+Logitech::Logitech() {
+    driver_.create();
+}
 
-		// 右键
-		if (mi.dwFlags & MOUSEEVENTF_RIGHTDOWN) btn.RButton_ = true;
-		if (mi.dwFlags & MOUSEEVENTF_RIGHTUP)   btn.RButton_ = false;
+// 析构函数：RAII释放驱动
+Logitech::~Logitech() {
+    release_all_keys();
+    release_all_mouse();
+    driver_.destroy();
+}
 
-		// 中键
-		if (mi.dwFlags & MOUSEEVENTF_MIDDLEDOWN) btn.MButton_ = true;
-		if (mi.dwFlags & MOUSEEVENTF_MIDDLEUP)   btn.MButton_ = false;
+// 获取单例
+Logitech& Logitech::get_logitech_instance() {
+    static Logitech instance; // 延迟初始化，线程安全
+    return instance;
+}
 
-		// X 按钮
-		if (mi.dwFlags & MOUSEEVENTF_XDOWN) {
-			if (mi.mouseData & XBUTTON1) btn.XButton1_ = true;
-			if (mi.mouseData & XBUTTON2) btn.XButton2_ = true;
-		}
-		if (mi.dwFlags & MOUSEEVENTF_XUP) {
-			if (mi.mouseData & XBUTTON1) btn.XButton1_ = false;
-			if (mi.mouseData & XBUTTON2) btn.XButton2_ = false;
-		}
-	}
+// 发送鼠标报告（支持移动、滚轮、按键等事件）
+bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
+    std::lock_guard lock(mouse_mutex_);
 
-	// 发送鼠标报告（支持移动、滚轮、按键等事件）
-	bool Logitech::send_mouse_report(const MOUSEINPUT& mi) {
-		std::lock_guard lock(mouse_mutex_);
+    // 处理鼠标移动
+    if (mi.dwFlags & MOUSEEVENTF_MOVE) {
+        mouse_report_.x_ = mi.dx;
+        mouse_report_.y_ = mi.dy;
+    } else {
+        mouse_report_.x_ = 0;
+        mouse_report_.y_ = 0;
+    }
 
-		// 处理鼠标移动
-		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
-			mouse_report_.x_ = mi.dx;
-			mouse_report_.y_ = mi.dy;
-		}
-		else {
-			//鼠标移动状态不需要维护，清零
-			mouse_report_.x_ = 0;
-			mouse_report_.y_ = 0;
-		}
+    // 处理鼠标滚轮
+    if (mi.dwFlags & MOUSEEVENTF_WHEEL) {
+        mouse_report_.wheel_ = (static_cast<int32_t>(mi.mouseData) > 0) ? 1 : -1;
+    }
 
-		// 处理鼠标滚轮
-		if (mi.dwFlags & MOUSEEVENTF_WHEEL) {
-			mouse_report_.wheel_ = (static_cast<int32_t>(mi.mouseData) > 0) ? 1 : -1;
-		}
+    // 按键 — 通过位掩码更新 button_byte_
+    auto apply = [&](DWORD down_flag, DWORD up_flag, uint8_t bit) {
+        if (mi.dwFlags & (down_flag | up_flag))
+            set_bit(mouse_report_.button_byte_, bit, mi.dwFlags & down_flag);
+    };
 
-		// 按键
-		if (mi.dwFlags & (MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP |
-			MOUSEEVENTF_RIGHTDOWN | MOUSEEVENTF_RIGHTUP |
-			MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP |
-			MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP))
-		{
-			update_mouse_button(mouse_report_.button_, mi);
-		}
+    apply(MOUSEEVENTF_LEFTDOWN,   MOUSEEVENTF_LEFTUP,   kButtonBits[0]);
+    apply(MOUSEEVENTF_RIGHTDOWN,  MOUSEEVENTF_RIGHTUP,  kButtonBits[1]);
+    apply(MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP, kButtonBits[2]);
 
-		return driver_.report_mouse(mouse_report_);
-	}
+    if (mi.dwFlags & (MOUSEEVENTF_XDOWN | MOUSEEVENTF_XUP)) {
+        bool down = (mi.dwFlags & MOUSEEVENTF_XDOWN);
+        if (mi.mouseData & XBUTTON1) set_bit(mouse_report_.button_byte_, kButtonBits[3], down);
+        if (mi.mouseData & XBUTTON2) set_bit(mouse_report_.button_byte_, kButtonBits[4], down);
+    }
 
-	// 发送键盘输入事件（支持修饰键状态更新）
-	bool Logitech::send_keyboard_report(KeyCode vk, bool keydown) {
-		std::lock_guard lock(keyboard_mutex_);
+    return driver_.report_mouse(mouse_report_);
+}
 
-		auto usage = static_cast<uint8_t>(vk);
+// 发送键盘输入事件（支持修饰键状态更新）
+bool Logitech::send_keyboard_report(KeyCode vk, bool keydown) {
+    std::lock_guard lock(keyboard_mutex_);
 
-		// Modifier keys: USB usage IDs 0xE0-0xE7 → driver bitfield
-		if (usage >= 0xE0 && usage <= 0xE7) {
-			switch (usage) {
-			case 0xE0: keyboard_report_.modifiers_.LCtrl_ = keydown; break;
-			case 0xE4: keyboard_report_.modifiers_.RCtrl_ = keydown; break;
-			case 0xE1: keyboard_report_.modifiers_.LShift_ = keydown; break;
-			case 0xE5: keyboard_report_.modifiers_.RShift_ = keydown; break;
-			case 0xE2: keyboard_report_.modifiers_.LAlt_ = keydown; break;
-			case 0xE6: keyboard_report_.modifiers_.RAlt_ = keydown; break;
-			case 0xE3: keyboard_report_.modifiers_.LGui_ = keydown; break;
-			case 0xE7: keyboard_report_.modifiers_.RGui_ = keydown; break;
-			}
-		}
-		else {
-			// Normal key: usage ID is the enum value itself
-			if (keydown) {
-				bool already_pressed = false;
-				for (int i = 0; i < 6; i++) {
-					if (keyboard_report_.keys_[i] == usage) {
-						already_pressed = true;
-						break;
-					}
-				}
+    auto usage = static_cast<uint8_t>(vk);
 
-				if (already_pressed) {
-					return driver_.report_keyboard(keyboard_report_);
-				}
+    // Modifier keys: USB usage IDs 0xE0-0xE7 → driver bitfield
+    if (usage >= 0xE0 && usage <= 0xE7) {
+        auto bit = modifier_bit_for_usage(usage);
+        set_bit(keyboard_report_.modifiers_byte_, bit, keydown);
+    } else {
+        // Normal key: usage ID is the enum value itself
+        if (keydown) {
+            bool already_pressed = false;
+            for (int i = 0; i < 6; i++) {
+                if (keyboard_report_.keys_[i] == usage) {
+                    already_pressed = true;
+                    break;
+                }
+            }
 
-				bool inserted = false;
-				for (int i = 0; i < 6; i++) {
-					if (keyboard_report_.keys_[i] == 0) {
-						keyboard_report_.keys_[i] = usage;
-						inserted = true;
-						break;
-					}
-				}
+            if (already_pressed) {
+                return driver_.report_keyboard(keyboard_report_);
+            }
 
-				if (!inserted) {
-					printf("按键数量超过6个限制!\n");
-					OutputDebugStringA("按键数量超过6个限制!\n");
-				}
-			}
-			else {
-				for (int i = 0; i < 6; i++) {
-					if (keyboard_report_.keys_[i] == usage) {
-						keyboard_report_.keys_[i] = 0;
-						break;
-					}
-				}
-			}
-		}
+            bool inserted = false;
+            for (int i = 0; i < 6; i++) {
+                if (keyboard_report_.keys_[i] == 0) {
+                    keyboard_report_.keys_[i] = usage;
+                    inserted = true;
+                    break;
+                }
+            }
 
-		return driver_.report_keyboard(keyboard_report_);
-	}
+            if (!inserted) {
+                printf("按键数量超过6个限制!\n");
+                OutputDebugStringA("按键数量超过6个限制!\n");
+            }
+        } else {
+            for (int i = 0; i < 6; i++) {
+                if (keyboard_report_.keys_[i] == usage) {
+                    keyboard_report_.keys_[i] = 0;
+                    break;
+                }
+            }
+        }
+    }
 
-	//释放所有鼠标按键：清空鼠标 HID 报告并提交
-	void Logitech::release_all_mouse() {
-		std::lock_guard lock(mouse_mutex_);
+    return driver_.report_keyboard(keyboard_report_);
+}
 
-		// 清空所有按钮状态
-		mouse_report_.button_byte_ = 0;
+//释放所有鼠标按键：清空鼠标 HID 报告并提交
+void Logitech::release_all_mouse() {
+    std::lock_guard lock(mouse_mutex_);
 
-		// 清空相对位移与滚轮
-		mouse_report_.x_ = 0;
-		mouse_report_.y_ = 0;
-		mouse_report_.wheel_ = 0;
+    mouse_report_.button_byte_ = 0;
+    mouse_report_.x_ = 0;
+    mouse_report_.y_ = 0;
+    mouse_report_.wheel_ = 0;
 
-		// 发送全 0 鼠标报告（所有按钮抬起）
-		driver_.report_mouse(mouse_report_);
-	}
+    driver_.report_mouse(mouse_report_);
+}
 
-	//释放所有按下的键：清空 HID 报告并提交
-	void Logitech::release_all_keys() {
-		std::lock_guard lock(keyboard_mutex_);
+//释放所有按下的键：清空 HID 报告并提交
+void Logitech::release_all_keys() {
+    std::lock_guard lock(keyboard_mutex_);
 
-		memset(&keyboard_report_.modifiers_, 0, sizeof(keyboard_report_.modifiers_));
-		memset(keyboard_report_.keys_, 0, sizeof(keyboard_report_.keys_));
+    keyboard_report_.modifiers_byte_ = 0;
+    memset(keyboard_report_.keys_, 0, sizeof(keyboard_report_.keys_));
 
-		// 发送全 0 HID 报告告诉系统"没有按键按下"
-		driver_.report_keyboard(keyboard_report_);
-	}
-
-
+    driver_.report_keyboard(keyboard_report_);
+}
 
 }
