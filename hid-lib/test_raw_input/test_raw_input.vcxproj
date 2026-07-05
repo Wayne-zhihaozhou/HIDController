@@ -97,6 +97,9 @@
   <ItemGroup>
     <ClCompile Include="test_raw_input.cpp" />
   </ItemGroup>
+  <Target Name="PostBuildCopy" AfterTargets="PostBuildEvent" Condition="true">
+    <Exec Command="copy /Y &quot;$(ProjectDir)\..\build\$(Configuration)\hid_controller.dll&quot; &quot;$(OutDir)&quot;" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
