@@ -3,6 +3,7 @@
 # ========================
 # C/C++ library build artifacts
 hid-lib/build/
+hid-lib/test_raw_input/build/
 hid-lib/*.obj
 hid-lib/*.ilk
 hid-lib/*.pdb

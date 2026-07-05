@@ -52,8 +52,8 @@ void update_mouse_button(LogitechDriver::MouseButton& btn, const MOUSEINPUT& mi)
 
 		// 处理鼠标移动
 		if (mi.dwFlags & MOUSEEVENTF_MOVE) {
-			mouse_report_.x_ = mi.dx;
-			mouse_report_.y_ = mi.dy;
+			mouse_report_.x_ = static_cast<int8_t>(mi.dx);
+			mouse_report_.y_ = static_cast<int8_t>(mi.dy);
 		}
 		else {
 			//鼠标移动状态不需要维护，清零
