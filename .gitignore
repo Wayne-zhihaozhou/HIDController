@@ -6,16 +6,6 @@ hid-lib/build/
 hid-lib/*.obj
 hid-lib/*.ilk
 hid-lib/*.pdb
-# Python CMake build directory
-hid-py/build/
-hid-py/CMakeCache.txt
-hid-py/CMakeFiles/
-hid-py/hid_controller_python.sln
-hid-py/Release/
-hid-py/_deps/
-hid-py/_*.dir/
-hid-py/input_tracker.dir/
-hid-py/x64/
 
 # ========================
 # IDE cache
@@ -28,35 +18,8 @@ hid-py/x64/
 *~
 
 # ========================
-# Python
-# ========================
-# Virtual environments
-.venv/
-venv/
-env/
-# Python bytecode
-__pycache__/
-*.pyc
-*.pyo
-*.py[cod]
-*$py.class
-# Compiled extensions
-*.so
-*.dylib
-*.pyd
-# Build dists
-*.egg-info/
-dist/
-build/
-pyproject-build/
-*.whl
-# CMake build artifacts
-hid-py/_libs/
-
-# ========================
 # OS files
 # ========================
 .DS_Store
 Thumbs.db
 desktop.ini
-.claude/skills/build.md
