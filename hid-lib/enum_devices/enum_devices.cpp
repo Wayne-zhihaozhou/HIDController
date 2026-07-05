@@ -78,25 +78,23 @@ static void print_device_info(UINT index, RAWINPUTDEVICELIST* dev) {
     printf("         type=%s\n", type_to_string(dev->dwType));
 
     if (dev->dwType == RIM_TYPEMOUSE) {
-        // RID_DEVICE_INFO_MOUSE: dwButtons, dwPointers, dwFunctionKeys, dwButtonRate, dwClickPolicy,
-        //   dwMouseID, dwNumberOfRawButtons, dwFirstButtonIndex
-        printf("         buttons=%u  buttonsPerPointer=%u\n",
-            rid.mouse.dwButtons, rid.mouse.dwNumberOfRawButtons);
-        printf("         mouseID=%u  firstButtonIndex=%u\n",
-            rid.mouse.dwMouseID, rid.mouse.dwFirstButtonIndex);
+        // RID_DEVICE_INFO_MOUSE: dwId, dwNumberOfButtons, dwSampleRate, fHasHorizontalWheel
+        printf("         buttons=%u  sampleRate=%u  hScroll=%d\n",
+            rid.mouse.dwNumberOfButtons, rid.mouse.dwSampleRate,
+            rid.mouse.fHasHorizontalWheel);
+        printf("         id=%u\n", rid.mouse.dwId);
     } else if (dev->dwType == RIM_TYPEKEYBOARD) {
-        // RID_DEVICE_INFO_KEYBOARD: dwType, dwInterfaceType, dwKeys, dwExtraInfo
-        printf("         keyboardType=0x%04X  interfaceType=0x%08X  keys=%u\n",
-            rid.keyboard.dwType, rid.keyboard.dwInterfaceType, rid.keyboard.dwKeys);
+        // RID_DEVICE_INFO_KEYBOARD: dwType, dwSubType, dwKeyboardMode, dwNumberOfFunctionKeys, dwNumberOfIndicators, dwNumberOfKeysTotal
+        printf("         type=0x%04X  subType=0x%04X  mode=0x%04X  funcKeys=%u  indicators=%u  keysTotal=%u\n",
+            rid.keyboard.dwType, rid.keyboard.dwSubType, rid.keyboard.dwKeyboardMode,
+            rid.keyboard.dwNumberOfFunctionKeys, rid.keyboard.dwNumberOfIndicators,
+            rid.keyboard.dwNumberOfKeysTotal);
     } else if (dev->dwType == RIM_TYPEHID) {
-        // RID_DEVICE_INFO_HID: dwVendorId, dwProductId, dwVersionNumber,
-        //   dwUsagePage, dwUsage, dwNumberOfKeys, dwNumberOfInputBuffers
+        // RID_DEVICE_INFO_HID: dwVendorId, dwProductId, dwVersionNumber, usUsagePage, usUsage
         printf("         vendor=0x%04X  product=0x%04X  version=0x%04X\n",
             rid.hid.dwVendorId, rid.hid.dwProductId, rid.hid.dwVersionNumber);
         printf("         usagePage=0x%04X  usage=0x%04X\n",
-            rid.hid.dwUsagePage, rid.hid.dwUsage);
-        printf("         numKeys=%u  numInputBuffers=%u\n",
-            rid.hid.dwNumberOfKeys, rid.hid.dwNumberOfInputBuffers);
+            rid.hid.usUsagePage, rid.hid.usUsage);
     }
     printf("\n");
 }
@@ -104,25 +102,42 @@ static void print_device_info(UINT index, RAWINPUTDEVICELIST* dev) {
 int main() {
     print_banner();
 
+    // Step 1: Query required array size
     UINT dev_count = 0;
-    auto list = std::make_unique<RAWINPUTDEVICELIST[]>(256);
-
-    if (GetRawInputDeviceList(list.get(), &dev_count, sizeof(RAWINPUTDEVICELIST)) == (UINT)-1) {
-        fprintf(stderr, "GetRawInputDeviceList failed: %lu\n", GetLastError());
+    if (GetRawInputDeviceList(nullptr, &dev_count, sizeof(RAWINPUTDEVICELIST)) == (UINT)-1) {
+        fprintf(stderr, "GetRawInputDeviceList (size query) failed: %lu\n", GetLastError());
+        printf("\nPress Enter to exit...");
+        getchar();
         return 1;
     }
 
     if (dev_count == 0) {
         printf("  (no raw input devices found)\n");
+        printf("\nPress Enter to exit...");
+        getchar();
         return 0;
     }
 
-    printf("  Found %u raw input device(s):\n\n", dev_count);
+    // Step 2: Allocate exact size and get the list
+    auto list = std::make_unique<RAWINPUTDEVICELIST[]>(dev_count);
+    UINT list_size = dev_count;
+    if (GetRawInputDeviceList(list.get(), &list_size, sizeof(RAWINPUTDEVICELIST)) == (UINT)-1) {
+        fprintf(stderr, "GetRawInputDeviceList (get list) failed: %lu\n", GetLastError());
+        printf("\nPress Enter to exit...");
+        getchar();
+        return 1;
+    }
 
-    for (UINT i = 0; i < dev_count; i++) {
+    printf("  Found %u raw input device(s):\n\n", list_size);
+
+    for (UINT i = 0; i < list_size; i++) {
         print_device_info(i, &list[i]);
     }
 
-    printf("=== %u device(s) ===\n", dev_count);
+    printf("=== %u device(s) ===\n", list_size);
+
+    printf("\nPress Enter to exit...");
+    getchar();
+
     return 0;
 }
