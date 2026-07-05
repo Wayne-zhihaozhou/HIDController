@@ -6,6 +6,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hid_controller", "hid_contr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_raw_input", "test_raw_input\test_raw_input.vcxproj", "{E3F8A2B1-7C9D-4E5F-8A3B-1D6C9E4F2A8B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_mouse_wave", "test_mouse_wave\test_mouse_wave.vcxproj", "{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -20,6 +22,10 @@ Global
 		{E3F8A2B1-7C9D-4E5F-8A3B-1D6C9E4F2A8B}.Debug|x64.Build.0 = Debug|x64
 		{E3F8A2B1-7C9D-4E5F-8A3B-1D6C9E4F2A8B}.Release|x64.ActiveCfg = Release|x64
 		{E3F8A2B1-7C9D-4E5F-8A3B-1D6C9E4F2A8B}.Release|x64.Build.0 = Release|x64
+		{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}.Debug|x64.ActiveCfg = Debug|x64
+		{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}.Debug|x64.Build.0 = Debug|x64
+		{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}.Release|x64.ActiveCfg = Release|x64
+		{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
