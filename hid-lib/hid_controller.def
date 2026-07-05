@@ -22,3 +22,6 @@ EXPORTS
     is_tracking                    @20
     register_raw_input             @21
     get_device_name                @22
+    ?get_mouse_delta@@YA?AU?$pair@JJ@std@@XZ @23
+    ?get_mouse_delta@@YA?AU?$pair@JJ@std@@_K@Z @24
+    ?get_pressed_keys@@YA?AV?$vector@GV?$allocator@G@std@@@std@@XZ @25

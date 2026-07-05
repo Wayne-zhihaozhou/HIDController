@@ -32,6 +32,7 @@ extern "C" {
 }
 extern "C++" {
     std::pair<long, long> get_mouse_delta();
+    std::pair<long, long> get_mouse_delta(uintptr_t device_handle);
     std::vector<uint16_t> get_pressed_keys();
 }
 
@@ -163,6 +164,7 @@ static void print_usage() {
     printf("Commands:\n");
     printf("  q           Quit the program\n");
     printf("  delta       Print accumulated mouse delta\n");
+    printf("  delta N     Print accumulated delta for device handle N (hex)\n");
     printf("  keys        Print currently pressed keys\n");
     printf("  devices     Enumerate connected HID devices\n");
     printf("  status      Check tracking status\n");
@@ -260,6 +262,14 @@ int main() {
         } else if (cmd == "delta") {
             auto [dx, dy] = get_mouse_delta();
             printf("Accumulated delta: dx=%ld  dy=%ld\n\n", dx, dy);
+        } else if (cmd.size() >= 6 && cmd.substr(0, 5) == "delta" && cmd[5] == ' ') {
+            uintptr_t handle;
+            if (sscanf_s(cmd.c_str()+6, " %Ix", &handle) == 1) {
+                auto [dx, dy] = get_mouse_delta(handle);
+                printf("Per-device delta [0x%Ix]: dx=%ld  dy=%ld\n\n", handle, dx, dy);
+            } else {
+                printf("Usage: delta 0x103f7\n\n");
+            }
         } else if (cmd == "keys") {
             auto keys = get_pressed_keys();
             if (keys.empty()) {
