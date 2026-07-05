@@ -62,10 +62,15 @@ static bool step_reports(int32_t total_dx, int32_t total_dy, int32_t max_step, F
         float curr_x = step_dx * i;
         float curr_y = step_dy * i;
 
+        float delta_x = curr_x - prev_x;
+        float delta_y = curr_y - prev_y;
+        int32_t rounded_x = static_cast<int32_t>(
+            (delta_x >= 0) ? (delta_x + 0.5f) : (delta_x - 0.5f));
+        int32_t rounded_y = static_cast<int32_t>(
+            (delta_y >= 0) ? (delta_y + 0.5f) : (delta_y - 0.5f));
+
         MOUSEINPUT mi{};
-        fill(mi,
-            static_cast<int32_t>(curr_x - prev_x + 0.5f),
-            static_cast<int32_t>(curr_y - prev_y + 0.5f));
+        fill(mi, rounded_x, rounded_y);
         reports.push_back(mi);
 
         prev_x = curr_x;
