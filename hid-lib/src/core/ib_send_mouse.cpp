@@ -110,10 +110,10 @@ DLLAPI bool WINAPI mouse_click(MouseButton button) {
 }
 
 DLLAPI bool WINAPI mouse_move_relative(int32_t dx, int32_t dy) {
-	//纠正系数
 	float coeff = get_mouse_move_coefficient();
-	dx = static_cast<int32_t>(dx * coeff);
-	dy = static_cast<int32_t>(dy * coeff);
+	// round() to avoid truncation loss (e.g. 50*0.9804 = 49.02 → 49)
+	dx = static_cast<int32_t>(std::round(dx * coeff));
+	dy = static_cast<int32_t>(std::round(dy * coeff));
 
 	return step_reports(dx, dy, 128, [](MOUSEINPUT& mi, int32_t sx, int32_t sy) {
 		mi.dx = sx; mi.dy = sy; mi.dwFlags = MOUSEEVENTF_MOVE;
