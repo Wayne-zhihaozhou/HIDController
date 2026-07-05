@@ -52,29 +52,30 @@ static bool step_reports(int32_t total_dx, int32_t total_dy, int32_t max_step, F
         (std::abs(total_dy) + max_step - 1) / max_step);
     if (steps < 1) steps = 1;
 
-    float step_dx = static_cast<float>(total_dx) / steps;
-    float step_dy = static_cast<float>(total_dy) / steps;
-    float prev_x = 0, prev_y = 0;
+    // Pure integer arithmetic — no float precision issues.
+    // Works with absolute values then applies sign, so remainder is always non-negative.
+    // sum(delta[i]) == total_dx exactly.
+    bool neg_dx = total_dx < 0;
+    bool neg_dy = total_dy < 0;
+    int32_t abs_dx = neg_dx ? -total_dx : total_dx;
+    int32_t abs_dy = neg_dy ? -total_dy : total_dy;
+
+    int32_t base_dx = abs_dx / steps;
+    int32_t rem_dx = abs_dx % steps;
+    int32_t base_dy = abs_dy / steps;
+    int32_t rem_dy = abs_dy % steps;
 
     std::vector<MOUSEINPUT> reports;
     reports.reserve(steps);
-    for (int32_t i = 1; i <= steps; ++i) {
-        float curr_x = step_dx * i;
-        float curr_y = step_dy * i;
-
-        float delta_x = curr_x - prev_x;
-        float delta_y = curr_y - prev_y;
-        int32_t rounded_x = static_cast<int32_t>(
-            (delta_x >= 0) ? (delta_x + 0.5f) : (delta_x - 0.5f));
-        int32_t rounded_y = static_cast<int32_t>(
-            (delta_y >= 0) ? (delta_y + 0.5f) : (delta_y - 0.5f));
+    for (int32_t i = 0; i < steps; ++i) {
+        int32_t delta_x = static_cast<int32_t>(base_dx + (i < rem_dx ? 1 : 0));
+        int32_t delta_y = static_cast<int32_t>(base_dy + (i < rem_dy ? 1 : 0));
+        if (neg_dx) delta_x = -delta_x;
+        if (neg_dy) delta_y = -delta_y;
 
         MOUSEINPUT mi{};
-        fill(mi, rounded_x, rounded_y);
+        fill(mi, delta_x, delta_y);
         reports.push_back(mi);
-
-        prev_x = curr_x;
-        prev_y = curr_y;
     }
     return send_mouse_input_bulk(reports.data(), static_cast<uint32_t>(reports.size()));
 }
