@@ -2,6 +2,7 @@
 // HIDController project — Windows RAW INPUT API keyboard and mouse event detection
 #include "input_tracker_internal.h"
 #include "../include/hid_controller.h"
+#include <unordered_map>
 
 // ==================== Global state ====================
 static std::atomic<bool> running_{false};
@@ -13,8 +14,8 @@ static keyboard_fn key_callback_;
 static mouse_button_fn mouse_button_callback_;
 static mouse_wheel_fn mouse_wheel_callback_;
 
-static std::atomic<long> accumulated_dx_{0};
-static std::atomic<long> accumulated_dy_{0};
+static std::mutex delta_mutex_;
+static std::unordered_map<uintptr_t, std::pair<long, long>> device_deltas_;
 
 static std::mutex key_mutex_;
 static std::set<uint16_t> pressed_keys_;
@@ -64,8 +65,12 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					long dy = mouse.lLastY;
 					uintptr_t device_handle = reinterpret_cast<uintptr_t>(raw->header.hDevice);
 
-					accumulated_dx_ += dx;
-					accumulated_dy_ += dy;
+					{
+						std::lock_guard<std::mutex> lock(delta_mutex_);
+						auto& d = device_deltas_[device_handle];
+						d.first += dx;
+						d.second += dy;
+					}
 
 					if (mouse_callback_ && (dx != 0 || dy != 0)) {
 						mouse_callback_(device_handle, dx, dy);
@@ -175,20 +180,38 @@ void stop_tracking_impl() {
 	key_callback_ = nullptr;
 	mouse_button_callback_ = nullptr;
 	mouse_wheel_callback_ = nullptr;
-	accumulated_dx_ = 0;
-	accumulated_dy_ = 0;
-
-	std::lock_guard<std::mutex> lock(key_mutex_);
-	pressed_keys_.clear();
+	{
+		std::lock_guard<std::mutex> lock(delta_mutex_);
+		device_deltas_.clear();
+	}
+	{
+		std::lock_guard<std::mutex> lock(key_mutex_);
+		pressed_keys_.clear();
+	}
 }
 
 bool is_tracking_impl() {
 	return running_.load();
 }
 
-std::pair<long, long> get_mouse_delta_impl() {
-	long dx = accumulated_dx_.exchange(0);
-	long dy = accumulated_dy_.exchange(0);
+std::pair<long, long> get_mouse_delta_impl(uintptr_t device_handle) {
+	std::lock_guard<std::mutex> lock(delta_mutex_);
+	if (device_handle == 0) {
+		long total_dx = 0, total_dy = 0;
+		for (auto& [_, d] : device_deltas_) {
+			total_dx += d.first;
+			total_dy += d.second;
+		}
+		device_deltas_.clear();
+		return {total_dx, total_dy};
+	}
+	auto it = device_deltas_.find(device_handle);
+	if (it == device_deltas_.end()) {
+		return {0, 0};
+	}
+	auto dx = it->second.first;
+	auto dy = it->second.second;
+	it->second = {0, 0};
 	return {dx, dy};
 }
 

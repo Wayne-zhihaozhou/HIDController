@@ -35,6 +35,12 @@ DLLAPI_CPP std::pair<long, long> get_mouse_delta()
     return {ldx, ldy};
 }
 
+DLLAPI_CPP std::pair<long, long> get_mouse_delta(uintptr_t device_handle)
+{
+    auto [ldx, ldy] = get_mouse_delta_impl(device_handle);
+    return {ldx, ldy};
+}
+
 DLLAPI_CPP std::vector<uint16_t> get_pressed_keys()
 {
     return get_pressed_keys_impl();

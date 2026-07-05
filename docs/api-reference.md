@@ -125,7 +125,11 @@ typedef void (*mouse_wheel_callback)(uintptr_t device_handle, int32_t wheel_delt
 
 ```cpp
 // Returns {delta_x, delta_y} of the latest mouse movement since last poll.
+// When called without arguments (Python) or via the no-arg overload (C++),
+// returns the combined delta from all devices. When a device_handle is provided,
+// returns the delta for that specific device only.
 std::pair<long, long> get_mouse_delta();
+std::pair<long, long> get_mouse_delta(uintptr_t device_handle);
 
 // Returns a vector of currently pressed virtual-key codes.
 std::vector<uint16_t> get_pressed_keys();

@@ -60,4 +60,5 @@ DLLAPI bool WINAPI register_raw_input(HWND hwnd);
 DLLAPI bool WINAPI get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length);
 // Raw input query — uses C++ linkage for std::pair/std::vector return types
 DLLAPI_CPP std::pair<long, long> get_mouse_delta();
+DLLAPI_CPP std::pair<long, long> get_mouse_delta(uintptr_t device_handle);
 DLLAPI_CPP std::vector<uint16_t> get_pressed_keys();

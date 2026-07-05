@@ -17,6 +17,6 @@ using mouse_wheel_fn = std::function<void(uintptr_t, int32_t, int32_t horizontal
 void start_tracking_impl(mouse_move_fn, keyboard_fn, mouse_button_fn, mouse_wheel_fn);
 void stop_tracking_impl();
 bool is_tracking_impl();
-std::pair<long, long> get_mouse_delta_impl();
+std::pair<long, long> get_mouse_delta_impl(uintptr_t device_handle = 0);
 std::vector<uint16_t> get_pressed_keys_impl();
 std::wstring get_device_name_impl(uintptr_t device_handle);

@@ -108,8 +108,10 @@ static PyObject* raw_is_tracking(PyObject* self, PyObject* args) {
 }
 
 static PyObject* raw_get_mouse_delta(PyObject* self, PyObject* args) {
-    (void)args;
-    auto [dx, dy] = get_mouse_delta();
+    uintptr_t device_handle = 0;
+    if (!PyArg_ParseTuple(args, "|K", &device_handle))
+        return NULL;
+    auto [dx, dy] = get_mouse_delta(device_handle);
     return Py_BuildValue("(l,l)", dx, dy);
 }
 
@@ -168,8 +170,8 @@ static PyMethodDef RawInputMethods[] = {
      "Stop tracking"},
     {"is_tracking", (PyCFunction)raw_is_tracking, METH_NOARGS,
      "Check if tracking is running"},
-    {"get_mouse_delta", (PyCFunction)raw_get_mouse_delta, METH_NOARGS,
-     "Get accumulated mouse delta since last call"},
+    {"get_mouse_delta", (PyCFunction)raw_get_mouse_delta, METH_VARARGS,
+     "Get accumulated mouse delta since last call. Optional: device_handle (K) — omit for combined delta from all devices"},
     {"get_pressed_keys", (PyCFunction)raw_get_pressed_keys, METH_NOARGS,
      "Get list of currently pressed virtual key codes"},
     {"register_raw_input", (PyCFunction)raw_register_raw_input, METH_VARARGS,
