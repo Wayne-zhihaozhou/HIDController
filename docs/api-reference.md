@@ -100,74 +100,47 @@ All functions return `bool` — `true` on success, `false` on failure.
 
 ---
 
-## Key Interception / Remapping API
+## Key Interception / Delayed Remapping API
 
-Intercepts physical keyboard input via a low-level `WH_KEYBOARD_LL` hook and optionally remaps keys or blocks them entirely. The hook distinguishes physical key presses from programmatic output (via the Logitech HID driver) using a timestamped ring buffer, so remapped output is never re-intercepted.
+Intercepts physical keyboard input via a low-level `WH_KEYBOARD_LL` hook and queues remapped keys. Nothing is sent to applications until you explicitly call `flush_remap_output()`. The hook distinguishes physical key presses from programmatic output (via the Logitech HID driver) using a timestamped ring buffer, so flushed output is never re-intercepted.
 
-> **Important**: `WH_KEYBOARD_LL` hooks are system-global and cannot distinguish between different physical keyboards. All physical keyboards are affected when interception is active.
+> **Important**: `WH_KEYBOARD_LL` hooks are system-global and cannot distinguish between different physical keyboards. The device handle is reserved for future use.
 
-### Setup
-
-| Function | Return | Description |
-|----------|--------|-------------|
-| `enable_key_intercept(bool enable)` | `void` | Start/stop the LL keyboard hook. The hook thread starts on first enable and stops only when both remap mode and forbid-all mode are disabled. |
-| `set_intercept_device(uintptr_t device_handle)` | `bool` | Reserve the physical keyboard device handle (from `keyboard_callback`) for future per-device filtering. |
-
-### Key Remapping
-
-Map one key to another at the LL hook level. The original key is blocked from reaching any window; the target key is sent via the Logitech HID driver.
+### API (6 个函数)
 
 | Function | Return | Description |
 |----------|--------|-------------|
-| `register_key_remap(KeyCode from_key, KeyCode to_key)` | `bool` | Register a remap: intercept `from_key`, send `to_key`. Returns `false` if `from_key == to_key`. |
-| `unregister_key_remap(KeyCode from_key)` | `bool` | Remove a previously registered remap. Returns `false` if no such mapping exists. |
-| `clear_key_remaps()` | `void` | Remove all registered key remappings. |
-| `enable_remap_output()` | `void` | Enable remap output. After calling this, intercepted keys emit their remapped target key. |
-| `disable_remap_output()` | `void` | Disable remap output (default). Intercepted keys are still blocked, but the target key is **not** sent. Tracks key state so key-up is never sent without a prior key-down. |
+| `set_intercept_device(uintptr_t handle)` | `void` | 设置拦截设备句柄。`0` = 拦截所有设备。 |
+| `register_key_remap(KeyCode from, KeyCode to)` | `bool` | 注册延迟映射：拦截 `from`，排队 `to`。`from == to` 返回 `false`。首个映射注册时自动启动钩子。 |
+| `unregister_key_remap(KeyCode from)` | `bool` | 反注册单个映射。映射表为空时自动停止钩子。返回 `false` 表示映射不存在。 |
+| `clear_key_remaps()` | `void` | 清除所有映射，停止钩子，并清空待发送缓冲。 |
+| `flush_remap_output()` | `void` | **一次性触发**：发送所有排队按键（press + release），然后清空缓冲。 |
+| `clear_pending_remaps()` | `void` | 丢弃所有排队按键，不发送。缓冲满时自动淘汰最旧条目（FIFO）。 |
 
-**Example:**
+### Hook 生命周期
+
+- 首个 `register_key_remap` → 自动启动钩子
+- `unregister_key_remap` 清空映射表，或调用 `clear_key_remaps` → 自动停止钩子
+- `flush_remap_output` / `clear_pending_remaps` **不影响**钩子生命周期
+
+### 缓冲行为
+
+- 环形缓冲区容量：256 条
+- 缓冲区满时新按键覆盖最旧条目（FIFO）
+- `flush_remap_output` 发送所有按键后清空
+- `clear_pending_remaps` 直接丢弃不清空
+
+### 使用流程
+
 ```cpp
-// Block physical A key, emit B instead
-register_key_remap(KeyCode::A, KeyCode::B);
-enable_key_intercept(true);
-
-// Remap is registered but output is disabled by default — pressing A
-// only blocks it, nothing is sent.
-
-enable_remap_output();
-// Now pressing A blocks A and sends B.
-
-disable_remap_output();
-// Pressing A blocks A again, no output sent.
+set_intercept_device(0);                          // 所有设备
+register_key_remap(KeyCode::A, KeyCode::B);       // 钩子启动，按 A 排队 B
+// ... 按了几次 A，B 在排队中
+flush_remap_output();                             // 一次性发送所有 B
+// ... 继续按 A，继续排队
+clear_pending_remaps();                           // 丢弃未发送的按键
+unregister_key_remap(KeyCode::A);                 // 反注册 A→B 映射，钩子停止
 ```
-
-### Forbid-All Mode
-
-Block **all** physical key presses from reaching any application. Programmatic output via `key_down`/`key_up`/etc. is unaffected.
-
-| Function | Return | Description |
-|----------|--------|-------------|
-| `start_forbid_keys(uintptr_t device_handle)` | `bool` | Start blocking all physical keyboard input. The hook thread starts automatically if not already running. |
-| `stop_forbid_keys()` | `void` | Stop blocking physical keyboard input. The hook thread shuts down if no other mode is active. |
-
-**Example:**
-```cpp
-// Block all physical keyboard input
-start_forbid_keys(device_handle);
-
-// The program can still send keys programmatically:
-key_press(KeyCode::ENTER);  // works normally
-
-// Restore physical keyboard input
-stop_forbid_keys();
-```
-
-### Interception lifecycle
-
-The LL hook thread is managed automatically:
-- `enable_key_intercept(true)`, `start_forbid_keys()` → hook starts if not already running
-- Both modes must be stopped before the hook thread exits
-- When the hook stops, any still-held remapped keys are automatically released (`key_up`)
 
 ---
 

@@ -8,22 +8,20 @@
 #include <atomic>
 #include <mutex>
 #include <unordered_map>
-#include <set>
 #include <array>
 #include <algorithm>
 #include <condition_variable>
+#include <vector>
 
 #include "../include/hid_controller.h"
 #include "key_intercept_internal.h"
 
 // ==================== Global state ====================
 
-static std::atomic<bool> g_intercept_enabled{false};    // remap active
-static std::atomic<bool> g_forbid_all_keys{false};      // block-all active
-static std::atomic<bool> g_remap_output_enabled{false}; // allow remap output
-
 static std::unordered_map<KeyCode, KeyCode> g_remap_table; // from → to
 static std::mutex g_remap_mutex;
+
+static uintptr_t g_device_handle{0}; // 0 = intercept all devices
 
 static HHOOK g_keyboard_hook = nullptr;
 static std::thread g_hook_thread;
@@ -33,13 +31,10 @@ static std::atomic<bool> g_hook_ready{false};
 static std::mutex g_hook_start_mutex;
 static std::condition_variable g_hook_start_cv;
 
-// Track which remapped keys are currently held down (for cleanup on disable)
-static std::set<KeyCode> g_active_remaps;
-static std::mutex g_active_remaps_mutex;
-
-// Whether the hook should be running (shared between remap and forbid-all)
+// Whether the hook should be running (auto-managed)
 static bool should_hook_run() {
-    return g_intercept_enabled.load() || g_forbid_all_keys.load();
+    std::lock_guard<std::mutex> lock(g_remap_mutex);
+    return !g_remap_table.empty();
 }
 
 // ==================== Programmatic send tracking ====================
@@ -153,55 +148,53 @@ static KeyCode vk_to_keycode(uint16_t vk) {
     return static_cast<KeyCode>(0);
 }
 
+// ==================== Delayed remap buffer ====================
+// Ring buffer of remapped keys waiting to be flushed.
+// Keys are queued on intercept, then sent in bulk on flush_remap_output().
+// When full, the oldest entry is evicted (FIFO).
+
+static constexpr int kPendingCapacity = 256;
+static std::array<KeyCode, kPendingCapacity> g_pending_remaps;
+static int g_pending_count{0};
+static int g_pending_head{0};
+static std::mutex g_pending_mutex;
+
+static void push_pending(KeyCode kc) {
+    std::lock_guard<std::mutex> lock(g_pending_mutex);
+    int idx;
+    if (g_pending_count >= kPendingCapacity) {
+        idx = g_pending_head;
+        g_pending_head = (g_pending_head + 1) % kPendingCapacity;
+    } else {
+        idx = (g_pending_head + g_pending_count) % kPendingCapacity;
+        ++g_pending_count;
+    }
+    g_pending_remaps[idx] = kc;
+}
+
 // ==================== WH_KEYBOARD_LL hook ====================
 
 static LRESULT CALLBACK ll_keyboard_proc(int code, WPARAM wParam, LPARAM lParam) {
-    if (code >= HC_ACTION && (g_intercept_enabled.load() || g_forbid_all_keys.load())) {
+    if (code >= HC_ACTION) {
+        if (!should_hook_run()) {
+            return CallNextHookEx(nullptr, code, wParam, lParam);
+        }
         KBDLLHOOKSTRUCT* kb = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-        bool keydown  = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
-        bool keyup    = (wParam == WM_KEYUP   || wParam == WM_SYSKEYUP);
+        bool keydown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+        bool keyup   = (wParam == WM_KEYUP   || wParam == WM_SYSKEYUP);
 
         if ((keydown || keyup) && (kb->vkCode != 0)) {
             KeyCode vk = vk_to_keycode(static_cast<uint16_t>(kb->vkCode));
 
-            // Skip keys that our own Logitech driver just sent.
-            // This prevents the remapped output from being intercepted again.
+            // Skip keys our own Logitech driver sent (programmatic output)
             if (!was_recently_sent(vk)) {
-                // 1) Check remap table
-                {
-                    std::lock_guard<std::mutex> lock(g_remap_mutex);
-                    auto it = g_remap_table.find(vk);
-                    if (it != g_remap_table.end()) {
-                        if (keydown && g_remap_output_enabled.load()) {
-                            key_down(it->second);
-                            {
-                                std::lock_guard<std::mutex> lock2(g_active_remaps_mutex);
-                                g_active_remaps.insert(it->second);
-                            }
-                        }
-                        else if (keyup) {
-                            // Only send key-up if key-down was actually sent
-                            // (i.e. remap output was enabled when this key was pressed)
-                            bool was_active = false;
-                            {
-                                std::lock_guard<std::mutex> lock2(g_active_remaps_mutex);
-                                auto it2 = g_active_remaps.find(it->second);
-                                if (it2 != g_active_remaps.end()) {
-                                    was_active = true;
-                                    g_active_remaps.erase(it2);
-                                }
-                            }
-                            if (was_active) {
-                                key_up(it->second);
-                            }
-                        }
-                        return 1; // Block original key from reaching any app
+                std::lock_guard<std::mutex> lock(g_remap_mutex);
+                auto it = g_remap_table.find(vk);
+                if (it != g_remap_table.end()) {
+                    if (keydown) {
+                        push_pending(it->second);
                     }
-                }
-
-                // 2) Forbid-all mode: block every physical key
-                if (g_forbid_all_keys.load()) {
-                    return 1;
+                    return 1; // Block original key from reaching any app
                 }
             }
         }
@@ -263,13 +256,6 @@ static void stop_hook() {
     }
     g_hook_thread_id = 0;
 
-    // Release any remapped keys still held down
-    std::lock_guard<std::mutex> lock(g_active_remaps_mutex);
-    for (auto kc : g_active_remaps) {
-        key_up(kc);
-    }
-    g_active_remaps.clear();
-
     // Clear programmatic send tracking
     {
         std::lock_guard<std::mutex> lock_recent(g_recent_send_mutex);
@@ -279,56 +265,67 @@ static void stop_hook() {
 
 // ==================== Public API ====================
 
+DLLAPI void WINAPI set_intercept_device(uintptr_t device_handle) {
+    g_device_handle = device_handle;
+}
+
 DLLAPI bool WINAPI register_key_remap(KeyCode from_key, KeyCode to_key) {
     if (from_key == to_key) return false;
-    std::lock_guard<std::mutex> lock(g_remap_mutex);
-    g_remap_table[from_key] = to_key;
+    bool was_empty;
+    {
+        std::lock_guard<std::mutex> lock(g_remap_mutex);
+        was_empty = g_remap_table.empty();
+        g_remap_table[from_key] = to_key;
+    }
+    if (was_empty) {
+        start_hook();
+    }
     return true;
 }
 
 DLLAPI bool WINAPI unregister_key_remap(KeyCode from_key) {
-    std::lock_guard<std::mutex> lock(g_remap_mutex);
-    return g_remap_table.erase(from_key) > 0;
+    bool now_empty = false;
+    {
+        std::lock_guard<std::mutex> lock(g_remap_mutex);
+        if (g_remap_table.erase(from_key) == 0) {
+            return false;
+        }
+        now_empty = g_remap_table.empty();
+    }
+    if (now_empty) {
+        stop_hook();
+    }
+    return true;
 }
 
 DLLAPI void WINAPI clear_key_remaps() {
-    std::lock_guard<std::mutex> lock(g_remap_mutex);
-    g_remap_table.clear();
-}
-
-DLLAPI bool WINAPI set_intercept_device(uintptr_t device_handle) {
-    (void)device_handle;
-    return true;
-}
-
-DLLAPI void WINAPI enable_key_intercept(bool enable) {
-    bool was_enabled = g_intercept_enabled.exchange(enable);
-    if (enable && !was_enabled) {
-        start_hook();
+    {
+        std::lock_guard<std::mutex> lock(g_remap_mutex);
+        g_remap_table.clear();
     }
-    else if (!enable && was_enabled && !should_hook_run()) {
-        stop_hook();
+    stop_hook();
+    clear_pending_remaps();
+}
+
+DLLAPI void WINAPI flush_remap_output() {
+    std::vector<KeyCode> local;
+    {
+        std::lock_guard<std::mutex> lock(g_pending_mutex);
+        local.reserve(g_pending_count);
+        for (int i = 0; i < g_pending_count; ++i) {
+            int idx = (g_pending_head + i) % kPendingCapacity;
+            local.push_back(g_pending_remaps[idx]);
+        }
+        g_pending_count = 0;
+        g_pending_head = 0;
     }
-}
-
-DLLAPI bool WINAPI start_forbid_keys(uintptr_t device_handle) {
-    g_forbid_all_keys.store(true);
-    set_intercept_device(device_handle);
-    start_hook();
-    return true;
-}
-
-DLLAPI void WINAPI stop_forbid_keys() {
-    g_forbid_all_keys.store(false);
-    if (!should_hook_run()) {
-        stop_hook();
+    for (auto kc : local) {
+        key_press(kc);
     }
 }
 
-DLLAPI void WINAPI enable_remap_output() {
-    g_remap_output_enabled.store(true);
-}
-
-DLLAPI void WINAPI disable_remap_output() {
-    g_remap_output_enabled.store(false);
+DLLAPI void WINAPI clear_pending_remaps() {
+    std::lock_guard<std::mutex> lock(g_pending_mutex);
+    g_pending_count = 0;
+    g_pending_head = 0;
 }

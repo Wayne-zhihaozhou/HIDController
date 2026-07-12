@@ -29,8 +29,5 @@ EXPORTS
     unregister_key_remap            @27
     clear_key_remaps                @28
     set_intercept_device            @29
-    enable_key_intercept            @30
-    start_forbid_keys               @31
-    stop_forbid_keys                @32
-    enable_remap_output             @33
-    disable_remap_output            @34
+    flush_remap_output              @30
+    clear_pending_remaps            @31

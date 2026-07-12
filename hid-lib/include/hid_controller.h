@@ -46,17 +46,14 @@ DLLAPI bool WINAPI key_combo(const std::vector<KeyCode>& keys);
 DLLAPI bool WINAPI key_seq(const std::vector<KeyCode>& keys);
 DLLAPI void WINAPI release_all_keys();
 
-// -------------------- 按键拦截/重映射 --------------------
+// -------------------- 按键拦截/延迟重映射 --------------------
 
+DLLAPI void WINAPI set_intercept_device(uintptr_t device_handle);
 DLLAPI bool WINAPI register_key_remap(KeyCode from_key, KeyCode to_key);
 DLLAPI bool WINAPI unregister_key_remap(KeyCode from_key);
 DLLAPI void WINAPI clear_key_remaps();
-DLLAPI bool WINAPI set_intercept_device(uintptr_t device_handle);
-DLLAPI void WINAPI enable_key_intercept(bool enable);
-DLLAPI bool WINAPI start_forbid_keys(uintptr_t device_handle);
-DLLAPI void WINAPI stop_forbid_keys();
-DLLAPI void WINAPI enable_remap_output();
-DLLAPI void WINAPI disable_remap_output();
+DLLAPI void WINAPI flush_remap_output();
+DLLAPI void WINAPI clear_pending_remaps();
 
 // -------------------- Raw Input 设备检测功能 --------------------
 

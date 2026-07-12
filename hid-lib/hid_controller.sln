@@ -8,6 +8,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_raw_input", "test_raw_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_mouse_wave", "test_mouse_wave\test_mouse_wave.vcxproj", "{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_intercept", "test_intercept\test_intercept.vcxproj", "{5A1E6C32-93B2-40CD-BF6A-9F0A8489F6F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -26,6 +28,10 @@ Global
 		{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}.Debug|x64.Build.0 = Debug|x64
 		{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}.Release|x64.ActiveCfg = Release|x64
 		{B8D4E1A3-7C2F-4A9B-8E3D-5F6A9C2B1D0E}.Release|x64.Build.0 = Release|x64
+		{5A1E6C32-93B2-40CD-BF6A-9F0A8489F6F2}.Debug|x64.ActiveCfg = Debug|x64
+		{5A1E6C32-93B2-40CD-BF6A-9F0A8489F6F2}.Debug|x64.Build.0 = Debug|x64
+		{5A1E6C32-93B2-40CD-BF6A-9F0A8489F6F2}.Release|x64.ActiveCfg = Release|x64
+		{5A1E6C32-93B2-40CD-BF6A-9F0A8489F6F2}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
