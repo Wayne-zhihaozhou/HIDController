@@ -100,6 +100,77 @@ All functions return `bool` — `true` on success, `false` on failure.
 
 ---
 
+## Key Interception / Remapping API
+
+Intercepts physical keyboard input via a low-level `WH_KEYBOARD_LL` hook and optionally remaps keys or blocks them entirely. The hook distinguishes physical key presses from programmatic output (via the Logitech HID driver) using a timestamped ring buffer, so remapped output is never re-intercepted.
+
+> **Important**: `WH_KEYBOARD_LL` hooks are system-global and cannot distinguish between different physical keyboards. All physical keyboards are affected when interception is active.
+
+### Setup
+
+| Function | Return | Description |
+|----------|--------|-------------|
+| `enable_key_intercept(bool enable)` | `void` | Start/stop the LL keyboard hook. The hook thread starts on first enable and stops only when both remap mode and forbid-all mode are disabled. |
+| `set_intercept_device(uintptr_t device_handle)` | `bool` | Reserve the physical keyboard device handle (from `keyboard_callback`) for future per-device filtering. |
+
+### Key Remapping
+
+Map one key to another at the LL hook level. The original key is blocked from reaching any window; the target key is sent via the Logitech HID driver.
+
+| Function | Return | Description |
+|----------|--------|-------------|
+| `register_key_remap(KeyCode from_key, KeyCode to_key)` | `bool` | Register a remap: intercept `from_key`, send `to_key`. Returns `false` if `from_key == to_key`. |
+| `unregister_key_remap(KeyCode from_key)` | `bool` | Remove a previously registered remap. Returns `false` if no such mapping exists. |
+| `clear_key_remaps()` | `void` | Remove all registered key remappings. |
+| `enable_remap_output()` | `void` | Enable remap output. After calling this, intercepted keys emit their remapped target key. |
+| `disable_remap_output()` | `void` | Disable remap output (default). Intercepted keys are still blocked, but the target key is **not** sent. Tracks key state so key-up is never sent without a prior key-down. |
+
+**Example:**
+```cpp
+// Block physical A key, emit B instead
+register_key_remap(KeyCode::A, KeyCode::B);
+enable_key_intercept(true);
+
+// Remap is registered but output is disabled by default — pressing A
+// only blocks it, nothing is sent.
+
+enable_remap_output();
+// Now pressing A blocks A and sends B.
+
+disable_remap_output();
+// Pressing A blocks A again, no output sent.
+```
+
+### Forbid-All Mode
+
+Block **all** physical key presses from reaching any application. Programmatic output via `key_down`/`key_up`/etc. is unaffected.
+
+| Function | Return | Description |
+|----------|--------|-------------|
+| `start_forbid_keys(uintptr_t device_handle)` | `bool` | Start blocking all physical keyboard input. The hook thread starts automatically if not already running. |
+| `stop_forbid_keys()` | `void` | Stop blocking physical keyboard input. The hook thread shuts down if no other mode is active. |
+
+**Example:**
+```cpp
+// Block all physical keyboard input
+start_forbid_keys(device_handle);
+
+// The program can still send keys programmatically:
+key_press(KeyCode::ENTER);  // works normally
+
+// Restore physical keyboard input
+stop_forbid_keys();
+```
+
+### Interception lifecycle
+
+The LL hook thread is managed automatically:
+- `enable_key_intercept(true)`, `start_forbid_keys()` → hook starts if not already running
+- Both modes must be stopped before the hook thread exits
+- When the hook stops, any still-held remapped keys are automatically released (`key_up`)
+
+---
+
 ## Raw Input Monitoring API
 
 Starts a background thread that listens for raw HID input events from connected devices (mice, keyboards) and delivers callbacks on the calling thread.
