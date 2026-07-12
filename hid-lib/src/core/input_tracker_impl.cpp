@@ -114,6 +114,7 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 				else if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 					uint16_t vkey = raw->data.keyboard.VKey;
 					bool is_down = !(raw->data.keyboard.Flags & RI_KEY_BREAK);
+					uintptr_t device_handle = reinterpret_cast<uintptr_t>(raw->header.hDevice);
 
 					{
 						std::lock_guard<std::mutex> lock(key_mutex_);
@@ -122,7 +123,16 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					}
 
 					if (key_callback_) {
-						key_callback_(reinterpret_cast<uintptr_t>(raw->header.hDevice), vkey, is_down);
+						key_callback_(device_handle, vkey, is_down);
+					}
+
+					// Forward to key intercept tracking
+					if (is_down) {
+						extern void fire_key_down(uint16_t, uintptr_t);
+						fire_key_down(vkey, device_handle);
+					} else {
+						extern void fire_key_up(uint16_t, uintptr_t);
+						fire_key_up(vkey, device_handle);
 					}
 				}
 			}

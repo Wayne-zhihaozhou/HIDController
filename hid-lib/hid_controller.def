@@ -31,3 +31,5 @@ EXPORTS
     set_intercept_device            @29
     flush_remap_output              @30
     clear_pending_remaps            @31
+    block_key_device                @32
+    unblock_key_device              @33

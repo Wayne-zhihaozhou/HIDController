@@ -54,6 +54,14 @@ DLLAPI bool WINAPI unregister_key_remap(KeyCode from_key);
 DLLAPI void WINAPI clear_key_remaps();
 DLLAPI void WINAPI flush_remap_output();
 DLLAPI void WINAPI clear_pending_remaps();
+DLLAPI void WINAPI block_key_device(uintptr_t device_handle);
+DLLAPI void WINAPI unblock_key_device(uintptr_t device_handle);
+
+// -------------------- 临时拦截 + 排队 + 重放 --------------------
+// 高频率触发（~1ms），hook 路径零锁零分配
+DLLAPI void WINAPI begin_key_intercept();
+DLLAPI void WINAPI end_key_intercept();
+DLLAPI void WINAPI discard_queued_keys();
 
 // -------------------- Raw Input 设备检测功能 --------------------
 

@@ -16,6 +16,74 @@
 #include "../include/hid_controller.h"
 #include "key_intercept_internal.h"
 
+// ==================== Device-level key blocking ====================
+// Key codes → device handle mapping, updated by raw input callback.
+// The LL hook checks this map to determine if a key should be blocked
+// based on its source device.
+
+static std::unordered_map<uint16_t, uintptr_t> g_key_device_map; // vk → device_handle
+static std::mutex g_key_device_mutex;
+
+static std::unordered_map<uintptr_t, bool> g_device_block; // device → blocked
+static std::mutex g_device_block_mutex;
+
+static bool is_key_blocked_by_device(uint16_t vk) {
+    uintptr_t dev;
+    {
+        std::lock_guard<std::mutex> lock(g_key_device_mutex);
+        auto it = g_key_device_map.find(vk);
+        if (it == g_key_device_map.end()) return false;
+        dev = it->second;
+    }
+
+    // Device 0 = wildcard: blocks all devices
+    std::lock_guard<std::mutex> lock2(g_device_block_mutex);
+    if (dev == 0) return g_device_block[0];
+    return g_device_block[dev];
+}
+
+static void on_key_down(uint16_t vk, uintptr_t device_handle) {
+    std::lock_guard<std::mutex> lock(g_key_device_mutex);
+    std::lock_guard<std::mutex> lock2(g_device_block_mutex);
+    if (!g_device_block[device_handle]) return;
+    g_key_device_map[vk] = device_handle;
+}
+
+static void on_key_up(uint16_t vk, uintptr_t device_handle) {
+    std::lock_guard<std::mutex> lock(g_key_device_mutex);
+    auto it = g_key_device_map.find(vk);
+    if (it != g_key_device_map.end() && it->second == device_handle) {
+        g_key_device_map.erase(it);
+    }
+}
+
+void fire_key_down(uint16_t vk, uintptr_t device_handle) {
+    on_key_down(vk, device_handle);
+}
+
+void fire_key_up(uint16_t vk, uintptr_t device_handle) {
+    on_key_up(vk, device_handle);
+}
+
+static void clear_device_blocking(uintptr_t device_handle) {
+    std::lock_guard<std::mutex> lock(g_device_block_mutex);
+    g_device_block.erase(device_handle);
+    if (device_handle == 0) {
+        // Clear all keys from all devices
+        g_key_device_map.clear();
+    } else {
+        // Remove only keys from this device
+        auto it = g_key_device_map.begin();
+        while (it != g_key_device_map.end()) {
+            if (it->second == device_handle) {
+                it = g_key_device_map.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+}
+
 // ==================== Global state ====================
 
 static std::unordered_map<KeyCode, KeyCode> g_remap_table; // from → to
@@ -30,6 +98,7 @@ static std::atomic<bool> g_hook_running{false};
 static std::atomic<bool> g_hook_ready{false};
 static std::mutex g_hook_start_mutex;
 static std::condition_variable g_hook_start_cv;
+static std::atomic<bool> g_all_keys_blocked{false};
 
 // Whether the hook should be running (auto-managed)
 static bool should_hook_run() {
@@ -172,30 +241,67 @@ static void push_pending(KeyCode kc) {
     g_pending_remaps[idx] = kc;
 }
 
+// ==================== 临时拦截 + 排队 + 重放 globals ====================
+// hook 线程只写，主线程只读，hook 路径零锁零分配
+static std::atomic<bool> g_intercept_enabled{false};
+
+static constexpr int kInterceptQueueSize = 512;
+struct InterceptEntry {
+    KeyCode code;
+    bool is_down;
+};
+static InterceptEntry g_intercept_queue[kInterceptQueueSize];
+static std::atomic<int> g_intercept_head{0};
+static int g_intercept_tail{0};
+static std::atomic<int> g_intercept_count{0};
+
 // ==================== WH_KEYBOARD_LL hook ====================
 
 static LRESULT CALLBACK ll_keyboard_proc(int code, WPARAM wParam, LPARAM lParam) {
-    if (code >= HC_ACTION) {
-        if (!should_hook_run()) {
-            return CallNextHookEx(nullptr, code, wParam, lParam);
-        }
-        KBDLLHOOKSTRUCT* kb = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
-        bool keydown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
-        bool keyup   = (wParam == WM_KEYUP   || wParam == WM_SYSKEYUP);
+    if (code < HC_ACTION)
+        return CallNextHookEx(nullptr, code, wParam, lParam);
 
-        if ((keydown || keyup) && (kb->vkCode != 0)) {
-            KeyCode vk = vk_to_keycode(static_cast<uint16_t>(kb->vkCode));
+    KBDLLHOOKSTRUCT* kb = reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam);
 
-            // Skip keys our own Logitech driver sent (programmatic output)
-            if (!was_recently_sent(vk)) {
-                std::lock_guard<std::mutex> lock(g_remap_mutex);
-                auto it = g_remap_table.find(vk);
-                if (it != g_remap_table.end()) {
-                    if (keydown) {
-                        push_pending(it->second);
-                    }
-                    return 1; // Block original key from reaching any app
+    // 1. 临时拦截优先：atomic load，hook 路径零锁
+    if (g_intercept_enabled.load(std::memory_order_relaxed)) {
+        uint16_t vk = static_cast<uint16_t>(kb->vkCode);
+        if (vk != 0) {
+            KeyCode kc = vk_to_keycode(vk);
+            if (!was_recently_sent(kc)) {
+                // 入队：单写者无锁，release 保证 count++ 前 entry 已写入
+                if (g_intercept_count.load(std::memory_order_relaxed) < kInterceptQueueSize) {
+                    int idx = g_intercept_head.fetch_add(1, std::memory_order_relaxed) % kInterceptQueueSize;
+                    g_intercept_queue[idx] = {kc, (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)};
+                    g_intercept_count.fetch_add(1, std::memory_order_release);
                 }
+                return 1; // 拦截
+            }
+        }
+    }
+
+    // 2. Device-level blocking
+    if (g_all_keys_blocked.load() || (g_device_block.empty() == false && is_key_blocked_by_device(static_cast<uint16_t>(kb->vkCode)))) {
+        return 1;
+    }
+    if (!should_hook_run()) {
+        return CallNextHookEx(nullptr, code, wParam, lParam);
+    }
+    bool keydown = (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+    bool keyup   = (wParam == WM_KEYUP   || wParam == WM_SYSKEYUP);
+
+    if ((keydown || keyup) && (kb->vkCode != 0)) {
+        KeyCode vk = vk_to_keycode(static_cast<uint16_t>(kb->vkCode));
+
+        // Skip keys our own Logitech driver sent (programmatic output)
+        if (!was_recently_sent(vk)) {
+            std::lock_guard<std::mutex> lock(g_remap_mutex);
+            auto it = g_remap_table.find(vk);
+            if (it != g_remap_table.end()) {
+                if (keydown) {
+                    push_pending(it->second);
+                }
+                return 1; // Block original key from reaching any app
             }
         }
     }
@@ -270,7 +376,7 @@ DLLAPI void WINAPI set_intercept_device(uintptr_t device_handle) {
 }
 
 DLLAPI bool WINAPI register_key_remap(KeyCode from_key, KeyCode to_key) {
-    if (from_key == to_key) return false;
+    
     bool was_empty;
     {
         std::lock_guard<std::mutex> lock(g_remap_mutex);
@@ -328,4 +434,67 @@ DLLAPI void WINAPI clear_pending_remaps() {
     std::lock_guard<std::mutex> lock(g_pending_mutex);
     g_pending_count = 0;
     g_pending_head = 0;
+}
+
+// ==================== Device-level key blocking API ====================
+
+DLLAPI void WINAPI block_key_device(uintptr_t device_handle) {
+    {
+        std::lock_guard<std::mutex> lock(g_device_block_mutex);
+        g_device_block[device_handle] = true;
+    }
+    // Register all currently pressed keys as belonging to this device
+    // so the LL hook can start blocking them.
+    std::vector<uint16_t> keys = get_pressed_keys();
+    for (auto vk : keys) {
+        on_key_down(vk, device_handle);
+    }
+}
+
+DLLAPI void WINAPI unblock_key_device(uintptr_t device_handle) {
+    {
+        std::lock_guard<std::mutex> lock(g_device_block_mutex);
+        g_device_block[device_handle] = false;
+    }
+    clear_device_blocking(device_handle);
+}
+
+// ==================== 临时拦截 + 排队 + 重放 ====================
+
+DLLAPI void WINAPI begin_key_intercept() {
+    start_hook(); // 确保 WH_KEYBOARD_LL 钩子已启动
+    g_intercept_enabled.store(true, std::memory_order_release);
+}
+
+DLLAPI void WINAPI end_key_intercept() {
+    g_intercept_enabled.store(false, std::memory_order_release);
+
+    // acquire 保证读到 count 时所有 entry 已完整写入
+    int count = g_intercept_count.load(std::memory_order_acquire);
+    for (int i = 0; i < count; i++) {
+        InterceptEntry& ev = g_intercept_queue[i];
+        key_down(ev.code);
+        key_up(ev.code);
+    }
+
+    // 重置队列
+    g_intercept_head.store(0, std::memory_order_relaxed);
+    g_intercept_tail = 0;
+    g_intercept_count.store(0, std::memory_order_release);
+
+    // 如果没有 remap 注册，停掉 hook 线程
+    bool remap_empty;
+    { std::lock_guard<std::mutex> lock(g_remap_mutex); remap_empty = g_remap_table.empty(); }
+    if (remap_empty) stop_hook();
+}
+
+DLLAPI void WINAPI discard_queued_keys() {
+    g_intercept_enabled.store(false, std::memory_order_release);
+    g_intercept_head.store(0, std::memory_order_relaxed);
+    g_intercept_tail = 0;
+    g_intercept_count.store(0, std::memory_order_relaxed);
+
+    bool remap_empty;
+    { std::lock_guard<std::mutex> lock(g_remap_mutex); remap_empty = g_remap_table.empty(); }
+    if (remap_empty) stop_hook();
 }
