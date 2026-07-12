@@ -126,14 +126,6 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 						key_callback_(device_handle, vkey, is_down);
 					}
 
-					// Forward to key intercept tracking
-					if (is_down) {
-						extern void fire_key_down(uint16_t, uintptr_t);
-						fire_key_down(vkey, device_handle);
-					} else {
-						extern void fire_key_up(uint16_t, uintptr_t);
-						fire_key_up(vkey, device_handle);
-					}
 				}
 			}
 		}

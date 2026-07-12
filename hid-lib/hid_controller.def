@@ -25,11 +25,6 @@ EXPORTS
     ?get_mouse_delta@@YA?AU?$pair@JJ@std@@XZ @23
     ?get_mouse_delta@@YA?AU?$pair@JJ@std@@_K@Z @24
     ?get_pressed_keys@@YA?AV?$vector@GV?$allocator@G@std@@@std@@XZ @25
-    register_key_remap              @26
-    unregister_key_remap            @27
-    clear_key_remaps                @28
-    set_intercept_device            @29
-    flush_remap_output              @30
-    clear_pending_remaps            @31
-    block_key_device                @32
-    unblock_key_device              @33
+    begin_key_intercept              @26
+    end_key_intercept                @27
+    discard_queued_keys              @28

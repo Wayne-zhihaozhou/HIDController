@@ -100,47 +100,39 @@ All functions return `bool` — `true` on success, `false` on failure.
 
 ---
 
-## Key Interception / Delayed Remapping API
+## Key Interception / Queue & Replay API
 
-Intercepts physical keyboard input via a low-level `WH_KEYBOARD_LL` hook and queues remapped keys. Nothing is sent to applications until you explicitly call `flush_remap_output()`. The hook distinguishes physical key presses from programmatic output (via the Logitech HID driver) using a timestamped ring buffer, so flushed output is never re-intercepted.
+Temporarily blocks physical keyboard input during a critical section and replays queued keys after it ends. Uses a `WH_KEYBOARD_LL` low-level hook with a lock-free ring buffer — hook path is zero-lock, zero-alloc, suitable for ~1ms high-frequency triggering.
 
-> **Important**: `WH_KEYBOARD_LL` hooks are system-global and cannot distinguish between different physical keyboards. The device handle is reserved for future use.
+> **Important**: Only 3 API functions, no setup/teardown needed. Just wrap your critical section.
 
-### API (6 个函数)
+### API
 
-| Function | Return | Description |
-|----------|--------|-------------|
-| `set_intercept_device(uintptr_t handle)` | `void` | 设置拦截设备句柄。`0` = 拦截所有设备。 |
-| `register_key_remap(KeyCode from, KeyCode to)` | `bool` | 注册延迟映射：拦截 `from`，排队 `to`。`from == to` 返回 `false`。首个映射注册时自动启动钩子。 |
-| `unregister_key_remap(KeyCode from)` | `bool` | 反注册单个映射。映射表为空时自动停止钩子。返回 `false` 表示映射不存在。 |
-| `clear_key_remaps()` | `void` | 清除所有映射，停止钩子，并清空待发送缓冲。 |
-| `flush_remap_output()` | `void` | **一次性触发**：发送所有排队按键（press + release），然后清空缓冲。 |
-| `clear_pending_remaps()` | `void` | 丢弃所有排队按键，不发送。缓冲满时自动淘汰最旧条目（FIFO）。 |
+| Function | Description |
+|----------|-------------|
+| `begin_key_intercept()` | Start intercepting physical keyboard input. All subsequent key presses are queued and **blocked** from reaching any application. Starts the low-level hook if not already running. |
+| `end_key_intercept()` | Stop intercepting. **Replays** all queued keys (down then up for each event) in FIFO order, then resets the queue and stops the hook. |
+| `discard_queued_keys()` | Stop intercepting and discard all queued keys without replaying them. Stops the hook. |
 
-### Hook 生命周期
-
-- 首个 `register_key_remap` → 自动启动钩子
-- `unregister_key_remap` 清空映射表，或调用 `clear_key_remaps` → 自动停止钩子
-- `flush_remap_output` / `clear_pending_remaps` **不影响**钩子生命周期
-
-### 缓冲行为
-
-- 环形缓冲区容量：256 条
-- 缓冲区满时新按键覆盖最旧条目（FIFO）
-- `flush_remap_output` 发送所有按键后清空
-- `clear_pending_remaps` 直接丢弃不清空
-
-### 使用流程
+### Usage
 
 ```cpp
-set_intercept_device(0);                          // 所有设备
-register_key_remap(KeyCode::A, KeyCode::B);       // 钩子启动，按 A 排队 B
-// ... 按了几次 A，B 在排队中
-flush_remap_output();                             // 一次性发送所有 B
-// ... 继续按 A，继续排队
-clear_pending_remaps();                           // 丢弃未发送的按键
-unregister_key_remap(KeyCode::A);                 // 反注册 A→B 映射，钩子停止
+begin_key_intercept();
+mouse_move_relative(dx, dy);
+if (useSkills) SimulateKey(attack_skills);
+key_press(kAttackKey);
+Sleep(kAttackDelayMs);
+mouse_move_relative(-dx, -dy);
+end_key_intercept();
 ```
+
+During the `begin_key_intercept()` / `end_key_intercept()` window, all physical keyboard input is queued. After `end_key_intercept()`, keys are replayed in order so the game never misses a press.
+
+### Performance
+
+- **Hook path**: 1× `atomic<bool> load(relaxed)` + 1× `atomic<int> load(relaxed)` + 1× `fetch_add` + struct write + `fetch_add(release)`. No mutex, no allocation, no syscall.
+- **Ring buffer**: 512 entries pre-allocated, power-of-2 modulo.
+- **Thread safety**: Release/acquire pairing guarantees the main thread sees fully-written entries when reading the queue.
 
 ---
 
