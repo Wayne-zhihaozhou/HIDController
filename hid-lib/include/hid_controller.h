@@ -52,12 +52,6 @@ DLLAPI void WINAPI begin_key_intercept();
 DLLAPI void WINAPI end_key_intercept();
 DLLAPI void WINAPI discard_queued_keys();
 
-// -------------------- 临时鼠标拦截+排队重放 --------------------
-
-DLLAPI void WINAPI begin_mouse_intercept();
-DLLAPI void WINAPI end_mouse_intercept();
-DLLAPI void WINAPI discard_queued_mouse_events();
-
 // -------------------- Raw Input 设备检测功能 --------------------
 
 typedef void (*mouse_move_callback)(uintptr_t device_handle, int32_t dx, int32_t dy);

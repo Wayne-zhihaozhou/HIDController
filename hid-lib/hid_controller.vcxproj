@@ -100,7 +100,6 @@
   <ItemGroup>
     <ClCompile Include="src\core\hid_raw_input_dll.cpp" />
     <ClCompile Include="src\core\ib_key_intercept.cpp" />
-    <ClCompile Include="src\core\ib_mouse_intercept.cpp" />
     <ClCompile Include="src\core\ib_send_keyboard.cpp" />
     <ClCompile Include="src\core\ib_send_mouse.cpp" />
     <ClCompile Include="src\core\input_tracker_impl.cpp" />
@@ -114,8 +113,6 @@
     <ClInclude Include="include\mouse_button.h" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="include\virtual_keys.h" />
-    <ClInclude Include="src\core\key_intercept_internal.h" />
-    <ClInclude Include="src\core\mouse_intercept_internal.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hid_controller.def" />

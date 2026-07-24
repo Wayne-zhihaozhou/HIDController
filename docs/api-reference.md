@@ -136,50 +136,6 @@ During the `begin_key_intercept()` / `end_key_intercept()` window, all physical 
 
 ---
 
-## Mouse Interception / Queue & Replay API
-
-Temporarily blocks physical mouse button and wheel input during a critical section and replays queued events after it ends. **Mouse movement is NOT intercepted** — the cursor moves freely during the entire interception window.
-
-Uses a `WH_MOUSE_LL` low-level hook with a lock-free ring buffer — hook path is zero-lock, zero-alloc, suitable for ~1ms high-frequency triggering.
-
-> **Note**: Only button clicks (down/up) and wheel events are intercepted. Mouse movement always passes through to applications.
-
-### API
-
-| Function | Description |
-|----------|-------------|
-| `begin_mouse_intercept()` | Start intercepting physical mouse button and wheel input. All subsequent button clicks and wheel scrolls are queued and **blocked** from reaching any application. Starts the low-level hook if not already running. |
-| `end_mouse_intercept()` | Stop intercepting. **Replays** all queued events (button presses, releases, wheel scrolls) in FIFO order, then resets the queue and stops the hook. |
-| `discard_queued_mouse_events()` | Stop intercepting and discard all queued events without replaying them. Stops the hook. |
-
-### Usage
-
-```cpp
-begin_mouse_intercept();
-// During this window, physical mouse clicks and wheel events are blocked.
-// The cursor still moves normally.
-// ... do your programmatic mouse operations ...
-end_mouse_intercept();
-```
-
-### Events recorded
-
-| Event | Queued as |
-|-------|-----------|
-| LEFT / RIGHT / MIDDLE button press | `DOWN` + button ID |
-| LEFT / RIGHT / MIDDLE button release | `UP` + button ID |
-| X1 / X2 button press | `DOWN` + button ID |
-| X1 / X2 button release | `UP` + button ID |
-| Wheel scroll | `WHEEL` + delta |
-
-### Performance
-
-- **Hook path**: identical design to keyboard intercept — 1× `atomic<bool> load(relaxed)` + 1× `atomic<int> load(relaxed)` + 1× `fetch_add` + struct write + `fetch_add(release)`. No mutex, no allocation, no syscall.
-- **Ring buffer**: 4096 entries pre-allocated, power-of-2 modulo.
-- **Thread safety**: Release/acquire pairing guarantees the main thread sees fully-written entries when reading the queue.
-
----
-
 ## Raw Input Monitoring API
 
 Starts a background thread that listens for raw HID input events from connected devices (mice, keyboards) and delivers callbacks on the calling thread.

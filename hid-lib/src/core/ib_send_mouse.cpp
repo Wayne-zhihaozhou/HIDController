@@ -1,7 +1,6 @@
 // ib_send_mouse.cpp - Logitech mouse control
 #include "pch.h"
 #include "logitech.h"
-#include "mouse_intercept_internal.h"
 
 // 全局系数缓存
 static float mouse_move_coefficient_ = 1.0f;
@@ -43,24 +42,6 @@ static const MouseMapping* lookup(MouseButton button) {
 	auto idx = static_cast<uint16_t>(button);
 	if (idx < 1 || idx > 5) return nullptr;
 	return &kMappings[idx - 1];
-}
-
-// Helper: map MouseButton to WM_*BUTTONDOWN / WM_*BUTTONUP for programmatic send tracking
-static DWORD button_down_msg(MouseButton btn) {
-	switch (btn) {
-	case MouseButton::LEFT:   return WM_LBUTTONDOWN;
-	case MouseButton::RIGHT:  return WM_RBUTTONDOWN;
-	case MouseButton::MIDDLE: return WM_MBUTTONDOWN;
-	default:                  return WM_XBUTTONDOWN; // X1, X2
-	}
-}
-static DWORD button_up_msg(MouseButton btn) {
-	switch (btn) {
-	case MouseButton::LEFT:   return WM_LBUTTONUP;
-	case MouseButton::RIGHT:  return WM_RBUTTONUP;
-	case MouseButton::MIDDLE: return WM_MBUTTONUP;
-	default:                  return WM_XBUTTONUP; // X1, X2
-	}
 }
 
 // 将大数值拆分为多个 HID 兼容的步进报告
@@ -105,7 +86,6 @@ DLLAPI bool WINAPI mouse_down(MouseButton button) {
 	MOUSEINPUT mi{};
 	mi.dwFlags = m->down;
 	mi.mouseData = m->data;
-	on_programmatic_mouse_send(button_down_msg(button));
 	return send_mouse_input_bulk(&mi, 1);
 }
 
@@ -115,7 +95,6 @@ DLLAPI bool WINAPI mouse_up(MouseButton button) {
 	MOUSEINPUT mi{};
 	mi.dwFlags = m->up;
 	mi.mouseData = m->data;
-	on_programmatic_mouse_send(button_up_msg(button));
 	return send_mouse_input_bulk(&mi, 1);
 }
 
@@ -127,8 +106,6 @@ DLLAPI bool WINAPI mouse_click(MouseButton button) {
 	inputs[0].mouseData = m->data;
 	inputs[1].dwFlags = m->up;
 	inputs[1].mouseData = m->data;
-	on_programmatic_mouse_send(button_down_msg(button));
-	on_programmatic_mouse_send(button_up_msg(button));
 	return send_mouse_input_bulk(inputs, 2);
 }
 
@@ -138,7 +115,6 @@ DLLAPI bool WINAPI mouse_move_relative(int32_t dx, int32_t dy) {
 	dx = static_cast<int32_t>(std::round(dx * coeff));
 	dy = static_cast<int32_t>(std::round(dy * coeff));
 
-	on_programmatic_mouse_send(WM_MOUSEMOVE);
 	return step_reports(dx, dy, 128, [](MOUSEINPUT& mi, int32_t sx, int32_t sy) {
 		mi.dx = sx; mi.dy = sy; mi.dwFlags = MOUSEEVENTF_MOVE;
 	});
@@ -158,7 +134,6 @@ DLLAPI bool WINAPI mouse_move_absolute(uint32_t target_x, uint32_t target_y) {
 }
 
 DLLAPI bool WINAPI mouse_wheel(int32_t movement) {
-	on_programmatic_mouse_send(WM_MOUSEWHEEL);
 	return step_reports(movement, 0, 120, [](MOUSEINPUT& mi, int32_t delta, int32_t) {
 		mi.mouseData = static_cast<DWORD>(delta); mi.dwFlags = MOUSEEVENTF_WHEEL;
 	});
