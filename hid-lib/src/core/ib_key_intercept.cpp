@@ -178,8 +178,11 @@ static LRESULT CALLBACK ll_keyboard_proc(int code, WPARAM wParam, LPARAM lParam)
 static void hook_message_loop() {
     g_hook_thread_id = GetCurrentThreadId();
 
+    HMODULE hmod_dll = nullptr;
+    GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+                      (LPCTSTR)ll_keyboard_proc, &hmod_dll);
     g_keyboard_hook = SetWindowsHookEx(WH_KEYBOARD_LL, ll_keyboard_proc,
-                                       GetModuleHandle(nullptr), 0);
+                                       hmod_dll, 0);
 
     g_hook_ready.store(true);
     g_hook_start_cv.notify_one();
