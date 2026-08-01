@@ -30,7 +30,7 @@ key_combo({KeyCode::LCTRL, KeyCode::C});
 
 ### `MouseButton` (enum class, uint16_t)
 
-Defined in [mouse_button.h](hid-lib/include/mouse_button.h).
+Defined in [hid_controller.h](hid-lib/include/hid_controller.h).
 
 | Value       | Meaning  |
 |-------------|----------|
@@ -42,7 +42,7 @@ Defined in [mouse_button.h](hid-lib/include/mouse_button.h).
 
 ### `KeyCode` (enum class, uint16_t)
 
-Defined in [virtual_keys.h](hid-lib/include/virtual_keys.h). Values are USB HID Keyboard Page Usage IDs.
+Defined in [hid_controller.h](hid-lib/include/hid_controller.h). Values are USB HID Keyboard Page Usage IDs.
 
 **Standard keys:** `BACK`, `TAB`, `ENTER`, `SHIFT`, `CTRL`, `ALT`, `PAUSE`, `CAPS_LOCK`, `ESCAPE`, `SPACE`
 
