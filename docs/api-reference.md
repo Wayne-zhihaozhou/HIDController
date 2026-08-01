@@ -100,42 +100,6 @@ All functions return `bool` — `true` on success, `false` on failure.
 
 ---
 
-## Key Interception / Queue & Replay API
-
-Temporarily blocks physical keyboard input during a critical section and replays queued keys after it ends. Uses a `WH_KEYBOARD_LL` low-level hook with a lock-free ring buffer — hook path is zero-lock, zero-alloc, suitable for ~1ms high-frequency triggering.
-
-> **Important**: Only 3 API functions, no setup/teardown needed. Just wrap your critical section.
-
-### API
-
-| Function | Description |
-|----------|-------------|
-| `begin_key_intercept()` | Start intercepting physical keyboard input. All subsequent key presses are queued and **blocked** from reaching any application. Starts the low-level hook if not already running. |
-| `end_key_intercept()` | Stop intercepting. **Replays** all queued keys (down then up for each event) in FIFO order, then resets the queue and stops the hook. |
-| `discard_queued_keys()` | Stop intercepting and discard all queued keys without replaying them. Stops the hook. |
-
-### Usage
-
-```cpp
-begin_key_intercept();
-mouse_move_relative(dx, dy);
-if (useSkills) SimulateKey(attack_skills);
-key_press(kAttackKey);
-Sleep(kAttackDelayMs);
-mouse_move_relative(-dx, -dy);
-end_key_intercept();
-```
-
-During the `begin_key_intercept()` / `end_key_intercept()` window, all physical keyboard input is queued. After `end_key_intercept()`, keys are replayed in order so the game never misses a press.
-
-### Performance
-
-- **Hook path**: 1× `atomic<bool> load(relaxed)` + 1× `atomic<int> load(relaxed)` + 1× `fetch_add` + struct write + `fetch_add(release)`. No mutex, no allocation, no syscall.
-- **Ring buffer**: 512 entries pre-allocated, power-of-2 modulo.
-- **Thread safety**: Release/acquire pairing guarantees the main thread sees fully-written entries when reading the queue.
-
----
-
 ## Raw Input Monitoring API
 
 Starts a background thread that listens for raw HID input events from connected devices (mice, keyboards) and delivers callbacks on the calling thread.
