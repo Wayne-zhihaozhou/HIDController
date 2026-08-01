@@ -190,11 +190,11 @@ All public DLL functions return `bool` — `true` indicates success, `false` ind
 
 ## Build
 
-The library is built with CMake + Visual Studio 2022 (C++20, release64 configuration only).
+The library is built with MSBuild + Visual Studio 2022 (C++17, Release|x64 only).
 
 ```bash
-cmake -G "Visual Studio 17 2022" -A x64 -B build
-cmake --build build --config release64
+cd hid-lib
+"<MSBuild.exe path>" hid_controller.sln -p:Configuration=Release -p:Platform=x64 -m
 ```
 
-Output: `dll/HIDController.dll` + headers in `include/`.
+Output: `build/Release/hid_controller.dll` + headers in `include/`.
