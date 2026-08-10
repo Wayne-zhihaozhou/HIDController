@@ -99,6 +99,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\hid_raw_input_dll.cpp" />
+    <ClCompile Include="src\core\ib_key_intercept.cpp" />
     <ClCompile Include="src\core\ib_send_keyboard.cpp" />
     <ClCompile Include="src\core\ib_send_mouse.cpp" />
     <ClCompile Include="src\core\input_tracker_impl.cpp" />
