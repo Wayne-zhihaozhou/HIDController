@@ -8,6 +8,16 @@ hid-lib/*.obj
 hid-lib/*.ilk
 hid-lib/*.pdb
 
+# Python extension build artifacts — the .pyd and its sibling DLL are copied
+# into the package at build time and must never be committed.
+hid-py/build/
+hid-py/dist/
+hid-py/temp/
+hid-py/*.egg-info/
+hid-py/hid_controller/*.pyd
+hid-py/hid_controller/*.dll
+hid-py/hid_controller/__pycache__/
+
 # ========================
 # IDE cache
 # ========================

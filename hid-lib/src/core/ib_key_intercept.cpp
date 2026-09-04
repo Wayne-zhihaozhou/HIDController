@@ -250,8 +250,10 @@ DLLAPI void WINAPI end_key_intercept() {
     int count = g_intercept_count.load(std::memory_order_acquire);
     for (int i = 0; i < count; i++) {
         InterceptEntry& ev = g_intercept_queue[i];
-        key_down(ev.code);
-        key_up(ev.code);
+        if (ev.is_down)
+            key_down(ev.code);
+        else
+            key_up(ev.code);
     }
 
     // 重置队列
