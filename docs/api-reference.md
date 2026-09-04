@@ -64,26 +64,26 @@ Defined in [hid_controller.h](hid-lib/include/hid_controller.h). Values are USB 
 
 ## Mouse API
 
-All functions return `bool` — `true` on success, `false` on failure.
+The movement and button functions below return `bool` — `true` on success, `false` on failure. The acceleration-control functions do not; see their `Return` column.
 
-| Function | Description |
-|----------|-------------|
-| `mouse_move_relative(int32_t dx, int32_t dy)` | Move the cursor by a relative offset. |
-| `mouse_move_absolute(uint32_t x, uint32_t y)` | Move the cursor to an absolute screen position. |
-| `mouse_down(MouseButton button)` | Press down the specified mouse button. |
-| `mouse_up(MouseButton button)` | Release the specified mouse button. |
-| `mouse_click(MouseButton button)` | Press and release the specified button (one-shot click). |
-| `mouse_wheel(int32_t movement)` | Scroll the mouse wheel. Positive = scroll up. |
+| Function | Return | Description |
+|----------|--------|-------------|
+| `mouse_move_relative(int32_t dx, int32_t dy)` | `bool` | Move the cursor by a relative offset. |
+| `mouse_move_absolute(uint32_t x, uint32_t y)` | `bool` | Move the cursor to an absolute screen position. |
+| `mouse_down(MouseButton button)` | `bool` | Press down the specified mouse button. |
+| `mouse_up(MouseButton button)` | `bool` | Release the specified mouse button. |
+| `mouse_click(MouseButton button)` | `bool` | Press and release the specified button (one-shot click). |
+| `mouse_wheel(int32_t movement)` | `bool` | Scroll the mouse wheel. Positive = scroll up. |
 
 ### Mouse acceleration control
 
-| Function | Description |
-|----------|-------------|
-| `set_mouse_move_coefficient(float coefficient)` | Set the mouse movement scaling coefficient. |
-| `get_mouse_move_coefficient()` | Get the current mouse movement coefficient. |
-| `auto_calibrate()` | Auto-calibrate the mouse movement coefficient. |
-| `disable_mouse_acceleration()` | Disable Windows mouse acceleration. |
-| `enable_mouse_acceleration()` | Re-enable Windows mouse acceleration. |
+| Function | Return | Description |
+|----------|--------|-------------|
+| `set_mouse_move_coefficient(float coefficient)` | `void` | Set the mouse movement scaling coefficient. |
+| `get_mouse_move_coefficient()` | `float` | Get the current mouse movement coefficient. |
+| `auto_calibrate()` | `void` | Auto-calibrate the mouse movement coefficient. |
+| `disable_mouse_acceleration()` | `void` | Disable Windows mouse acceleration. |
+| `enable_mouse_acceleration()` | `void` | Re-enable Windows mouse acceleration. |
 
 ---
 
@@ -96,7 +96,7 @@ All functions return `bool` — `true` on success, `false` on failure.
 | `key_press(KeyCode vk)` | `bool` | Press and release a single key (one-shot). |
 | `key_combo(const std::vector<KeyCode>& keys)` | `bool` | Press multiple keys simultaneously (e.g., Ctrl+C). |
 | `key_seq(const std::vector<KeyCode>& keys)` | `bool` | Type a sequence of keys in order (press then release each). |
-| `release_all_keys()` | `void` | Release all currently pressed keys. |
+| `release_all_keys()` | `void` | Release all currently pressed keys **and all pressed mouse buttons**. Despite the name it calls both `Logitech::release_all_keys()` and `Logitech::release_all_mouse()`, so it is a full input-state reset. |
 
 ---
 
@@ -149,13 +149,30 @@ typedef void (*keyboard_callback)(uintptr_t device_handle, uint16_t vkey, bool i
 typedef void (*mouse_wheel_callback)(uintptr_t device_handle, int32_t wheel_delta, int32_t horizontal);
 ```
 
-| Function | Description |
-|----------|-------------|
-| `start_input_tracking(mouse_move_callback, keyboard_callback, mouse_button_callback, mouse_wheel_callback)` | Start raw input monitoring. Pass `nullptr` for any callback you don't need. Returns `true` on success. |
-| `stop_input_tracking()` | Stop raw input monitoring. Must be called to clean up the background thread. |
-| `is_tracking()` | Returns `true` if monitoring is active. |
-| `register_raw_input(HWND hwnd)` | Register a window to receive raw input messages. Required on some Windows versions. |
-| `get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length)` | Get the human-readable name of a raw input device. |
+| Function | Return | Description |
+|----------|--------|-------------|
+| `start_input_tracking(mouse_move_callback, keyboard_callback, mouse_button_callback, mouse_wheel_callback)` | `bool` | Start raw input monitoring. **Not all callbacks tolerate `nullptr`** — see below. The return value is always `true` and carries no information. |
+| `stop_input_tracking()` | `void` | Stop raw input monitoring. Must be called to clean up the background thread. |
+| `is_tracking()` | `bool` | Returns `true` if monitoring is active. |
+| `register_raw_input(HWND hwnd)` | `bool` | Register a window to receive raw input messages. Required on some Windows versions. |
+| `get_device_name(uintptr_t device_handle, wchar_t* name, uint32_t* name_length)` | `bool` | Get the human-readable name of a raw input device. `false` also signals "buffer too small" — `name_length` is then set to the required size. |
+
+#### `nullptr` tolerance per callback
+
+`start_input_tracking` does **not** accept `nullptr` uniformly. In [hid_raw_input_dll.cpp](hid-lib/src/core/hid_raw_input_dll.cpp) two of the four callbacks are wrapped in capturing lambdas before being handed to `start_tracking_impl`. A lambda converted to `std::function` is never empty, so the `if (mouse_callback_)` / `if (mouse_wheel_callback_)` guards in [input_tracker_impl.cpp](hid-lib/src/core/input_tracker_impl.cpp) are always true and the wrapper dereferences the null user pointer.
+
+| Callback parameter | `nullptr` safe? | Why |
+|--------------------|-----------------|-----|
+| `mouse_move_callback` | **No — crashes** | Wrapped in a capturing lambda; the guard never sees an empty `std::function`. |
+| `mouse_wheel_callback` | **No — crashes** | Wrapped in a capturing lambda; same as above. |
+| `keyboard_callback` | Yes | Passed through raw; a null function pointer yields an empty `std::function`, so the guard is `false`. |
+| `mouse_button_callback` | Yes | Passed through raw; same as above. |
+
+> **Important**: If you do not need the mouse-move or mouse-wheel events, pass a no-op function rather than `nullptr`. Passing `nullptr` for either one will crash on the first matching raw input event.
+
+##### Return value
+
+`start_input_tracking` returns `true` unconditionally. `start_tracking_impl` returns `void` and propagates no failure, so there is **no success signal at all** — do not branch on the result. To confirm monitoring actually started, call `is_tracking()`.
 
 ### Polling functions (C++ linkage)
 
@@ -220,7 +237,16 @@ Namespace `send`. These are internal components for sending reports via a Logite
 
 ## Error Handling
 
-All public DLL functions return `bool` — `true` indicates success, `false` indicates failure. On failure, call `GetLastError()` for extended error information.
+Public DLL functions do **not** share a single return convention. Of the 28 exported declarations in [hid_controller.h](hid-lib/include/hid_controller.h):
+
+| Return type | Count | Functions | Failure signal |
+|-------------|-------|-----------|----------------|
+| `bool` | 15 | All mouse movement/button and keyboard send functions, plus `start_input_tracking`, `is_tracking`, `register_raw_input`, `get_device_name` | `false`. Note `start_input_tracking` always returns `true` and `is_tracking` reports state, not failure. |
+| `void` | 9 | `set_mouse_move_coefficient`, `auto_calibrate`, `disable_mouse_acceleration`, `enable_mouse_acceleration`, `release_all_keys`, `begin_key_intercept`, `end_key_intercept`, `discard_queued_keys`, `stop_input_tracking` | None — these cannot report failure. |
+| `float` | 1 | `get_mouse_move_coefficient` | None — returns the current coefficient. |
+| STL by value (`DLLAPI_CPP`) | 3 | `get_mouse_delta()`, `get_mouse_delta(uintptr_t)`, `get_pressed_keys()` | None — an empty/zero result is indistinguishable from "no input since last poll". |
+
+`GetLastError()` is only meaningful where a `false` originated from a failing Win32 call (for example `register_raw_input`, which forwards the result of `RegisterRawInputDevices`). The library never calls `SetLastError()` itself, so do not rely on the thread error code after a failure in the send path.
 
 ---
 
@@ -234,3 +260,8 @@ cd hid-lib
 ```
 
 Output: `build/Release/hid_controller.dll` + headers in `include/`.
+
+The solution contains four projects: `hid_controller` plus the three test executables
+(`test_raw_input`, `test_mouse_wave`, `test_hid_controller`). Each test project carries a
+`<ProjectReference>` to `hid_controller.vcxproj`, so the parallel flag `-m` is safe — MSBuild
+derives the build order from those references.
