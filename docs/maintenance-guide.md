@@ -6,9 +6,9 @@
 
 | 文档 | 覆盖内容 | 与本文的关系 |
 |---|---|---|
-| [api-reference.md](./api-reference.md) | 逐函数 API 说明、参数、返回值 | 本文不重复任何函数签名。但该文档**有若干处与代码不符**，见第 6 节 |
+| [api-reference.md](./api-reference.md) | 逐函数 API 说明、参数、返回值 | 本文不重复任何函数签名。该文档**现已与代码一致**；历史上的四处不一致作为背景记录在第 6.2 节 |
 | [naming-conventions.md](./naming-conventions.md) | C++ / Python 命名规范 | 本文不重述命名规则，新增代码必须遵守该文档 |
-| [../.claude/skills/build.md](../.claude/skills/build.md) | 一条 MSBuild 命令 | 本文**取代**它。该文件记录的命令带 `-m`，存在竞态，见第 6 节 |
+| [../.claude/skills/build.md](../.claude/skills/build.md) | 一条 MSBuild 命令 | 该文件记录的带 `-m` 命令**现已可用**，见第 6.1 节 |
 
 ---
 
@@ -40,13 +40,13 @@
 | `input_tracker_impl.cpp` | RAW INPUT 后台窗口 + 消息循环 + 设备增量/按键集合，**文件级静态状态只允许存在于 DLL 内** |
 | `hid_raw_input_dll.cpp` | 把 `input_tracker_impl` 的内部接口包装成公开 DLL 导出 |
 
-三个测试工程，注意它们并不都在解决方案里：
+三个测试工程，现已全部在解决方案里：
 
 | 测试工程 | 是否在 `hid_controller.sln` 中 | 说明 |
 |---|---|---|
 | `hid-lib/test_raw_input/` | 是 | RAW INPUT 监听测试 |
 | `hid-lib/test_mouse_wave/` | 是 | 鼠标移动轨迹测试 |
-| `hid-lib/test_hid_controller/` | **否** | 仅有 `.cpp` 和 `.vcxproj`，未被 `.sln` 引用，构建解决方案不会编译它 |
+| `hid-lib/test_hid_controller/` | 是（2026-09-04 补入） | 输出 API 测试。此前只有 `.cpp` 和 `.vcxproj` 而未被 `.sln` 引用，构建解决方案不会编译它；现已加入并随解决方案一起构建 |
 
 ---
 
@@ -192,7 +192,7 @@ CPython 用 `LOAD_WITH_ALTERED_SEARCH_PATH` 加载扩展模块，因此导入时
 | C++ 枚举**加一个值** | **不需要**。只要在 `hid_send_bindings.cpp` 的 `KEY_CODE_ENTRY` 宏列表里加一行，Python 侧自动出现 |
 | C++ **加一个函数** | **需要**。必须编辑 `__getattr__` 的名字列表和 `__all__`，否则函数在包层面完全不可见 |
 
-这不是理论风险，现在就有实例：`get_key_code_map` 和 `get_mouse_button_map` 在 `hid_send` 扩展模块里存在，但因为不在名字列表中，`hid_controller.get_key_code_map` 直接抛 `AttributeError`。要访问只能绕道 `import hid_controller.hid_send`。
+这不是理论风险，历史上真实踩过：`get_key_code_map` 和 `get_mouse_button_map` 一直存在于 `hid_send` 扩展模块里，却因为漏在名字元组之外，`hid_controller.get_key_code_map` 直接抛 `AttributeError`，只能绕道 `import hid_controller.hid_send` 才能访问。2026-09-04 已把这两个名字补进 `__getattr__` 的名字元组**和** `__all__`，现在包层面可直接调用。教训仍然有效：加 C++ 函数时必须同步改 `__init__.py`，否则症状就是「C++ 和扩展模块都有，包层面却查不到」。
 
 ### 3.6 `.def` 文件的角色
 
@@ -222,7 +222,7 @@ CPython 用 `LOAD_WITH_ALTERED_SEARCH_PATH` 加载扩展模块，因此导入时
 | 4 | `hid-lib/hid_controller.def` | 加导出并分配**新的下一个序号**（当前最大 `@28`，下一个是 `@29`）。返回 STL 类型的必须填完整 mangled 名 | 符号不导出，`.lib` 里没有，扩展模块链接失败 |
 | 5 | `hid-lib/src/bindings/*_bindings.cpp` | 写包装函数：`PyArg_ParseTuple` 解参 → 调用 C++ → 转成 `PyObject*`。鼠标/键盘类放 `hid_send_bindings.cpp`，追踪类放 `raw_input_bindings.cpp` | Python 无法调用 |
 | 6 | 同文件的 `PyMethodDef` 表 | 在 `HidSendMethods[]` 或 `RawInputMethods[]` 里加条目（含 `METH_VARARGS` / `METH_NOARGS` 和 docstring），必须加在结尾 `{NULL,...}` 哨兵**之前** | 包装函数存在但模块里查不到 |
-| 7 | `hid-py/hid_controller/__init__.py` | 在 `__getattr__` 对应的名字元组里加名字，**并且**加进 `__all__` | 函数在包层面不可见（正是 3.5 节 `get_key_code_map` 的现状） |
+| 7 | `hid-py/hid_controller/__init__.py` | 在 `__getattr__` 对应的名字元组里加名字，**并且**加进 `__all__` | 函数在包层面不可见（3.5 节 `get_key_code_map` 就是这么漏掉的，已于 2026-09-04 补上） |
 | 8 | [api-reference.md](./api-reference.md) | 补上函数说明与返回值 | 文档与代码不一致，第 6 节列的那些坑就是这么攒出来的 |
 
 新增**枚举值**是唯一的例外，只需改两处：`hid_controller.h` 的枚举体，以及 `hid_send_bindings.cpp` 里 `hid_get_key_code_map` 的 `KEY_CODE_ENTRY` 宏列表。Python 侧无需改动。
@@ -248,10 +248,10 @@ CPython 用 `LOAD_WITH_ALTERED_SEARCH_PATH` 加载扩展模块，因此导入时
 
 `hid-py/CMakeLists.txt` 会显式检查并在缺失时以 `FATAL_ERROR` 中止，报错信息是 `hid_controller.lib not found in ... — build hid-lib (Release|x64) first`。`.lib` 和 `.dll` 两者都检查。
 
-阶段一，构建 hid-lib。**注意不要加 `-m`**，原因见第 6 节：
+阶段一，构建 hid-lib。**可以加 `-m` 并行**，原因见第 6.1 节：
 
 ```bash
-"C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" /c/Users/Admin/source/repos/HIDController/hid-lib/hid_controller.sln -p:Configuration=Release -p:Platform=x64
+"C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" /c/Users/Admin/source/repos/HIDController/hid-lib/hid_controller.sln -p:Configuration=Release -p:Platform=x64 -m
 ```
 
 阶段二，构建两个 Python 扩展模块：
@@ -273,7 +273,7 @@ cd /c/Users/Admin/source/repos/HIDController/hid-py && "C:/Users/Admin/AppData/L
 | `raw_input` 扩展 | `C:\Users\Admin\source\repos\HIDController\hid-py\hid_controller\raw_input.cp312-win_amd64.pyd` |
 | 随行 DLL | `C:\Users\Admin\source\repos\HIDController\hid-py\hid_controller\hid_controller.dll` |
 | 扩展模块自身 `.lib` / `.exp` | `C:\Users\Admin\source\repos\HIDController\hid-py\temp\` |
-| 测试可执行文件 | `C:\Users\Admin\source\repos\HIDController\hid-lib\test_raw_input\build\Release\test_raw_input.exe` 等 |
+| 测试可执行文件 | `C:\Users\Admin\source\repos\HIDController\hid-lib\test_raw_input\build\Release\test_raw_input.exe`、`...\test_mouse_wave\build\Release\test_mouse_wave.exe`、`...\test_hid_controller\build\Release\test_hid_controller.exe` |
 
 ---
 
@@ -281,39 +281,50 @@ cd /c/Users/Admin/source/repos/HIDController/hid-py && "C:/Users/Admin/AppData/L
 
 以下每一条都经过代码核实。
 
-### 6.1 `.sln` 缺项目依赖，并行构建必败
+### 6.1 `.sln` 项目依赖（已修复，2026-09-04）
 
-实测结果：
+**现状：并行构建可用。** 三个测试工程都通过 `<ProjectReference>` 指向 `hid_controller.vcxproj`，MSBuild 据此推导构建顺序，`-m` 已可安全使用。
 
-| 检查项 | 结果 |
+| 检查项 | 当前结果 |
 |---|---|
-| `hid-lib/hid_controller.sln` 中 `ProjectSection(ProjectDependencies)` | **0 处**，完全没有 |
-| 三个测试 `.vcxproj` 中 `<ProjectReference>` 指向 `hid_controller.vcxproj` | **0 处**，一个都没有 |
-| 测试工程如何拿到库 | 靠 `<AdditionalDependencies>hid_controller.lib</AdditionalDependencies>` + `<AdditionalLibraryDirectories>` 硬写路径 |
+| 三个测试 `.vcxproj` 中指向 `hid_controller.vcxproj` 的 `<ProjectReference>` | **3 处**，每个测试工程各一 |
+| 测试工程如何拿到库 | 由 `<ProjectReference>` 自动传递导入库，无需手写路径 |
+| `hid_controller.sln` 中 `ProjectSection(ProjectDependencies)` | 0 处，且**不需要**。`<ProjectReference>` 已表达依赖，是比 `.sln` 依赖节更现代的做法 |
+| `test_hid_controller` 是否在 `.sln` 中 | 是，已补入（仅 `Release\|x64`）|
 
-因为没有依赖关系，MSBuild 加 `-m` 时会与 `hid_controller` 工程并行编译测试工程，`hid_controller.lib` 还没生成，链接器就报：
+实测：删除全部 `build/` 目录后连续两次 `-t:Rebuild ... -m`，四个工程均 0 错误 0 警告。
 
-| 错误 | 含义 |
+历史问题（保留作为背景，修复前的真实状态）：
+
+| 项 | 修复前的情况 |
 |---|---|
-| `LNK1181: cannot open input file 'hid_controller.lib'` | 导入库尚未产出 |
-| `MSB3073` | 上述链接失败导致的工程失败 |
+| 根因 | `.sln` 无任何依赖声明，测试 `.vcxproj` 也无 `<ProjectReference>`，仅靠 `<AdditionalDependencies>hid_controller.lib</AdditionalDependencies>` + `<AdditionalLibraryDirectories>` 硬写路径 |
+| 症状 | 加 `-m` 时测试工程与 `hid_controller` 并行编译，`hid_controller.lib` 尚未产出即链接，报 `LNK1181: cannot open input file 'hid_controller.lib'`，并连带 `MSB3073` |
+| 为何长期没被发现 | 顺序构建（不加 `-m`）总是成功，而只有文档化的命令带 `-m` |
+| 另一处拷贝粘贴错误 | `test_raw_input.vcxproj` 的 `AdditionalLibraryDirectories` 指向 `..\test_hid_controller\build\$(Configuration)\`，即**另一个测试工程**的输出目录，该目录只在有人单独构建过 `test_hid_controller` 之后才存在 |
 
-顺序构建（不加 `-m`）总是成功。**`.claude/skills/build.md` 目前记录的命令带 `-m`，也就是说被文档化的构建命令本身是有竞态的。** 用第 5.2 节的命令替代。
+修复方式：三个测试工程各加一条 `<ProjectReference>`，同时删除已冗余的 `hid_controller.lib` 硬写依赖与 `AdditionalLibraryDirectories`（含上述错误路径）。
 
-顺带一个相关坑：`test_raw_input.vcxproj` 的 `AdditionalLibraryDirectories` 指向 `..\test_hid_controller\build\$(Configuration)\`，而 `test_hid_controller` 工程**不在 `.sln` 里**。也就是说该目录只有在有人单独构建过 `test_hid_controller` 之后才存在。
+新增测试工程时请照此办理：加 `<ProjectReference>`，**不要**再手写 `hid_controller.lib` 路径。
 
-### 6.2 `api-reference.md` 与代码不一致
+### 6.2 `api-reference.md` 与代码不一致（已修复，2026-09-04）
 
-以下四处已逐条核实为**真实不一致**：
+**现状：文档已改正。** 下述四处不一致均已在 [api-reference.md](./api-reference.md) 中订正，该文档现在如实描述了代码行为。
 
-| 编号 | 文档的说法 | 代码实际情况 | 后果 |
+注意区分两件事：**修的是文档，不是代码**。下表描述的代码行为**至今仍然如此**（例如两个回调传 `nullptr` 依旧会崩），只是文档不再误导读者。因此下表仍是有效的工程知识，改这些函数前请先读一遍。
+
+| 编号 | 修复前文档的说法 | 代码实际情况（仍然如此） | 后果 |
 |---|---|---|---|
 | a | `start_input_tracking` 的任意回调都可传 `nullptr` | `hid-lib/src/core/hid_raw_input_dll.cpp` 把 mouse-move 和 wheel 两个回调包进**捕获式 lambda**，lambda 转成 `std::function` 后永远非空，内部 `if (mouse_callback_)` 判断恒真，于是无条件调用 | 这两个传 `nullptr` 会**崩溃**。keyboard 和 mouse-button 回调是裸函数指针直传，`std::function` 由空指针构造出来是空的，判断为假，因此**只有这两个**容忍 `nullptr` |
-| b | `start_input_tracking` 成功返回 `true` | 函数体末尾是无条件 `return true;`；`start_tracking_impl` 返回 `void`，且若已在运行会直接 early-return | **没有失败信号**，返回值不可用于判断是否真的启动 |
+| b | `start_input_tracking` 成功返回 `true` | 函数体末尾是无条件 `return true;`；`start_tracking_impl` 返回 `void`，且若已在运行会直接 early-return | **没有失败信号**，返回值不可用于判断是否真的启动，要确认请调 `is_tracking()` |
 | c | 「所有公开 DLL 函数返回 `bool`」 | 实测：9 个返回 `void`（`set_mouse_move_coefficient`、`auto_calibrate`、`disable_mouse_acceleration`、`enable_mouse_acceleration`、`release_all_keys`、`stop_input_tracking`、`begin_key_intercept`、`end_key_intercept`、`discard_queued_keys`），1 个返回 `float`（`get_mouse_move_coefficient`），3 个返回 STL 类型 | 错误处理一节的前提不成立 |
 | d | `release_all_keys()` 释放所有按键 | `hid-lib/src/core/ib_send_keyboard.cpp` 实现里先 `logitech.release_all_keys()` **再 `logitech.release_all_mouse()`** | 它**同时释放鼠标按钮**，函数名有误导性 |
 
 补充一点缓解措施：Python 侧的 `raw_start_input_tracking` 对 4 个回调逐个做 `PyCallable_Check`，传 `None` 会抛 `TypeError`。因此 (a) 只影响直接调 C++ 的代码，从 Python 调用不会踩到。
+
+修复方式：逐条改写 `api-reference.md` 的对应段落——补上按回调区分的 `nullptr` 容忍度表、注明返回值不携带信息、按返回类型重列函数计数、并在 `release_all_keys` 条目里点明它同时清鼠标按钮。
+
+改动这四处涉及的 C++ 函数时，请记得同步回写 `api-reference.md`，见第 4 节第 8 步。
 
 ### 6.3 `begin_key_intercept` 会吞掉全部物理按键
 
@@ -333,7 +344,7 @@ cd /c/Users/Admin/source/repos/HIDController/hid-py && "C:/Users/Admin/AppData/L
 
 **风险**：调用 `begin_key_intercept()` 后若因异常、提前 return 或测试崩溃而没走到收尾函数，钩子仍然装着、拦截仍然开着，用户会被锁死在自己的键盘外面。必须保证两个收尾函数之一一定执行（C++ 用 RAII 守卫，Python 用 `try` / `finally`）。**不要在自动化测试里随手调用它。**
 
-顺便：`g_intercept_tail` 在第 134 行声明，在第 261 和 270 行被赋 0，但**从未被读取**，是一个死变量。改这个文件时不要以为它参与了环形缓冲逻辑——实际的读写游标只有 `g_intercept_head` 和 `g_intercept_count`。
+环形队列只有**两个游标**：`g_intercept_head`（写入位置，`fetch_add` 后取模）和 `g_intercept_count`（当前元素数，兼作满队列判据）。改这个文件时不要凭直觉去找 tail 游标——重放和重置都只依赖这两个原子量。
 
 ### 6.4 构建产物绝不入库
 
@@ -373,7 +384,7 @@ cd /c/Users/Admin/source/repos/HIDController/hid-py && "C:/Users/Admin/AppData/L
 | 1 | `import hid_controller` | 不抛异常 | 通过 |
 | 2 | `len(hid_send.get_key_code_map())` | 120 | 120 |
 | 3 | `len(hid_send.get_mouse_button_map())` | 5 | 5 |
-| 4 | `__all__` 中每个名字都能 `getattr` 到 | 无不可达项（`__all__` 共 29 项） | 全部可达 |
+| 4 | `__all__` 中每个名字都能 `getattr` 到 | 无不可达项（`__all__` 共 31 项） | 全部可达 |
 | 5 | `get_mouse_delta()` | 返回二元组不崩溃 | `(0, 0)` |
 | 6 | `get_pressed_keys()` | 返回 list 不崩溃 | `[]` |
 | 7 | `get_mouse_move_coefficient()` | 返回 float | `1.0` |

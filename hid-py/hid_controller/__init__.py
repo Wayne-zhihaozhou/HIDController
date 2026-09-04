@@ -39,6 +39,8 @@ def __getattr__(name):
         "begin_key_intercept",
         "end_key_intercept",
         "discard_queued_keys",
+        "get_key_code_map",
+        "get_mouse_button_map",
     ):
         if _hid_send is None:
             import hid_controller.hid_send as _mod
@@ -83,6 +85,9 @@ __all__ = [
     # Mouse / Key enums
     "MouseButton",
     "KeyCode",
+    # Enum mapping queries
+    "get_key_code_map",
+    "get_mouse_button_map",
     # Mouse control
     "mouse_move_relative",
     "mouse_move_absolute",

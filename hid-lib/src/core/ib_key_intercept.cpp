@@ -131,7 +131,6 @@ struct InterceptEntry {
 };
 static InterceptEntry g_intercept_queue[kInterceptQueueSize];
 static std::atomic<int> g_intercept_head{0};
-static int g_intercept_tail{0};
 static std::atomic<int> g_intercept_count{0};
 
 // ==================== WH_KEYBOARD_LL hook ====================
@@ -258,7 +257,6 @@ DLLAPI void WINAPI end_key_intercept() {
 
     // 重置队列
     g_intercept_head.store(0, std::memory_order_relaxed);
-    g_intercept_tail = 0;
     g_intercept_count.store(0, std::memory_order_release);
 
     stop_hook();
@@ -267,7 +265,6 @@ DLLAPI void WINAPI end_key_intercept() {
 DLLAPI void WINAPI discard_queued_keys() {
     g_intercept_enabled.store(false, std::memory_order_release);
     g_intercept_head.store(0, std::memory_order_relaxed);
-    g_intercept_tail = 0;
     g_intercept_count.store(0, std::memory_order_relaxed);
     stop_hook();
 }
